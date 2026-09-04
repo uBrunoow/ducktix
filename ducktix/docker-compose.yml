@@ -1,0 +1,39 @@
+name: ducktix
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ducktix
+      POSTGRES_PASSWORD: ducktix
+      POSTGRES_DB: ducktix
+    ports:
+      # 5433 no host para não colidir com um Postgres local na 5432 padrão.
+      - '5433:5432'
+    volumes:
+      - ducktix_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ducktix -d ducktix']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@ducktix.com
+      PGADMIN_DEFAULT_PASSWORD: ducktix
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '5050:80'
+    volumes:
+      - ducktix_pgadmin:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  ducktix_pgdata:
+  ducktix_pgadmin:

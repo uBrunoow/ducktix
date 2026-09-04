@@ -7,7 +7,7 @@ tags:
 aliases:
   - Convenções
   - Guidelines
-updated: 2026-08-27
+updated: 2026-09-01
 ---
 
 # Guidelines de Desenvolvimento
@@ -27,15 +27,16 @@ graph TD
 ```
 
 > [!danger] Regra única e inegociável
-> `Domain` ==nunca== conhece PostgreSQL, HTTP, JSON, chi/net-http ou Next.js. Dependency Inversion sempre: `Domain ← Application ← Ports ← Adapters`.
+> `Domain` ==nunca== conhece PostgreSQL, Drizzle, HTTP, JSON, React ou Next.js. Dependency Inversion sempre: `Domain ← Application ← Ports ← Adapters`.
 
 | Onde vive | O quê |
 |---|---|
-| `internal/<contexto>/domain/` | Entities, value objects, regras de negócio, domain errors. Sem infraestrutura. |
-| `internal/<contexto>/application/` | Use cases, commands, queries, orquestração. Chama ports, nunca SQL direto. |
-| `internal/<contexto>/ports/` | Interfaces de repositório e serviços externos. |
-| `internal/<contexto>/adapters/` | Implementação PostgreSQL, handlers HTTP, comandos CLI. |
-| `internal/shared/` | Código realmente compartilhado entre bounded contexts (ex.: erros comuns, tipos de valor genéricos). Não vira `utils` genérico. |
+| `src/server/<contexto>/domain/` | Entities, value objects, regras de negócio, domain errors. Sem infraestrutura. |
+| `src/server/<contexto>/application/` | Use cases, commands, queries, orquestração. Chama ports, nunca SQL direto. |
+| `src/server/<contexto>/ports/` | Interfaces de repositório e serviços externos. |
+| `src/server/<contexto>/infrastructure/` | Implementação com Drizzle sobre Postgres. |
+| `src/app/api/**/route.ts`, Server Actions, `scripts/cli.ts` | Adaptadores de entrada: parse/validação e resposta, sem regra de negócio. |
+| `src/server/shared/` | Código realmente compartilhado entre bounded contexts (ex.: erros comuns, tipos de valor genéricos, client do Drizzle). Não vira `utils` genérico. |
 
 Pergunte sempre: **"essa regra pertence a qual bounded context?"**
 
@@ -51,12 +52,12 @@ Estrutura concreta em [[backend/manifesto]] e [[frontend/manifesto]].
 ## Segurança
 
 > [!danger] Obrigatório, sem exceção
-> - SQL sempre parametrizado (`pgx`). **Nunca** concatenar entrada do usuário em query.
-> - Credenciais de banco ficam em `.env`, nunca versionadas nem hardcoded.
+> - SQL sempre parametrizado — query builder do Drizzle ou `sql` com placeholders. **Nunca** interpolar entrada do usuário em query (`sql.raw` é proibido com dado de usuário).
+> - Credenciais de banco (`DATABASE_URL` do Neon) ficam em `.env.local`, nunca versionadas nem hardcoded. Nenhum segredo em variável `NEXT_PUBLIC_*`.
 > - Autorização é implementada no backend, não apenas ocultando botão no frontend.
 > - Regra de negócio crítica (ex.: "não vender ingresso de lote esgotado") vive no domínio, nunca só no frontend.
-> - CORS configurado adequadamente na API.
-> - Autenticação pode ser simples — o foco do projeto é banco de dados, Go e arquitetura, não segurança avançada.
+> - Route Handlers são same-origin; não expor a API a outras origens sem necessidade.
+> - Autenticação pode ser simples — o foco do projeto é banco de dados, TypeScript e arquitetura, não segurança avançada.
 
 ## Erros
 
@@ -66,16 +67,16 @@ O backend retorna erro estruturado, sem stack trace para o usuário:
 { "code": "TICKET_BATCH_SOLD_OUT", "message": "Lote de ingressos esgotado", "details": {} }
 ```
 
-Erros de domínio (ex.: `ErrTicketBatchSoldOut`, `ErrCheckInAlreadyDone`) são distintos de erros de infraestrutura, e cada um mapeia para um HTTP status apropriado no adapter HTTP.
+Erros de domínio (ex.: `TicketBatchSoldOutError`, `CheckInAlreadyDoneError`) são classes distintas dos erros de infraestrutura, e cada uma mapeia para um HTTP status apropriado no adaptador de entrada.
 
 ## Concorrência na venda de ingressos
 
 > [!important] Ponto crítico do projeto
-> `confirmOrder` deve rodar em transação com `SELECT ... FOR UPDATE` sobre a linha do lote/tipo de ingresso, garantindo que duas compras simultâneas nunca vendam o mesmo último ingresso. Explicar a estratégia em ADR-006. Ver [[fluxos#Comprar ingresso]] e [[backend/fluxos#Concorrência]].
+> `confirmOrder` deve rodar em transação (`db.transaction`) com `SELECT ... FOR UPDATE` (`.for('update')` no Drizzle) sobre a linha do lote/tipo de ingresso, garantindo que duas compras simultâneas nunca vendam o mesmo último ingresso. Explicar a estratégia em ADR-006. Ver [[fluxos#Comprar ingresso]] e [[backend/fluxos#Concorrência]].
 
 ## Transações
 
-Todo processo de negócio que altera múltiplas tabelas usa transação explícita (`BEGIN`/`COMMIT`/`ROLLBACK`), por exemplo `confirmOrder` (pagamento + emissão de ingressos + atualização de estoque + status do pedido). Ver [[backend/services]].
+Todo processo de negócio que altera múltiplas tabelas usa transação explícita (`db.transaction`, com rollback ao lançar erro), por exemplo `confirmOrder` (pagamento + emissão de ingressos + atualização de estoque + status do pedido). Ver [[backend/services]].
 
 ## Modelagem e normalização
 
@@ -83,16 +84,17 @@ Todo processo de negócio que altera múltiplas tabelas usa transação explíci
 - Tabelas associativas usadas corretamente (ex.: `event_categories`, `order_items`).
 - PKs, FKs, `UNIQUE`, `CHECK` e `NOT NULL` aplicados de forma consistente.
 - `JSONB` só com justificativa real — nunca para substituir relacionamento.
-- Toda alteração de schema é feita via migration (`golang-migrate`), nunca via `docker-entrypoint-initdb.d`.
+- Toda alteração de schema é feita via migration versionada (`drizzle-kit generate` + `migrate`), nunca via `docker-entrypoint-initdb.d` nem `db push` em produção.
 
-## Go idiomático
+## TypeScript idiomático
 
-- `context.Context` propagado em toda operação de aplicação e repositório.
+- `strict: true`, sem `any`; tipos derivados do schema Drizzle (`InferSelectModel`/`InferInsertModel`) em vez de duplicados à mão.
 - Interfaces pequenas (ports), definidas onde são consumidas, não onde são implementadas.
-- Erros explícitos, `errors.Is`/`errors.As`, sem panics para controle de fluxo.
-- Dependency injection manual e simples — sem framework de DI.
-- `pgx`/`pgxpool` para acesso a PostgreSQL, sem ORM pesado.
-- Evitar: frameworks gigantes, "repository" genérico universal, interfaces criadas sem necessidade, reflection, abstrações que só existem para "seguir DDD".
+- Erros explícitos como classes de domínio, verificadas com `instanceof`; sem exceção genérica para controle de fluxo.
+- Dependency injection manual e simples (o use case recebe o repositório por parâmetro) — sem framework de DI.
+- Drizzle como query builder tipado, sem ORM mágico (nada de lazy loading ou active record).
+- Zod só na borda (parse de entrada em Route Handlers, Server Actions e CLI), nunca como regra de domínio.
+- Evitar: frameworks gigantes, "repository" genérico universal, interfaces criadas sem necessidade, abstrações que só existem para "seguir DDD".
 
 ## Mocks e dados de demonstração
 
@@ -100,7 +102,7 @@ Seeds devem ser realistas (múltiplos eventos, organizadores, participantes, lot
 
 ## Performance
 
-Queries indexadas (`event_id`, `organizer_id`, `participant_id`, `order_id`, status, timestamps) · paginação em listagens · queries de relatório organizadas em arquivos dedicados (`queries/`), fáceis de identificar.
+Queries indexadas (`event_id`, `organizer_id`, `participant_id`, `order_id`, status, timestamps) · paginação em listagens · queries de relatório organizadas em `infrastructure/postgres/queries/`, fáceis de identificar. Em ambiente serverless, reutilizar o client do Neon — nunca abrir um pool por requisição.
 
 ## Testes
 
@@ -112,21 +114,21 @@ Queries indexadas (`event_id`, `organizer_id`, `participant_id`, `order_id`, sta
 
 ## Convenções de código
 
-**Backend** — Go idiomático, `internal/` por bounded context com `domain/application/ports/adapters`, `cmd/api` e `cmd/cli` como entrypoints, migrations versionadas.
+**Backend** — TypeScript strict em `src/server/`, um diretório por bounded context com `domain/application/ports/infrastructure`; Route Handlers, Server Actions e `scripts/cli.ts` como entrypoints; migrations versionadas com `drizzle-kit`.
 
-**Frontend** — TypeScript, Next.js App Router, componentes reutilizáveis, sem regra de negócio crítica no cliente.
+**Frontend** — Next.js App Router em `src/app/`, componentes reutilizáveis, sem regra de negócio crítica no cliente.
 
 **Commits** — mensagens claras em português, descrevendo o processo de negócio ou entidade afetada.
 
 ## Definition of Done
 
 > [!success] Uma funcionalidade só está pronta quando
-> Domínio + aplicação + adapter PostgreSQL + adapter HTTP/CLI + frontend funcionam de ponta a ponta; regra de negócio testada; transação/concorrência tratada quando aplicável; documentação (`docs/`) atualizada.
+> Domínio + aplicação + infraestrutura Drizzle/Postgres + adaptador de entrada (Route Handler, Server Action ou CLI) + UI funcionam de ponta a ponta; regra de negócio testada; transação/concorrência tratada quando aplicável; documentação (`docs/`) atualizada.
 
 ## Antipadrões
 
 > [!failure] Não faça
-> Microserviços, ORM pesado sem justificativa, regra de negócio no handler HTTP ou no frontend, `utils`/`helpers` genérico contendo tudo, abstração que só existe para "seguir DDD" sem agregar valor.
+> Microserviços, backend separado do Next.js, regra de negócio no Route Handler, na Server Action ou no frontend, `utils`/`helpers` genérico contendo tudo, abstração que só existe para "seguir DDD" sem agregar valor.
 
 > [!failure] Não entregue
 > CRUD simples de eventos sem processos de negócio reais, relatórios de tabela única, tabelas artificiais só para aumentar a nota, venda de ingresso sem controle de concorrência.

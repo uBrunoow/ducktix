@@ -7,7 +7,7 @@ tags:
 aliases:
   - Estado
   - State Management
-updated: 2026-08-27
+updated: 2026-09-01
 ---
 
 # Frontend — Gerenciamento de Estado
@@ -21,7 +21,7 @@ updated: 2026-08-27
 ## Princípio
 
 > [!danger] O servidor é a fonte de verdade
-> Disponibilidade de ingressos, status de pedido e regras de negócio ==vêm prontos da API Go==. O frontend não recalcula regra de negócio — ver [[manifesto#Princípios]].
+> Disponibilidade de ingressos, status de pedido e regras de negócio ==vêm prontos do servidor== (use cases em `src/server/`). O frontend não recalcula regra de negócio — ver [[manifesto#Princípios]].
 
 Três categorias, com ferramentas distintas:
 
@@ -36,9 +36,10 @@ Três categorias, com ferramentas distintas:
 
 ## Client HTTP
 
-`src/lib/api-client.ts` — wrapper simples sobre `fetch`:
+`src/lib/api-client.ts` — wrapper simples sobre `fetch`, usado **apenas** por componentes client-side:
 
-- Base URL de `NEXT_PUBLIC_API_URL`, apontando para a API Go.
+- Caminhos relativos same-origin (`/api/...`); não existe base URL externa nem `NEXT_PUBLIC_API_URL`.
+- Server Components e Server Actions não passam por ele: chamam os use cases diretamente.
 - Normaliza erros da API (status HTTP + mensagem) em uma classe `ApiError`.
 - Autenticação, quando existir, é opcional e simples (PRD seção 37) — não deve consumir esforço significativo do frontend.
 

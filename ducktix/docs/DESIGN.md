@@ -7,90 +7,98 @@ tags:
 aliases:
   - Design
   - Identidade Visual
-updated: 2026-08-27
+updated: 2026-09-02
 ---
 
 # Design System — Ducktix
 
 > [!abstract] Propósito
-> Definir a identidade visual do Ducktix: paleta, tipografia, grid e componentes-base. Referência obrigatória para qualquer tela em [[frontend/manifesto]]. Inspiração visual em `design/` (moodboards genéricos — a paleta de cor deles **não** se aplica, ver abaixo).
+> Definir a identidade visual do Ducktix: paleta, tipografia, grid e componentes-base. Referência obrigatória para qualquer tela em [[frontend/manifesto]].
+
+> [!warning] Este documento substitui a versão anterior
+> A versão de 2026-08-27 descrevia um mundo **tech/mono/quadrado/escuro** que foi **descartado por decisão explícita do usuário antes da implementação** — nunca chegou a ser construído. O que existe no código (`src/app/layout.tsx`, `src/app/globals.css`) é um mundo diferente: canvas quente, tipografia Onest/Inter Tight, tudo em pill, um único acento amarelo em dois papéis. Este documento descreve **esse** mundo — a autoridade visual é o código, este arquivo só o registra por escrito.
 
 ## Conceito
 
-Ducktix é um evento de patos. A identidade é **tech / editorial / quadrada**: fontes monoespaçadas, grid rígido, cantos retos (sem `border-radius` grande), bastante espaço negativo e um único acento de cor.
+Ducktix é uma plataforma de eventos com a gramática de um produto de infraestrutura: densa em dado, calma, com moldura editorial. Recusa o herói fotográfico full-bleed comum da categoria — a marca vem da **moldura** (filetes verticais + gutters hachurados), não de fotografia.
 
 > [!important] Regra de cor
-> Só existem três cores de verdade: **preto**, **branco** e **amarelo**. Amarelo é o único acento — usar com moderação (CTA primário, destaques, foco, ícone de marca). Nunca introduzir uma segunda cor de acento (sem verde, sem azul, sem gradientes coloridos).
+> Só existem três cores de verdade: o canvas quente, preto/cinza para texto e um único acento amarelo `#FFD400`. O amarelo tem **dois papéis que nunca se trocam**: preenche (`--brand`, texto sempre preto por cima) ou é tinta de texto (`--brand-ink`, um tom mais escuro para manter contraste). Nunca introduzir uma segunda cor de acento.
 
-Referências (`design/*.png`) mostram o *estilo* a copiar — grid modular tipo bento, badges em mono, cards quadrados, fotos em duotone, textura de pontos/pixels — não a paleta (elas usam verde neon; nós usamos amarelo).
+## Tema único (claro)
 
-## Temas
-
-O site tem **tema escuro** (padrão) e **tema claro**, ambos preto/branco/amarelo com os papéis invertidos.
+Não existe tema escuro. Todos os tokens vivem em `:root` de `src/app/globals.css`.
 
 ### Tokens
 
-| Token | Dark | Light | Uso |
-|---|---|---|---|
-| `--bg` | `#0A0A0A` | `#FFFFFF` | Fundo da página |
-| `--surface` | `#141414` | `#F5F5F0` | Cards, painéis |
-| `--surface-2` | `#1F1F1F` | `#EAEAE3` | Hover de card, inputs |
-| `--border` | `#2E2E2E` | `#111111` | Bordas, divisores (1px, sempre sólida) |
-| `--fg` | `#FFFFFF` | `#0A0A0A` | Texto principal |
-| `--fg-muted` | `#A3A3A3` | `#4A4A4A` | Texto secundário |
-| `--accent` | `#FFD400` | `#FFD400` | CTA, foco, destaque, links |
-| `--accent-fg` | `#0A0A0A` | `#0A0A0A` | Texto sobre fundo `--accent` (sempre preto) |
+| Token | Valor | Uso |
+|---|---|---|
+| `--bg` | `#EFF1E7` | Canvas da página — quente, não branco puro |
+| `--surface` | `#FFFFFF` | Cards, painéis |
+| `--surface-2` | `#E7E9DE` | Hover, inputs |
+| `--line` | `#DFE1D6` | Bordas, filetes hairline |
+| `--line-strong` | `#C9CCBC` | Borda em hover |
+| `--fg` | `#26262B` | Texto principal |
+| `--fg-muted` | `#6B6B73` | Texto secundário |
+| `--brand` | `#FFD400` | Preenchimento — CTA, chip ativo (texto sempre `--brand-fg`, preto) |
+| `--brand-fg` | `#0A0A0A` | Texto sobre `--brand` |
+| `--brand-ink` | `#7A5C00` | Amarelo como tinta de texto — headline bicolor, links, anel de foco (6.9:1 de contraste; `--brand` puro sobre o canvas reprova) |
+| `--brand-tint` | `#FFF6CC` | Fundo suave de estado ativo (chip/opção selecionada) |
+| `--danger` / `--danger-tint` | `#C0392B` / `#FBEAE7` | Único delta negativo — não é acento, é semântico |
 
-> [!note] Amarelo fixo
-> `--accent` não muda entre temas — é a única constante entre os dois modos, junto com `--accent-fg` (texto sobre amarelo é **sempre preto**, nunca branco, por contraste).
-
-Preferir `prefers-color-scheme` com toggle manual persistido (ex.: `localStorage`), aplicando `data-theme="dark|light"` na raiz — mesmo padrão de tokens usado em qualquer Artifact deste projeto.
+> [!note] `--brand` e `--brand-ink` não são intercambiáveis
+> `--brand` (`#FFD400`) só entra como **fundo preenchido**. Como cor de texto sobre o canvas ele dá 1.3:1 de contraste e reprova qualquer critério — por isso título bicolor, links e foco usam `--brand-ink`.
 
 ## Tipografia
 
-- **Mono** (títulos, labels, badges, números, navegação): `JetBrains Mono` ou `IBM Plex Mono`, peso 500–700. Caixa alta em labels curtos (`GET A DEMO`, `LOTE 1`), tracking levemente aberto (`letter-spacing: 0.02em`).
-- **Sans** (parágrafos longos, descrições): `Inter` ou `IBM Plex Sans`, peso 400–500. Nunca em títulos grandes — títulos são sempre mono.
-- Hierarquia por **tamanho + peso**, não por cor. Títulos grandes em mono bold, corpo em sans regular, `--fg-muted` para texto de apoio.
+- **Onest** (`--font-display`), peso 600, `tracking: -0.05em`: títulos, headings, chips de rótulo. Classe utilitária `.display`.
+- **Inter Tight** (`--font-sans`): todo o resto — corpo, labels de formulário, navegação, botões.
+- Nunca serifada, nunca mono para título grande — a versão anterior deste documento pedia mono; **não usar**.
 
 ## Grid e forma
 
-- Grid modular tipo *bento*: seções compostas por blocos quadrados/retangulares de proporções simples (1:1, 4:3, 16:9), como nos moodboards de referência.
-- `border-radius`: **0 a 4px**, no máximo. O sistema é quadrado — evitar cantos muito arredondados em qualquer componente.
-- Bordas finas de 1px (`--border`) delimitando cards, nunca sombra pesada. Sombra, se usada, é sutil e só no tema claro.
-- Espaçamento em escala de 4px (`4, 8, 12, 16, 24, 32, 48, 64, 96`).
-- Textura opcional de fundo: grade de pontos (`dot-grid`) ou pixels em baixa opacidade (`8–15%`) sobre `--surface`, como visto em `image copy 2.png` — usar preto/branco, nunca colorido.
+- **Tudo é pill.** `border-radius: 9999px` em botões, chips e badges (`--r-pill`). Cards usam `--r-card` = `1rem` (não zero, não quadrado).
+- **Moldura**: coluna central com filetes verticais full-bleed (`Moldura` em `src/components/moldura.tsx`) e gutters hachurados a 45° (`.hatch`) — é a assinatura reconhecível sem conteúdo, substitui o "grid bento" da versão anterior.
+- Bordas finas de 1px (`--line`), sombra sutil só em cards (`--shadow-card`), nunca glassmorphism/blur pesado.
+- Header é uma pill flutuante (`Cabecalho`), não uma barra full-width com borda inferior.
 
 ## Componentes-base
 
+Os componentes reais vivem em `src/components/ui/*` (shadcn, estilo `new-york`, tokens remapeados — ver `globals.css`, seção `@theme inline`) e `src/components/*` (composições do produto: `Moldura`, `Cabecalho`, `Rodape`, `CardEvento`, `SeloStatus`, `LoadingButton`).
+
 ### Botão primário (CTA)
-Fundo `--accent`, texto `--accent-fg`, mono uppercase, sem radius (ou `2px`), padding `12px 20px`. Hover: leve escurecimento do amarelo (`#E6BF00`), nunca troca de cor.
+`variant="default"` do componente `Button`: fundo `--brand`, texto `--brand-fg`, `rounded-full`, hover escurece o amarelo (`#E8C200`) — nunca troca de cor.
 
-### Botão secundário
-Fundo transparente, borda 1px `--border`, texto `--fg`, mesmo padding e tipografia do primário. Hover: borda vira `--fg`.
+### Botão secundário / outline
+Fundo transparente ou `--surface-2`, borda 1px, mesmo formato pill.
 
-### Badge / tag
-Texto mono uppercase pequeno (`11–12px`), padding `4px 10px`, fundo `--surface-2`, borda 1px `--border`. Usar para status de lote, categoria de evento, contagem regressiva.
+### Ação assíncrona
+Toda Server Action é disparada por `LoadingButton` (`@/components/ui/loading-button`) — nunca um `Button` desabilitado manualmente — e termina em `toast` (sonner) de sucesso ou erro.
 
-### Card de evento
-Retângulo com borda 1px, imagem no topo (duotone preto/branco, sem cor — o amarelo pode entrar como overlay sutil de gradiente na base da imagem), título em mono, metadados (data/local) em mono menor com `--fg-muted`, preço/CTA no rodapé em destaque `--accent`.
+### Badge / chip
+`Badge`/`Rotulo`: texto pequeno, `rounded-chip` (`1.9rem`), fundo `--surface-2` ou `--brand-tint` quando ativo, borda 1px.
 
-### Navegação
-Barra fixa, fundo `--bg`, borda inferior 1px `--border`, logo à esquerda (mono, caixa alta), links mono no centro/direita, CTA amarelo à extrema direita — mesmo layout do header em `image.png`.
+### Card
+Borda 1px `--line`, `rounded-card` (`1rem`), `shadow-card`, fundo `--surface` sobre o canvas `--bg`. Título em Onest (`.display`), metadados em Inter Tight com `--fg-muted`.
+
+### Formulário
+Zod + react-hook-form sempre (`@/components/ui/form`). Campo de senha usa `CampoDeSenha` (toggle de visibilidade embutido). Upload de imagem usa `react-dropzone` + preview, nunca só um `<input type="file">` cru. Texto rico usa `EditorDeTexto` (Tiptap) — nunca um `<textarea>` para conteúdo que vai virar HTML exibido.
 
 ## Imagens
 
-- Fotos e ilustrações tratadas em **duotone preto/branco** (alto contraste, grão leve permitido) para manter unidade com o restante do site — nunca fotos coloridas soltas.
-- Ícones: traço fino (`stroke`, 1.5px), monocromáticos (`--fg` ou `--accent`), nunca preenchidos coloridos.
+- Sem fotografia de estoque nesta fase: capas de evento são arte gerada em código (`PainelArte`, padrão geométrico determinístico pelo slug). Quando o organizador envia um banner de verdade (`imagemUrl`, data URL), ele substitui a arte gerada.
+- Ícones: `lucide-react`, traço fino, monocromáticos (`--fg` ou `--brand-ink`).
 
 ## O que evitar
 
 > [!danger] Não fazer
-> - Segunda cor de acento (verde, azul, roxo, gradiente multicolor).
-> - `border-radius` grande (pill buttons, cards muito arredondados).
-> - Sombra pesada / glassmorphism / blur excessivo.
-> - Fontes serifadas ou script.
-> - Amarelo como cor de fundo de página inteira (ele é acento, não base).
+> - Segunda cor de acento.
+> - Cantos retos / `border-radius` pequeno em botão ou chip — o sistema é pill, não quadrado.
+> - Tipografia mono para título.
+> - Tema escuro (não existe).
+> - `--brand` como cor de texto direto sobre o canvas (usar `--brand-ink`).
+> - Formulário sem zod+react-hook-form, ação de envio sem `LoadingButton`+toast.
 
 ## Relação com outros documentos
 
-Este documento define a linguagem visual; a implementação de componentes React/Tailwind fica em [[frontend/manifesto]]. Fluxos de tela (não visual) estão em [[fluxos]]. Convenções de código gerais em [[guidelines]].
+Este documento define a linguagem visual real; a implementação de componentes React/Tailwind fica em `src/components/`. `docs/frontend/manifesto.md`, `docs/manifesto.md` e `docs/funcionalidades.md` ainda podem conter referências ao mundo antigo (Go/API separada, mono/quadrado) — ver aviso de legado em `PRODUCT.md`. Convenções de código gerais em [[guidelines]].

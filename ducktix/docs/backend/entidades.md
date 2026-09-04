@@ -7,7 +7,7 @@ tags:
 aliases:
   - Entidades
   - Models
-updated: 2026-08-27
+updated: 2026-09-03
 ---
 
 # Backend — Entidades
@@ -15,8 +15,23 @@ updated: 2026-08-27
 > [!abstract] Propósito
 > Tabelas e relacionamentos por bounded context. Vocabulário de negócio em [[../glossario|Glossário]].
 
-> [!warning] Estado atual
-> ==Nenhuma migration existe ainda.== Todas as entidades abaixo são ==previstas== — ver [[../../prd|PRD]] seção 7.
+> [!danger] Documento superado
+> **Este arquivo descreve o modelo PREVISTO antes da implementação e não é mais
+> a fonte da verdade.** O modelo vigente está em:
+>
+> - [[../modelo-conceitual|Modelo Conceitual]] — entidades, relacionamentos, cardinalidades
+> - [[../modelo-logico|Modelo Lógico]] — dicionário de dados completo
+> - [[../modelo-mudancas|O que mudou]] — diferenças em relação a este documento e o porquê de cada uma
+> - `db/schema.sql` — DDL executável
+>
+> Principais divergências: `ticket_batches` + `ticket_types` viraram uma tabela
+> só (`lote`); `registrations` virou `inscricao` e passou a valer para todo
+> ingresso, não só para eventos gratuitos; `participante` deixou de exigir
+> conta; surgiram `cupom_evento`, `uso_de_cupom`, `dados_cobranca` e
+> `dados_profissionais`. Os nomes passaram para português, acompanhando o
+> restante do código.
+>
+> Mantido no repositório como registro histórico da modelagem inicial.
 
 ## Base
 

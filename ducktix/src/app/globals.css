@@ -1,0 +1,409 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/* O mundo é claro-only, mas os componentes do shadcn vêm cheios de utilitários
+   `dark:`, e no Tailwind v4 `dark:` responde a prefers-color-scheme — num
+   navegador em modo escuro eles disparavam sozinhos (o Input ganhava um fundo
+   translúcido que ninguém pediu). Reapontando a variante para uma classe que
+   nunca existe, todo `dark:` do registry vira inerte sem precisar editar os
+   componentes um a um. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Ducktix — camada de tokens.
+
+   O mundo visual é claro-only: um canvas quente com cards brancos por cima,
+   moldura editorial de filetes e um único acento amarelo em dois papéis
+   distintos. Não existe tema escuro — cada token tem um valor só.
+
+   Nota de nomenclatura: o acento da marca é --brand, não --accent. O shadcn/ui
+   já usa --accent para "superfície de hover" (ghost button, item de dropdown);
+   se o amarelo ocupasse esse nome, todo hover viraria um bloco amarelo sólido.
+   Os dois vivem lado a lado sem colidir.
+--------------------------------------------------------------------------- */
+:root {
+  /* Ducktix */
+  --bg: #eff1e7;
+  --surface: #ffffff;
+  --surface-2: #e7e9de;
+  --line: #dfe1d6;
+  --line-strong: #c9ccbc;
+  --fg: #26262b;
+  --fg-muted: #6b6b73;
+
+  /* O amarelo em dois papéis. --brand preenche (texto preto por cima, sempre).
+     --brand-ink é o amarelo como TINTA DE TEXTO: #FFD400 sobre o canvas dá
+     1.3:1 e reprova em qualquer critério, então headline bicolor, links e anel
+     de foco usam este valor (6.9:1). Trocar um pelo outro quebra contraste. */
+  --brand: #ffd400;
+  --brand-fg: #0a0a0a;
+  --brand-ink: #7a5c00;
+  --brand-tint: #fff6cc;
+
+  /* Delta negativo precisa de um segundo matiz — um só não expressa os dois. */
+  --danger: #c0392b;
+  --danger-tint: #fbeae7;
+
+  /* ESTADO SEMÂNTICO — não são acentos de marca, e a distinção é a regra.
+     O amarelo continua o único acento: ele é quem a página usa para dizer
+     "olhe aqui" (CTA, chip ativo, série de gráfico). Estes três só aparecem
+     dentro de um selo de estado, onde a cor carrega significado que a forma
+     não carrega: pago/presente (ok), pendente/em breve (warn), falhou/
+     cancelado (danger). Fora de um selo ou de um delta, não usar — e nunca
+     como paleta categórica de gráfico, que continua proibida.
+     Contraste sobre o respectivo -tint: ok 5.4:1, warn 5.8:1. */
+  --ok: #1f7a4c;
+  --ok-tint: #e4f4ea;
+  --warn: #8a5a00;
+  --warn-tint: #fdf0d9;
+
+  --shadow-brand: 0 8px 24px -8px rgb(160 120 0 / 0.35);
+  --shadow-card: 0 1px 2px rgb(38 38 43 / 0.04), 0 8px 24px -16px rgb(38 38 43 / 0.12);
+
+  --r-btn: 0.5rem;
+  --r-card: 1rem;
+  --r-chip: 1.9rem;
+  --r-pill: 9999px;
+
+  --pilha-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --pilha-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+
+  color-scheme: light;
+
+  /* shadcn/ui — reapontado para os tokens acima em vez de manter uma segunda
+     paleta em paralelo. */
+  --radius: 0.5rem;
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--surface);
+  --card-foreground: var(--fg);
+  --popover: var(--surface);
+  --popover-foreground: var(--fg);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-fg);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--fg);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--fg-muted);
+  --accent: var(--surface-2);
+  --accent-foreground: var(--fg);
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--brand-ink);
+  --chart-1: var(--brand);
+  --chart-2: var(--brand-ink);
+  --chart-3: var(--line-strong);
+  --chart-4: var(--fg-muted);
+  --chart-5: var(--danger);
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--fg);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-fg);
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: var(--fg);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand-ink);
+}
+
+/* Tokens expostos como utilitários Tailwind. Os valores continuam vivendo nas
+   variáveis acima; o @theme só ensina o Tailwind a gerar classes para elas. */
+/**
+ * Chão do back-office (modo Operate).
+ *
+ * O canvas quente `--bg: #EFF1E7` é assinatura da vitrine: ele combina com a
+ * moldura de filetes e com a leitura longa. Num painel denso, o mesmo verde
+ * puxa a página para "documento" e tira contraste dos cards brancos, que são
+ * o conteúdo aqui. Então o modo Operate reescreve só o chão e os filetes —
+ * `--surface` continua branco, `--brand` continua o único acento, e nenhum
+ * componente muda: eles já consomem estes tokens, e `@theme inline` resolve
+ * a variável no ponto de uso, então redefinir aqui basta.
+ */
+.operate {
+  --bg: #f5f5f6;
+  --surface-2: #eeeef0;
+  --line: #e4e4e8;
+  --line-strong: #cfcfd6;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-tint: var(--brand-tint);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --color-ok: var(--ok);
+  --color-ok-tint: var(--ok-tint);
+  --color-warn: var(--warn);
+  --color-warn-tint: var(--warn-tint);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-card: var(--r-card);
+  --radius-chip: var(--r-chip);
+
+  --shadow-brand: var(--shadow-brand);
+  --shadow-card: var(--shadow-card);
+
+  --font-display: var(--pilha-display);
+  --font-sans: var(--pilha-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--pilha-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+/* O display é apertado por natureza: 600, tracking negativo, leading curto.
+   Vive em @layer components de propósito: fora de camada ele venceria todo
+   utilitário do Tailwind, e qualquer `leading-*` ou `tracking-*` aplicado a um
+   título falharia em silêncio. Dentro da camada, o utilitário ganha. */
+@layer components {
+  .display {
+    font-family: var(--pilha-display);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Assinaturas do mundo. A moldura é o que torna a página reconhecível com todo
+   o conteúdo removido: filetes verticais full-bleed emoldurando a coluna
+   central, com os gutters hachurados a 45°.
+--------------------------------------------------------------------------- */
+.hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--line) 0,
+    var(--line) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+}
+
+.dotgrid {
+  background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Marcador em cruz nos cruzamentos dos filetes. */
+.tick::before,
+.tick::after {
+  content: '';
+  position: absolute;
+  background: var(--line-strong);
+}
+.tick::before {
+  inset-inline-start: -4.5px;
+  inset-block-start: -0.5px;
+  block-size: 1px;
+  inline-size: 10px;
+}
+.tick::after {
+  inset-inline-start: -0.5px;
+  inset-block-start: -4.5px;
+  inline-size: 1px;
+  block-size: 10px;
+}
+
+/* ---------------------------------------------------------------------------
+   Superfícies do navegador: nada aqui fica com o default de fábrica.
+--------------------------------------------------------------------------- */
+::selection {
+  background: var(--brand);
+  color: var(--brand-fg);
+}
+
+@layer base {
+  ::placeholder {
+    color: var(--fg-muted);
+    opacity: 1;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-ink);
+  outline-offset: 2px;
+}
+
+input,
+textarea {
+  caret-color: var(--brand-ink);
+}
+
+@supports (scrollbar-color: red blue) {
+  html {
+    scrollbar-color: var(--line-strong) var(--bg);
+    scrollbar-width: thin;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 2px solid var(--bg);
+  border-radius: var(--r-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fg-muted);
+}
+
+/* Em @layer base de propósito. Fora de camada, `color: inherit` venceria
+   qualquer `text-*` do Tailwind em toda âncora do site — inclusive nos botões
+   com asChild, que renderizam um <a>. Dentro da camada, o utilitário ganha. */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 120px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   O único momento autorado de movimento do site: a marca-texto amarela varre
+   por trás da segunda linha da headline, uma vez, na carga. O texto já entra
+   visível — a animação acrescenta, não revela. Sob reduced-motion a regra
+   global acima zera a duração e a marca aparece pronta.
+--------------------------------------------------------------------------- */
+.marca-texto {
+  display: inline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0.04em 0.14em;
+  margin: 0 -0.14em;
+  border-radius: 0.18em;
+  background-image: linear-gradient(var(--brand), var(--brand));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  animation: varrer 900ms cubic-bezier(0.16, 1, 0.3, 1) 250ms forwards;
+}
+
+@keyframes varrer {
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Conteúdo rico (descrição de evento, editor WYSIWYG e a página pública que
+   renderiza o mesmo HTML): sem plugin de tipografia, os elementos básicos
+   ficam sem estilo nenhum por padrão — isso devolve hierarquia mínima.
+--------------------------------------------------------------------------- */
+.prose-evento p {
+  margin: 0 0 0.75em;
+}
+.prose-evento p:last-child {
+  margin-bottom: 0;
+}
+.prose-evento ul,
+.prose-evento ol {
+  margin: 0 0 0.75em;
+  padding-left: 1.25em;
+}
+.prose-evento ul {
+  list-style: disc;
+}
+.prose-evento ol {
+  list-style: decimal;
+}
+.prose-evento strong {
+  font-weight: 600;
+  color: var(--fg);
+}
+.prose-evento em {
+  font-style: italic;
+}
+.prose-evento p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--fg-muted);
+  pointer-events: none;
+}
+
+/* NOTA: `npx shadcn add sidebar` acrescenta aqui um bloco `.dark` com uma
+   paleta própria (cinza-azulado + acento azul). Ele foi removido de
+   propósito: o mundo é claro-only e só existe um acento (o amarelo). Os
+   tokens `--sidebar-*` já vivem no `:root` acima, remapeados para os tokens
+   do Ducktix. Se rodar o instalador de novo, apagar o bloco outra vez. */

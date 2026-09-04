@@ -8,7 +8,7 @@ aliases:
   - Manifesto
   - Visão do Produto
 status: em-planejamento
-updated: 2026-08-27
+updated: 2026-09-01
 ---
 
 # Manifesto — Ducktix
@@ -30,7 +30,7 @@ graph LR
     F --> G[Relatórios]
 ```
 
-Este projeto é acadêmico (disciplina de Banco de Dados) e tem um objetivo secundário: servir como projeto de aprendizado de **Golang**.
+Este projeto é acadêmico (disciplina de Banco de Dados) e tem um objetivo secundário: servir como projeto de aprendizado de **TypeScript full stack com Next.js**.
 
 ## O problema
 
@@ -56,11 +56,11 @@ A evolução pretendida do domínio:
 | Princípio | Significado prático |
 |---|---|
 | **Domínio não conhece infraestrutura** | O domínio não pode depender de PostgreSQL, HTTP, JSON ou Next.js. Ver [[guidelines]]. |
-| **Sem microserviços** | Monólito modular com bounded contexts, não serviços distribuídos. |
+| **Sem microserviços** | Monólito full stack em um único projeto Next.js, com bounded contexts como pastas — não serviços distribuídos, não backend separado. |
 | **Processos de negócio explícitos** | Toda tabela associativa relevante precisa de uma operação de negócio, não apenas CRUD. |
 | **Concorrência controlada** | Venda de ingressos usa transação + `SELECT ... FOR UPDATE` para nunca vender o mesmo ingresso duas vezes. |
 | **REST não é a interface final** | A interface final é o frontend Next.js; a API é um adaptador de entrada. |
-| **SQL explícito** | Sem ORM pesado — queries legíveis com `pgx`, parametrizadas, organizadas por bounded context. |
+| **SQL explícito** | Drizzle ORM usado como query builder tipado, não como ORM mágico — queries legíveis e parametrizadas, organizadas por bounded context. |
 | **Migrations, nunca init scripts** | Toda alteração de schema passa por migration versionada. |
 
 As convenções que materializam esses princípios estão em [[guidelines]].
@@ -84,7 +84,7 @@ A arquitetura (ports/adapters) deve permitir a adaptação para NoSQL na Fase 2 
 - **Ticketing** — lotes, tipos de ingresso, pedidos, cupons, pagamentos.
 - **Participation** — inscrições, ingressos emitidos, check-in.
 
-Stack: **Go** (`pgx`/`pgxpool`, `golang-migrate`, `net/http`/`chi`) no backend, **PostgreSQL** como banco relacional, **Next.js** como interface final, e uma **CLI** mínima reutilizando os mesmos use cases da API.
+Stack: **Next.js (App Router)** em TypeScript strict contendo frontend e backend no mesmo projeto — Route Handlers e Server Actions como adaptadores de entrada, **Drizzle ORM** (`drizzle-kit` para migrations) sobre **PostgreSQL** no **Neon** via `@neondatabase/serverless`, deploy único na **Vercel**, e uma **CLI** mínima (`tsx`) reutilizando os mesmos use cases.
 
 ## Estado atual do projeto
 
@@ -95,9 +95,9 @@ Stack: **Go** (`pgx`/`pgxpool`, `golang-migrate`, `net/http`/`chi`) no backend, 
 |---|---|
 | Discovery (domínio, entidades, bounded contexts) | 📋 Previsto |
 | Modelagem (DER, esquema lógico, dicionário de dados) | 📋 Previsto |
-| Infraestrutura (Docker Compose, migrations, seeds, backup) | 📋 Previsto |
-| Backend (domain → application → ports → adapters) | 📋 Previsto |
-| Frontend (Next.js) | 📋 Previsto |
+| Infraestrutura (Postgres local, migrations, seeds, backup) | 📋 Previsto |
+| Backend em `src/server/` (domain → application → ports → infrastructure) | 📋 Previsto |
+| Frontend (`src/app/`) | 📋 Previsto |
 | Testes | 📋 Previsto |
 | Documentação final (`docs/fase-1.md`, ADRs) | 📋 Previsto |
 

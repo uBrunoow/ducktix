@@ -7,7 +7,7 @@ tags:
 aliases:
   - Catálogo de Features
   - Features
-updated: 2026-08-27
+updated: 2026-09-01
 ---
 
 # Funcionalidades
@@ -90,13 +90,13 @@ Detalhes: [[backend/api#Relatórios]].
 
 | # | Funcionalidade | Status |
 |---|---|---|
-| F-50 | API REST em Go como adaptador de entrada | 📋 |
-| F-51 | CLI mínima reutilizando os mesmos use cases da API | 📋 |
-| F-52 | Migrations versionadas (`golang-migrate`) | 📋 |
+| F-50 | Route Handlers e Server Actions do Next.js como adaptadores de entrada | 📋 |
+| F-51 | CLI mínima (`tsx scripts/cli.ts`) reutilizando os mesmos use cases | 📋 |
+| F-52 | Migrations versionadas (`drizzle-kit`) | 📋 |
 | F-53 | Seeds com dados realistas | 📋 |
 | F-54 | Backup e restore do PostgreSQL | 📋 |
-| F-55 | Frontend Next.js como interface final | 📋 |
-| F-56 | Docker Compose com PostgreSQL e pgAdmin | 📋 |
+| F-55 | Frontend Next.js (App Router) como interface final | 📋 |
+| F-56 | Postgres local em Docker Compose (dev) e Neon serverless (produção) | 📋 |
 
 ## Fora do MVP (Fase 1)
 
