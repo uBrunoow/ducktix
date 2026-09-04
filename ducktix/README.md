@@ -80,6 +80,21 @@ pg_dump --format=plain --no-owner --no-privileges ducktix > db/backup.sql
 > Todos os dados são **sintéticos**. Nenhuma pessoa, organizador ou local
 > existe; os e-mails usam `example.com`, domínio reservado pela RFC 2606.
 
+### 2.6 Migrations (produção / Vercel)
+
+`schema.sql` acima é só para bootstrap do Postgres local via Docker. Em
+produção (Neon), quem cria e atualiza as tabelas são as migrations do Drizzle
+em `drizzle/`, geradas a partir de `src/server/db/schema.ts`:
+
+```bash
+npm run db:generate   # gera uma nova migration após alterar schema.ts
+npm run db:migrate    # aplica as migrations pendentes no banco de DATABASE_URL
+```
+
+O deploy na Vercel roda `npm run vercel-build`, que aplica as migrations
+pendentes (`drizzle-kit migrate`) antes de `next build` — não é preciso
+aplicar nada manualmente após o primeiro deploy.
+
 ---
 
 ## 3. Aplicação

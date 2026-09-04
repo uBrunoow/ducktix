@@ -1,9 +1,8 @@
 /**
- * Espelho TypeScript de `db/schema.sql`. O SQL é a fonte da verdade do
- * dicionário de dados (documento de entrega descreve o SQL, não este
- * arquivo) — se os dois divergirem, corrija aqui. Não há `drizzle-kit
- * generate`/`migrate` neste projeto: `schema.sql` é aplicado diretamente
- * (ver README), e este arquivo existe só para dar tipos ao query builder.
+ * Fonte da verdade do esquema (gera as migrations em `drizzle/` — ver
+ * README 2.6). `db/schema.sql` é um espelho SQL mantido para o dicionário de
+ * dados do documento de entrega e para o bootstrap do Postgres local via
+ * Docker; se os dois divergirem, corrija aqui e rode `npm run db:generate`.
  */
 
 import {
