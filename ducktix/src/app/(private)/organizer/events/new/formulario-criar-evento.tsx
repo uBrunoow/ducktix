@@ -51,6 +51,8 @@ const FORMATOS_ONLINE = [
 
 const PASSOS = ['Informações', 'Mídia', 'Lotes', 'Revisão'] as const;
 
+const TAMANHO_MAXIMO_IMAGEM_BYTES = 5 * 1024 * 1024;
+
 const DESCRICAO_DO_PASSO: Record<number, { titulo: string; apoio: string }> = {
   0: { titulo: 'Informações gerais', apoio: 'Onde, quando e de que tipo é o evento.' },
   1: { titulo: 'Mídia e descrição', apoio: 'A capa e o texto que o participante lê antes de comprar.' },
@@ -97,6 +99,10 @@ export function FormularioCriarEvento({
     (arquivos: File[]) => {
       const arquivo = arquivos[0];
       if (!arquivo) return;
+      if (arquivo.size > TAMANHO_MAXIMO_IMAGEM_BYTES) {
+        toast.error('A imagem precisa ter no máximo 5 MB.');
+        return;
+      }
       const leitor = new FileReader();
       leitor.onload = () => {
         const dataUrl = leitor.result as string;

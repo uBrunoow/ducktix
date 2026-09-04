@@ -56,6 +56,8 @@ const FORMATOS_ONLINE = [
   { valor: 'conteudo-digital', rotulo: 'Conteúdo digital (sob demanda)' },
 ] as const;
 
+const TAMANHO_MAXIMO_IMAGEM_BYTES = 5 * 1024 * 1024;
+
 export function FormularioEditarEvento({
   eventoId,
   categorias,
@@ -84,6 +86,10 @@ export function FormularioEditarEvento({
     (arquivos: File[]) => {
       const arquivo = arquivos[0];
       if (!arquivo) return;
+      if (arquivo.size > TAMANHO_MAXIMO_IMAGEM_BYTES) {
+        toast.error('A imagem precisa ter no máximo 5 MB.');
+        return;
+      }
       const leitor = new FileReader();
       leitor.onload = () => {
         const dataUrl = leitor.result as string;
