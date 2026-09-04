@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { acaoEditarEvento } from './acoes';
+import { enviarImagemParaBlob } from '@/lib/enviar-imagem-para-blob';
 import { type DadosEditarEvento, esquemaEditarEvento } from './schemas';
 
 const MODALIDADES = [
@@ -90,16 +91,17 @@ export function FormularioEditarEvento({
         toast.error('A imagem precisa ter no máximo 5 MB.');
         return;
       }
-      const leitor = new FileReader();
-      leitor.onload = () => {
-        const dataUrl = leitor.result as string;
-        setImagemUrl(dataUrl);
-        formulario.setValue('imagemUrl', dataUrl, {
-          shouldValidate: true,
-          shouldDirty: true,
+      void enviarImagemParaBlob(arquivo)
+        .then((url) => {
+          setImagemUrl(url);
+          formulario.setValue('imagemUrl', url, {
+            shouldValidate: true,
+            shouldDirty: true,
+          });
+        })
+        .catch((erro: unknown) => {
+          toast.error(erro instanceof Error ? erro.message : 'Não foi possível enviar a imagem.');
         });
-      };
-      leitor.readAsDataURL(arquivo);
     },
     [formulario],
   );

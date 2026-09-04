@@ -86,7 +86,7 @@ Zod + react-hook-form sempre (`@/components/ui/form`). Campo de senha usa `Campo
 
 ## Imagens
 
-- Sem fotografia de estoque nesta fase: capas de evento são arte gerada em código (`PainelArte`, padrão geométrico determinístico pelo slug). Quando o organizador envia um banner de verdade (`imagemUrl`, data URL), ele substitui a arte gerada.
+- Sem fotografia de estoque nesta fase: capas de evento são arte gerada em código (`PainelArte`, padrão geométrico determinístico pelo slug). Quando o organizador envia um banner de verdade (`imagemUrl`, URL pública do Vercel Blob), ele substitui a arte gerada.
 - Ícones: `lucide-react`, traço fino, monocromáticos (`--fg` ou `--brand-ink`).
 
 ## O que evitar
