@@ -7,6 +7,7 @@ import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/in
 import { drizzleIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/drizzle-ingressos';
 import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
+import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
 import { enviarEmailDeConfirmacaoDoPedido } from '@/server/notifications/infrastructure/resend-email';
 
 export interface RespostaDoPagamento {
@@ -27,6 +28,7 @@ async function exigirSessao() {
  */
 export async function acaoConfirmarPedido(pedidoId: string): Promise<RespostaDoPagamento> {
   const sessao = await exigirSessao();
+  const compradoEm = new Date();
   let resultado: Awaited<ReturnType<typeof confirmarPedido>>;
   try {
     resultado = await confirmarPedido(
@@ -46,8 +48,13 @@ export async function acaoConfirmarPedido(pedidoId: string): Promise<RespostaDoP
   }
 
   try {
+    const comprador = await usuariosRepository.buscarPorId(sessao.usuarioId);
+    if (!comprador) throw new Error('Comprador não encontrado após confirmar o pedido.');
     const emails = [...new Set(
-      resultado.pedido.participantes?.map((participante) => participante.email.trim().toLowerCase()) ?? [],
+      [
+        comprador.email,
+        ...(resultado.pedido.participantes?.map((participante) => participante.email.trim().toLowerCase()) ?? []),
+      ].filter((email): email is string => Boolean(email)),
     )];
     const eventos = new Map(
       await Promise.all(
@@ -60,8 +67,13 @@ export async function acaoConfirmarPedido(pedidoId: string): Promise<RespostaDoP
     await enviarEmailDeConfirmacaoDoPedido({
       emails,
       pedido: resultado.pedido,
+      compradoEm,
       ingressos: resultado.ingressos,
       eventos: new Map([...eventos].filter((entry): entry is [string, NonNullable<typeof entry[1]>] => entry[1] !== null)),
+      comprador: { nome: comprador.nome, email: comprador.email },
+      cupom: resultado.pedido.cupomId
+        ? await cupomRepository.buscarPorId(resultado.pedido.cupomId)
+        : null,
     });
   } catch (erro) {
     if (erro instanceof Error) {

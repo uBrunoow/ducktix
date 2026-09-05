@@ -3,7 +3,12 @@ import { Resend } from 'resend';
 import type { Evento } from '@/server/event/domain/evento';
 import type { Ingresso } from '@/server/participation/domain/ingresso';
 import { nomeDeExibicao } from '@/server/participation/domain/ingresso';
-import type { Pedido } from '@/server/ticketing/domain/pedido';
+import {
+  totalBrutoCentavos,
+  totalComDescontoCentavos,
+  type Pedido,
+} from '@/server/ticketing/domain/pedido';
+import type { Cupom } from '@/server/ticketing/domain/cupom';
 
 function clienteResend(): Resend {
   const chave = process.env.RESEND_API_KEY;
@@ -33,6 +38,39 @@ function escaparHtml(valor: string): string {
         "'": '&#39;',
       })[caractere] ?? caractere,
   );
+}
+
+function moeda(centavos: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(centavos / 100);
+}
+
+function dataHora(data: Date): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(data);
+}
+
+function dataDoEvento(data: Date): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+  }).format(data);
+}
+
+function rotuloDoPagamento(metodo: Pedido['metodoPagamento']): string {
+  if (metodo === 'cartao') return 'Cartão';
+  if (metodo === 'pix') return 'Pix';
+  if (metodo === 'boleto') return 'Boleto';
+  return 'Não informado';
+}
+
+function imagemDoEvento(url: string | null): string {
+  if (!url || (!url.startsWith('https://') && !url.startsWith('data:image/'))) return '';
+  return `<img src="${escaparHtml(url)}" alt="" width="100%" style="display:block;width:100%;height:auto;max-height:180px;object-fit:cover;border-radius:4px 4px 0 0;" />`;
 }
 
 const estilos = {
@@ -147,15 +185,58 @@ export async function enviarEmailDeRedefinicao(dados: {
 
 export async function enviarEmailDeConfirmacaoDoPedido(dados: {
   readonly emails: readonly string[];
+  readonly comprador: { readonly nome: string; readonly email: string };
   readonly pedido: Pedido;
+  readonly compradoEm: Date;
   readonly ingressos: readonly Ingresso[];
   readonly eventos: ReadonlyMap<string, Evento>;
+  readonly cupom: Cupom | null;
 }): Promise<void> {
-  const itens = dados.ingressos
-    .map((ingresso) => {
-      const evento = dados.eventos.get(ingresso.eventoId);
-      return `<li>${escaparHtml(nomeDeExibicao(ingresso))} - ${escaparHtml(evento?.nome ?? 'Evento')}</li>`;
+  const bruto = totalBrutoCentavos(dados.pedido);
+  const total = totalComDescontoCentavos(dados.pedido, dados.cupom);
+  const desconto = Math.max(0, bruto - total);
+  const ingressosPorItem = new Map<string, Ingresso[]>();
+  for (const ingresso of dados.ingressos) {
+    const lista = ingressosPorItem.get(ingresso.itemPedidoId) ?? [];
+    lista.push(ingresso);
+    ingressosPorItem.set(ingresso.itemPedidoId, lista);
+  }
+  const itens = dados.pedido.itens
+    .map((item) => {
+      const evento = dados.eventos.get(item.eventoId);
+      const ingressos = ingressosPorItem.get(item.id) ?? [];
+      const nomes = ingressos.map(nomeDeExibicao).join(', ');
+      return `
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #dfe1d6;color:#26262b;font-size:14px;line-height:1.5;">
+            <strong>${escaparHtml(evento?.nome ?? 'Evento')}</strong><br />
+            <span style="color:#6b6b73;">${item.quantidade} ingresso(s) · ${moeda(item.precoUnitarioCentavos)} cada</span>
+            ${nomes ? `<br /><span style="color:#6b6b73;">Participante(s): ${escaparHtml(nomes)}</span>` : ''}
+          </td>
+          <td align="right" valign="top" style="padding:12px 0;border-bottom:1px solid #dfe1d6;color:#26262b;font-size:14px;white-space:nowrap;">
+            ${moeda(item.quantidade * item.precoUnitarioCentavos)}
+          </td>
+        </tr>
+      `;
     })
+    .join('');
+  const eventos = [...new Set(dados.pedido.itens.map((item) => item.eventoId))]
+    .map((eventoId) => dados.eventos.get(eventoId))
+    .filter((evento): evento is Evento => evento !== undefined)
+    .map(
+      (evento) => `
+        <div style="margin:0 0 18px;border:1px solid #dfe1d6;border-radius:5px;overflow:hidden;">
+          ${imagemDoEvento(evento.imagemUrl)}
+          <div style="padding:16px 18px;background:#ffffff;">
+            <h3 style="margin:0 0 8px;color:#26262b;font-size:16px;line-height:1.3;">${escaparHtml(evento.nome)}</h3>
+            <p style="margin:0;color:#6b6b73;font-size:13px;line-height:1.6;">
+              ${escaparHtml(dataDoEvento(evento.comecaEm))}<br />
+              ${escaparHtml(evento.local ?? 'Evento online')}
+            </p>
+          </div>
+        </div>
+      `,
+    )
     .join('');
   const url = `${urlDaAplicacao()}/my-tickets/${dados.pedido.id}`;
 
@@ -166,17 +247,36 @@ export async function enviarEmailDeConfirmacaoDoPedido(dados: {
       `
         <h1 style="${estilos.titulo}">Pedido confirmado</h1>
         <p style="${estilos.paragrafo}">
-          Tudo certo! Os ingressos do pedido
-          <strong style="color:#26262b;">${escaparHtml(dados.pedido.id)}</strong>
-          já estão disponíveis na sua conta.
+          Olá, ${escaparHtml(dados.comprador.nome)}. Seu pedido foi confirmado e os ingressos já estão disponíveis.
         </p>
+        <div style="margin:24px 0 30px;padding:18px 20px;background:#fff6cc;border:1px solid #dfe1d6;border-radius:5px;">
+          <p style="margin:0;color:#7a5c00;font-size:12px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;">
+            Resumo da compra
+          </p>
+          <p style="margin:10px 0 0;color:#26262b;font-size:14px;line-height:1.8;">
+            <strong>Pedido:</strong> ${escaparHtml(dados.pedido.id)}<br />
+            <strong>Comprador:</strong> ${escaparHtml(dados.comprador.nome)}<br />
+            <strong>E-mail:</strong> ${escaparHtml(dados.comprador.email)}<br />
+            <strong>Comprado em:</strong> ${escaparHtml(dataHora(dados.compradoEm))}<br />
+            <strong>Pagamento:</strong> ${rotuloDoPagamento(dados.pedido.metodoPagamento)}
+          </p>
+        </div>
+        <p style="margin:0 0 12px;color:#7a5c00;font-size:12px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;">
+          Eventos
+        </p>
+        ${eventos}
         <div style="margin:26px 0 30px;padding:18px 20px;background:#e7e9de;border:1px solid #dfe1d6;border-radius:5px;">
           <p style="margin:0 0 10px;color:#7a5c00;font-size:12px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;">
-            Seus ingressos
+            Ingressos e valores
           </p>
-          <ul style="margin:0;padding-left:20px;color:#26262b;font-size:14px;line-height:1.8;">
-            ${itens}
-          </ul>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tbody>${itens}</tbody>
+          </table>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;color:#26262b;font-size:14px;line-height:1.8;">
+            <tr><td>Subtotal</td><td align="right">${moeda(bruto)}</td></tr>
+            ${desconto > 0 ? `<tr><td>Desconto${dados.cupom ? ` (${escaparHtml(dados.cupom.codigo)})` : ''}</td><td align="right">- ${moeda(desconto)}</td></tr>` : ''}
+            <tr><td style="padding-top:8px;border-top:1px solid #c9ccbc;font-size:16px;"><strong>Total</strong></td><td align="right" style="padding-top:8px;border-top:1px solid #c9ccbc;font-size:16px;"><strong>${moeda(total)}</strong></td></tr>
+          </table>
         </div>
         <p style="margin:0 0 30px;">
           <a href="${url}" style="${estilos.botao}">Ver meus ingressos</a>
