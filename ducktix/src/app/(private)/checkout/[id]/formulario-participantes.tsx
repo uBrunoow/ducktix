@@ -20,6 +20,7 @@ import { useState, useTransition } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { acaoAvancarParaPagamento } from './acoes';
+import { formatarCelular, formatarCpfCnpj } from '@/lib/formatadores';
 import {
   type DadosEtapaParticipantes,
   esquemaEtapaParticipantes,
@@ -274,7 +275,14 @@ export function FormularioParticipantes({
                             <FormItem>
                               <FormLabel>Celular</FormLabel>
                               <FormControl>
-                                <Input type="tel" autoComplete="tel" placeholder="(00) 00000-0000" {...field} />
+                                <Input
+                                  type="tel"
+                                  autoComplete="tel"
+                                  placeholder="(00) 00000-0000"
+                                  maxLength={15}
+                                  {...field}
+                                  onChange={(e) => field.onChange(formatarCelular(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -410,7 +418,13 @@ export function FormularioParticipantes({
                 <FormItem>
                   <FormLabel>CPF</FormLabel>
                   <FormControl>
-                    <Input inputMode="numeric" placeholder="000.000.000-00" {...field} />
+                    <Input
+                      inputMode="numeric"
+                      placeholder="000.000.000-00"
+                      maxLength={18}
+                      {...field}
+                      onChange={(e) => field.onChange(formatarCpfCnpj(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { enviarImagemParaBlob } from '@/lib/enviar-imagem-para-blob';
+import { formatarCpfCnpj } from '@/lib/formatadores';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/ui/loading-button';
@@ -145,7 +146,13 @@ export function FormularioPerfil({
               <FormItem>
                 <FormLabel>CPF ou CNPJ</FormLabel>
                 <FormControl>
-                  <Input inputMode="numeric" placeholder="000.000.000-00" {...field} />
+                  <Input
+                    inputMode="numeric"
+                    maxLength={18}
+                    placeholder="000.000.000-00"
+                    {...field}
+                    onChange={(e) => field.onChange(formatarCpfCnpj(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

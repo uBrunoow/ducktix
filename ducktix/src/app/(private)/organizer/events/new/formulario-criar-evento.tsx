@@ -36,6 +36,7 @@ import { cn } from '@/lib/utils';
 import { acaoCriarEvento } from './acoes';
 import { enviarImagemParaBlob } from '@/lib/enviar-imagem-para-blob';
 import { CAMPOS_DO_PASSO, type DadosCriarEvento, esquemaCriarEvento } from './schemas';
+import { formatarReais, reaisDoCampo } from '@/lib/formatadores';
 
 const MODALIDADES = [
   { valor: 'presencial', titulo: 'Presencial', descricao: 'Acontece num local físico.' },
@@ -460,7 +461,13 @@ export function FormularioCriarEvento({
                           <FormItem>
                             <FormLabel>Preço (R$)</FormLabel>
                             <FormControl>
-                              <Input type="number" min={0.01} step="0.01" {...field} value={field.value as number} />
+                              <Input
+                                inputMode="decimal"
+                                placeholder="0,00"
+                                {...field}
+                                value={formatarReais(field.value as number)}
+                                onChange={(e) => field.onChange(reaisDoCampo(e.target.value))}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

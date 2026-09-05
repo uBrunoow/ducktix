@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, asc, eq, gte, inArray, lt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, lt, sql } from 'drizzle-orm';
 import { db } from '@/server/db/client';
 import {
   categoria as categoriaTabela,
@@ -13,6 +13,7 @@ import { gerarSlug, type Evento, type Lote } from '../domain/evento';
 import type {
   CatalogoPublicoRepository,
   DadosDeEdicaoDeEvento,
+  DadosDeNovoLote,
   DadosDeNovoEvento,
 } from '../ports/catalogo-publico';
 
@@ -345,6 +346,70 @@ class DrizzleCatalogoPublicoRepository implements CatalogoPublicoRepository {
     const evento = await this.buscarPorId(eventoId);
     if (!evento) throw new EventoNaoEncontradoError();
     return evento;
+  }
+
+  async adicionarLote(eventoId: string, dados: DadosDeNovoLote): Promise<Evento> {
+    const existentes = await db
+      .select({ ordem: loteTabela.ordem })
+      .from(loteTabela)
+      .where(eq(loteTabela.eventoId, eventoId))
+      .orderBy(desc(loteTabela.ordem))
+      .limit(1);
+    await db.insert(loteTabela).values({
+      eventoId,
+      nome: dados.nome,
+      precoCentavos: dados.precoCentavos,
+      vagas: dados.vagas,
+      iniciaEm: dados.iniciaEm,
+      encerraEm: dados.encerraEm,
+      ordem: (existentes[0]?.ordem ?? -1) + 1,
+    });
+    const evento = await this.buscarPorId(eventoId);
+    if (!evento) throw new EventoNaoEncontradoError();
+    return evento;
+  }
+
+  async atualizarLote(eventoId: string, loteId: string, dados: DadosDeNovoLote): Promise<Evento> {
+    const [lote] = await db
+      .select({ vendidos: loteTabela.vendidos })
+      .from(loteTabela)
+      .where(and(eq(loteTabela.id, loteId), eq(loteTabela.eventoId, eventoId)))
+      .limit(1);
+    if (!lote) throw new EventoNaoEncontradoError();
+    if (lote.vendidos > 0) throw new Error('Este lote já possui ingressos vendidos e não pode ser editado.');
+    await db
+      .update(loteTabela)
+      .set({
+        nome: dados.nome,
+        precoCentavos: dados.precoCentavos,
+        vagas: dados.vagas,
+        iniciaEm: dados.iniciaEm,
+        encerraEm: dados.encerraEm,
+      })
+      .where(and(eq(loteTabela.id, loteId), eq(loteTabela.eventoId, eventoId)));
+    const evento = await this.buscarPorId(eventoId);
+    if (!evento) throw new EventoNaoEncontradoError();
+    return evento;
+  }
+
+  async excluirLote(eventoId: string, loteId: string): Promise<void> {
+    const lotes = await db
+      .select({ id: loteTabela.id })
+      .from(loteTabela)
+      .where(eq(loteTabela.eventoId, eventoId));
+    if (lotes.length <= 1) {
+      throw new Error('O evento precisa manter ao menos um lote de ingresso.');
+    }
+    const [lote] = await db
+      .select({ vendidos: loteTabela.vendidos })
+      .from(loteTabela)
+      .where(and(eq(loteTabela.id, loteId), eq(loteTabela.eventoId, eventoId)))
+      .limit(1);
+    if (!lote) throw new EventoNaoEncontradoError();
+    if (lote.vendidos > 0) throw new Error('Este lote já possui ingressos vendidos e não pode ser excluído.');
+    await db
+      .delete(loteTabela)
+      .where(and(eq(loteTabela.id, loteId), eq(loteTabela.eventoId, eventoId)));
   }
 }
 

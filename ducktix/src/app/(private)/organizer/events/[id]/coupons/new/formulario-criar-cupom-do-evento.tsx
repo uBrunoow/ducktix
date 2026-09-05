@@ -23,6 +23,7 @@ import {
   type DadosCriarCupomDoEvento,
   esquemaCriarCupomDoEvento,
 } from '../schemas';
+import { formatarReais, reaisDoCampo } from '@/lib/formatadores';
 
 export function FormularioCriarCupomDoEvento({
   eventoId,
@@ -154,12 +155,20 @@ export function FormularioCriarCupomDoEvento({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          min={tipoDesconto === 'percentual' ? 1 : 0.01}
-                          max={tipoDesconto === 'percentual' ? 100 : undefined}
-                          step={tipoDesconto === 'percentual' ? 1 : 0.01}
+                          inputMode="decimal"
                           {...field}
-                          value={field.value as number}
+                          value={
+                            tipoDesconto === 'percentual'
+                              ? String(field.value ?? '')
+                              : formatarReais(field.value as number)
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              tipoDesconto === 'percentual'
+                                ? Number(e.target.value.replace(/\D/g, '')) || 0
+                                : reaisDoCampo(e.target.value),
+                            )
+                          }
                         />
                       </FormControl>
                       <FormMessage />

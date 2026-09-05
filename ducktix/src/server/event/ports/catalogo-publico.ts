@@ -102,4 +102,8 @@ export interface CatalogoPublicoRepository {
    * processo de negócio (e outra tela), não um campo de formulário.
    */
   atualizar(eventoId: string, dados: DadosDeEdicaoDeEvento): Promise<Evento>;
+
+  adicionarLote(eventoId: string, dados: DadosDeNovoLote): Promise<Evento>;
+  atualizarLote(eventoId: string, loteId: string, dados: DadosDeNovoLote): Promise<Evento>;
+  excluirLote(eventoId: string, loteId: string): Promise<void>;
 }

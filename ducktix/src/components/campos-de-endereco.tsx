@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useEnderecoPorCep } from '@/hooks/usar-endereco-por-cep';
+import { formatarCep } from '@/lib/formatadores';
 
 /**
  * CEP + logradouro/número/complemento/bairro/cidade/UF, com autopreenchimento
@@ -42,7 +43,9 @@ export function CamposDeEndereco({ prefix }: { prefix: string }) {
                 <Input
                   inputMode="numeric"
                   placeholder="00000-000"
+                  maxLength={9}
                   {...field}
+                  onChange={(e) => field.onChange(formatarCep(e.target.value))}
                   onBlur={(e) => {
                     field.onBlur();
                     aoSairDoCep(e.target.value);

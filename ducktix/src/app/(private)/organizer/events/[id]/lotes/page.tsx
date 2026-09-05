@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { FormularioLote } from './formulario-lote';
+import { BotaoExcluirLote } from './botao-excluir-lote';
 import {
   BarraDeProporcao,
   BlocoDoPainel,
@@ -146,12 +148,42 @@ export default async function LotesDoEvento({
                     <TableCell className="pr-5 text-right font-semibold tabular-nums">
                       {formatarMoeda(lote.vendidos * lote.precoCentavos)}
                     </TableCell>
+                    <TableCell className="pr-5 text-right">
+                      {lote.vendidos === 0 ? (
+                        <details>
+                          <summary className="cursor-pointer text-sm font-medium text-brand-ink">Editar</summary>
+                          <div className="mt-3 min-w-72 text-left">
+                            <FormularioLote
+                              eventoId={evento.id}
+                              loteId={lote.id}
+                              valores={{
+                                nome: lote.nome,
+                                precoReais: lote.precoCentavos / 100,
+                                vagas: lote.vagas,
+                                iniciaEm: lote.iniciaEm ? lote.iniciaEm.toISOString().slice(0, 10) : '',
+                                encerraEm: lote.encerraEm ? lote.encerraEm.toISOString().slice(0, 10) : '',
+                              }}
+                            />
+                            <BotaoExcluirLote eventoId={evento.id} loteId={lote.id} />
+                          </div>
+                        </details>
+                      ) : (
+                        <span className="text-xs text-fg-muted">Com vendas</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
         </div>
+      </BlocoDoPainel>
+
+      <BlocoDoPainel
+        titulo="Adicionar lote"
+        descricao="Crie um novo lote para este evento."
+      >
+        <FormularioLote eventoId={evento.id} />
       </BlocoDoPainel>
 
       <p className="text-[13px] text-fg-muted">
