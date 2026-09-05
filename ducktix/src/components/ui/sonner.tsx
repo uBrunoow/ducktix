@@ -30,9 +30,18 @@ const Toaster = ({ ...props }: ToasterProps) => (
         '--success-bg': 'var(--brand-tint)',
         '--success-text': 'var(--brand-ink)',
         '--success-border': 'var(--brand)',
+        '--info-bg': '#e8f1fb',
+        '--info-text': '#24527a',
+        '--info-border': '#8db7dd',
+        '--warning-bg': 'var(--warn-tint)',
+        '--warning-text': 'var(--warn)',
+        '--warning-border': '#e3bd72',
         '--error-bg': 'var(--danger-tint)',
         '--error-text': 'var(--danger)',
         '--error-border': 'var(--danger)',
+        '--loading-bg': 'var(--surface-2)',
+        '--loading-text': 'var(--fg)',
+        '--loading-border': 'var(--line-strong)',
       } as React.CSSProperties
     }
     {...props}
