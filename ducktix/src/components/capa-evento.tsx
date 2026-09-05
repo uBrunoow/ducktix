@@ -26,6 +26,7 @@ export function CapaEvento({
     <PainelArte
       semente={semente}
       emAmarelo={semente % 4 === 0}
+      imagemUrl={evento.imagemUrl}
       kicker={comKicker ? evento.categoria : undefined}
       className={className}
     >

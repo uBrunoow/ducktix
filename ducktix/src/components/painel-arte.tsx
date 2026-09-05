@@ -29,12 +29,14 @@ export function padraoDoIndice(semente: number) {
 export function PainelArte({
   semente,
   emAmarelo,
+  imagemUrl,
   kicker,
   className = '',
   children,
 }: {
   semente: number;
   emAmarelo?: boolean;
+  imagemUrl?: string | null;
   kicker?: string;
   className?: string;
   children?: React.ReactNode;
@@ -46,6 +48,13 @@ export function PainelArte({
       } ${className}`}
       aria-hidden="true"
     >
+      {imagemUrl ? (
+        <img
+          src={imagemUrl}
+          alt=""
+          className="absolute inset-0 size-full object-cover"
+        />
+      ) : null}
       <span
         className="absolute inset-0"
         style={
@@ -58,11 +67,11 @@ export function PainelArte({
         }
       />
       {kicker ? (
-        <span className="absolute left-3 top-3 rounded-chip bg-surface/80 px-2.5 py-1 text-[11px] font-medium backdrop-blur-sm">
+        <span className="absolute left-3 top-3 z-10 rounded-chip bg-surface/80 px-2.5 py-1 text-[11px] font-medium backdrop-blur-sm">
           {kicker}
         </span>
       ) : null}
-      {children}
+      <span className="relative z-10">{children}</span>
     </div>
   );
 }
