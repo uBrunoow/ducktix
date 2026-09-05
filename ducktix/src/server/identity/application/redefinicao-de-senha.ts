@@ -10,9 +10,8 @@ import type { UsuariosRepository } from '../ports/usuarios';
  * e-mail existe — quem pergunta sempre recebe a mesma resposta de sucesso;
  * só quando a conta existe é que um token de verdade é criado.
  *
- * Sem serviço de e-mail configurado nesta fase acadêmica (ver PRODUCT.md,
- * "Evidence on Hand"), o token não é enviado — é devolvido para a camada de
- * apresentação exibir como link de teste, rotulado como tal.
+ * O envio do token é responsabilidade da camada de infraestrutura de
+ * notificações, depois que o token é criado.
  */
 export async function solicitarRedefinicaoDeSenha(
   repo: UsuariosRepository,

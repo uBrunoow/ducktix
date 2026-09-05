@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { NOME_DO_COOKIE, decodificarSessao } from '@/server/identity/infrastructure/sessao-codec';
 
+const rotasDeAutenticacao = new Set([
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+]);
+
 /**
  * Gate de autenticação das rotas privadas. Roda em Edge, antes de qualquer
  * Server Component ou Server Action da rota — é a defesa de primeira linha;
@@ -13,6 +20,14 @@ import { NOME_DO_COOKIE, decodificarSessao } from '@/server/identity/infrastruct
 export function middleware(request: NextRequest) {
   const sessao = decodificarSessao(request.cookies.get(NOME_DO_COOKIE)?.value);
   const { pathname, search } = request.nextUrl;
+  const eRotaDeAutenticacao = rotasDeAutenticacao.has(pathname);
+
+  if (eRotaDeAutenticacao) {
+    if (sessao) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    return NextResponse.next();
+  }
 
   if (!sessao) {
     const destinoLogin = new URL('/login', request.url);
@@ -28,5 +43,14 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/account/:path*', '/checkout/:path*', '/my-tickets/:path*', '/organizer/:path*'],
+  matcher: [
+    '/account/:path*',
+    '/checkout/:path*',
+    '/my-tickets/:path*',
+    '/organizer/:path*',
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+  ],
 };

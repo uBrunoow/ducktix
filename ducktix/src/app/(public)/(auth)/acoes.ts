@@ -24,6 +24,7 @@ import {
 } from '@/server/identity/application/redefinicao-de-senha';
 import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
 import { encerrarSessao, iniciarSessao } from '@/server/identity/infrastructure/sessao';
+import { enviarEmailDeRedefinicao } from '@/server/notifications/infrastructure/resend-email';
 
 /**
  * Resposta de uma ação de conta. `erro` é falha de fluxo (credencial errada,
@@ -34,7 +35,6 @@ export interface RespostaDaAcao {
   readonly erro?: string;
   readonly campos?: Readonly<Record<string, string>>;
   readonly enviado?: boolean;
-  readonly linkDeTeste?: string;
 }
 
 /** Traduz o erro do zod para o formato que o formulário sabe aplicar. */
@@ -116,12 +116,18 @@ export async function acaoSolicitarRedefinicao(dados: unknown): Promise<Resposta
     analise.data.email,
   );
 
-  // Sucesso sempre parece o mesmo, exista ou não a conta — só o link de teste
-  // (quando existe) revela a diferença, e só porque não há e-mail de verdade
-  // nesta fase. Ver o comentário em redefinicao-de-senha.ts.
+  if (registro) {
+    const usuario = await usuariosRepository.buscarPorEmail(analise.data.email.trim().toLowerCase());
+    if (!usuario) throw new Error('Usuário não encontrado após gerar o token de redefinição.');
+    await enviarEmailDeRedefinicao({
+      nome: usuario.nome,
+      email: usuario.email,
+      token: registro.token,
+    });
+  }
+
   return {
     enviado: true,
-    linkDeTeste: registro ? `/reset-password?token=${registro.token}` : undefined,
   };
 }
 

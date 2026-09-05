@@ -38,7 +38,7 @@ export function FormularioEsqueciSenha() {
       descricao={
         recibo
           ? undefined
-          : 'Informe o e-mail da sua conta. Se ele existir, geramos um link de redefinição — válido por uma hora.'
+          : 'Informe o e-mail da sua conta. Se ele existir, enviaremos um link de redefinição válido por uma hora.'
       }
       rodape={
         <>
@@ -52,20 +52,11 @@ export function FormularioEsqueciSenha() {
           className="rounded-lg border border-brand bg-brand-tint px-4 py-3.5 text-sm leading-[1.6] text-brand-ink"
         >
           <p className="m-0">
-            Se este e-mail tiver uma conta, o link de redefinição foi gerado.
+            Se este e-mail tiver uma conta, você receberá o link de redefinição.
           </p>
-          {recibo.linkDeTeste ? (
-            <p className="m-0 mt-2.5 break-words">
-              Sem envio de e-mail nesta fase acadêmica — o link aparece aqui só
-              para teste:{' '}
-              <Link
-                href={recibo.linkDeTeste as '/reset-password'}
-                className="font-semibold underline underline-offset-4"
-              >
-                {recibo.linkDeTeste}
-              </Link>
-            </p>
-          ) : null}
+          <p className="m-0 mt-2.5">
+            Se o e-mail existir, você receberá as instruções para redefinir sua senha.
+          </p>
         </div>
       ) : (
         <>
@@ -88,7 +79,7 @@ export function FormularioEsqueciSenha() {
               />
 
               <Button type="submit" size="lg" disabled={enviando} className="mt-1 w-full">
-                {enviando ? 'Gerando link…' : 'Gerar link de redefinição'}
+                {enviando ? 'Enviando link…' : 'Enviar link de redefinição'}
               </Button>
             </form>
           </Form>
