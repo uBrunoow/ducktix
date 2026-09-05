@@ -12,6 +12,7 @@ projeto. O documento formal exigido pela Fase 1 está em
 | [`modelo-conceitual.md`](modelo-conceitual.md) | Entidades, relacionamentos e cardinalidades |
 | [`modelo-logico.md`](modelo-logico.md) | Dicionário de dados, normalização e índices |
 | [`modelo-mudancas.md`](modelo-mudancas.md) | Diferenças entre o modelo previsto e o implementado |
+| [`MIGRACAO.md`](MIGRACAO.md) | Plano de migração gradual do PostgreSQL para uma arquitetura híbrida com NoSQL |
 | [`funcionalidades.md`](funcionalidades.md) | Funcionalidades e status |
 | [`fluxos.md`](fluxos.md) | Fluxos públicos e do organizador |
 | [`glossario.md`](glossario.md) | Vocabulário do domínio |
