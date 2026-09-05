@@ -84,14 +84,14 @@ export default async function PaginaDeIngressos() {
             </Button>
           </div>
         ) : (
-          <ul className="mt-10 grid gap-3">
+          <ul className="mt-10 grid min-w-0 gap-3">
             {porPedido.map(({ ingresso, evento, pedidoId, quantidade }) => (
-              <li key={pedidoId}>
+              <li key={pedidoId} className="min-w-0">
                 <Link
                   href={`/my-tickets/${pedidoId}`}
-                  className="group flex min-w-0 items-center gap-3 overflow-hidden rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:gap-5 sm:p-4"
+                  className="group flex min-w-0 max-w-full flex-wrap items-center gap-3 overflow-hidden rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:flex-nowrap sm:gap-5 sm:p-4"
                 >
-                  <div className="w-20 shrink-0 overflow-hidden rounded-[calc(var(--r-card)-0.4rem)] sm:w-28">
+                  <div className="w-16 shrink-0 overflow-hidden rounded-[calc(var(--r-card)-0.4rem)] sm:w-28">
                     {evento ? (
                       <CapaEvento
                         evento={evento}
@@ -120,7 +120,7 @@ export default async function PaginaDeIngressos() {
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                  <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
                     <SeloStatusIngresso status={ingresso.status} />
                     <ChevronRight
                       className="size-4 text-fg-muted transition-transform duration-200 group-hover:translate-x-0.5"

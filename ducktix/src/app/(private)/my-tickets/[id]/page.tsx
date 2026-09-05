@@ -72,14 +72,14 @@ export default async function PaginaDeIngresso({
           <SeloStatusIngresso status={encontrados[0].ingresso.status} />
         </div>
 
-        <div className="mt-10 grid gap-8">
+        <div className="mt-10 grid min-w-0 gap-8">
           {encontrados.map(({ ingresso }) => {
             const dadosProfissionaisPreenchidos = ingresso.dadosProfissionais
               ? Object.entries(ingresso.dadosProfissionais).filter(([, valor]) => valor.trim() !== '')
               : [];
 
             return (
-              <div key={ingresso.id} className="grid gap-6 lg:grid-cols-[22rem_1fr]">
+              <div key={ingresso.id} className="grid min-w-0 gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
           {/* Cartão do ingresso: capa, QR e o essencial para apresentar na entrada. */}
           <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
             {evento ? <CapaEvento evento={evento} className="aspect-[16/9]" /> : null}
@@ -96,7 +96,7 @@ export default async function PaginaDeIngresso({
 
               <div className="mx-auto flex w-fit flex-col items-center gap-3 rounded-[calc(var(--r-card)-0.4rem)] border border-line bg-surface p-4">
                 <CodigoQR valor={ingresso.id} />
-                <p className="font-mono text-[11px] tracking-tight text-fg-muted">
+                <p className="break-all font-mono text-[11px] tracking-tight text-fg-muted">
                   {ingresso.id}
                 </p>
               </div>
@@ -118,7 +118,7 @@ export default async function PaginaDeIngresso({
               <dl className="mt-4 grid gap-4 sm:grid-cols-2">
                 <div className="flex items-start gap-3">
                   <Calendar className="mt-0.5 size-4 shrink-0 text-fg-muted" strokeWidth={1.75} aria-hidden="true" />
-                  <div>
+                  <div className="min-w-0">
                     <dt className="text-[13px] text-fg-muted">Data e horário</dt>
                     <dd className="mt-0.5 text-sm font-medium">
                       {evento
@@ -129,7 +129,7 @@ export default async function PaginaDeIngresso({
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-fg-muted" strokeWidth={1.75} aria-hidden="true" />
-                  <div>
+                  <div className="min-w-0">
                     <dt className="text-[13px] text-fg-muted">Local</dt>
                     <dd className="mt-0.5 text-sm font-medium">
                       {evento ? localDeExibicao(evento) : 'Indisponível'}
@@ -151,13 +151,13 @@ export default async function PaginaDeIngresso({
             <section className="rounded-card border border-line bg-surface p-6 shadow-card sm:p-7">
               <h2 className="display m-0 text-lg">Participante</h2>
               <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div>
+                <div className="min-w-0">
                   <dt className="text-[13px] text-fg-muted">Nome</dt>
                   <dd className="mt-0.5 text-sm font-medium">
                     {ingresso.participanteNome} {ingresso.participanteSobrenome}
                   </dd>
                 </div>
-                <div>
+                <div className="min-w-0">
                   <dt className="text-[13px] text-fg-muted">Nome no crachá</dt>
                   <dd className="mt-0.5 text-sm font-medium">{nomeDeExibicao(ingresso)}</dd>
                 </div>

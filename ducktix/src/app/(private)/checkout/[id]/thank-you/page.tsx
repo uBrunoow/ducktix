@@ -49,7 +49,7 @@ export default async function PaginaDeAgradecimento({
   return (
     <Moldura>
       <Cabecalho />
-      <Faixa className="py-10 md:py-14">
+      <Faixa className="min-w-0 overflow-x-clip py-10 md:py-14">
         <PassosDoFluxo passos={['Participantes', 'Pagamento', 'Confirmação']} atual={2} />
 
         <div className="mt-10">
@@ -74,14 +74,14 @@ export default async function PaginaDeAgradecimento({
           </p>
         </div>
 
-        <ul className="mt-8 grid gap-2.5">
+        <ul className="mt-8 grid min-w-0 gap-2.5">
           {ingressosComEvento.map(({ ingresso, evento }) => (
-            <li key={ingresso.id}>
+            <li key={ingresso.id} className="min-w-0">
               <Link
                 href={`/my-tickets/${id}`}
-                className="group flex min-w-0 items-center gap-3 overflow-hidden rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:gap-5 sm:p-4"
+                className="group flex min-w-0 max-w-full flex-wrap items-center gap-3 overflow-hidden rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:flex-nowrap sm:gap-5 sm:p-4"
               >
-                <div className="w-20 shrink-0 overflow-hidden rounded-[calc(var(--r-card)-0.4rem)]">
+                <div className="w-16 shrink-0 overflow-hidden rounded-[calc(var(--r-card)-0.4rem)] sm:w-20">
                   {evento ? (
                     <CapaEvento
                       evento={evento}
@@ -106,7 +106,7 @@ export default async function PaginaDeAgradecimento({
                   </p>
                 </div>
 
-                <span className="flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-brand-ink">
+                <span className="ml-auto flex shrink-0 items-center gap-1.5 text-[13px] font-medium text-brand-ink">
                   <span className="hidden sm:inline">Ver ingresso</span>
                   <ChevronRight
                     className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"

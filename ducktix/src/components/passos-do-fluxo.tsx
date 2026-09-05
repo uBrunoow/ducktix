@@ -35,7 +35,7 @@ export function PassosDoFluxo({
   return (
     <div className={className}>
       <ol
-        className="flex items-center gap-2 sm:gap-3"
+        className="flex min-w-0 items-center gap-2 sm:gap-3"
         aria-label={`Progresso: etapa ${atual + 1} de ${passos.length}`}
       >
         {passos.map((titulo, indice) => {
@@ -45,7 +45,7 @@ export function PassosDoFluxo({
           return (
             <li
               key={titulo}
-              className={cn('flex items-center gap-2', indice < passos.length - 1 && 'flex-1')}
+              className={cn('flex min-w-0 items-center gap-2', indice < passos.length - 1 && 'flex-1')}
             >
               <span
                 aria-current={ativo ? 'step' : undefined}

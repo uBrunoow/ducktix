@@ -12,7 +12,7 @@ export function Moldura({ children }: { children: React.ReactNode }) {
           o documento inteiro, o gradiente repetido cobre milhares de pixels de
           altura e trava a composição da página. */}
       <div aria-hidden="true" className="hatch fixed inset-0 -z-10" />
-      <div className="mx-auto w-full max-w-[1180px] border-x border-line bg-bg">
+      <div className="mx-auto min-w-0 w-full max-w-[1180px] border-x border-line bg-bg">
         {children}
       </div>
     </div>
@@ -26,7 +26,7 @@ export function Faixa({
   ...props
 }: React.ComponentProps<'section'>) {
   return (
-    <section className={cn('px-5 py-16 md:px-10 md:py-20', className)} {...props}>
+    <section className={cn('min-w-0 px-5 py-16 md:px-10 md:py-20', className)} {...props}>
       {children}
     </section>
   );
