@@ -1,1 +1,1 @@
-ALTER TABLE "cupom" DROP CONSTRAINT "cupom_codigo_unique";
+ALTER TABLE "cupom" DROP CONSTRAINT IF EXISTS "cupom_codigo_unique";
