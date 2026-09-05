@@ -4,7 +4,6 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { acaoLogin } from '../acoes';
 import { type DadosLogin, esquemaLogin } from '../schemas';
-import { AlertaDeFormulario } from '@/components/alerta-de-formulario';
 import { CampoDeSenha } from '@/components/campo-de-senha';
 import { CascaConta, LinkDeConta } from '@/components/casca-conta';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,7 @@ export function FormularioLogin({
     esquema: esquemaLogin,
     padroes: { email: '', senha: '' },
     acao: (dados) => acaoLogin(dados, next),
+    erroComoToast: true,
   });
 
   const linkRegistro = (
@@ -55,8 +55,6 @@ export function FormularioLogin({
           Senha redefinida. Entre com a nova senha.
         </p>
       ) : null}
-
-      <AlertaDeFormulario mensagem={formulario.formState.errors.root?.message} />
 
       <Form {...formulario}>
         <form onSubmit={enviar} noValidate className="grid gap-5">

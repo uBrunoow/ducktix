@@ -6,20 +6,13 @@
  * porque o Neon também aceita conexão TCP direta (não queremos escolher o
  * driver errado em dev contra um DATABASE_URL do Neon).
  *
- * `db` é tipado como `PostgresJsDatabase` sempre, mesmo quando o cliente real
- * é o `neon-http` — os dois implementam a mesma API de query builder que os
- * repositórios usam. A exceção é transação/`SELECT ... FOR UPDATE`
- * (`registrarVenda` em ticketing, por exemplo): `neon-http` não sustenta
- * sessão entre queries, então não suporta nenhum dos dois. Isso não trava o
- * dev (roda contra `postgres.js` de verdade) nem o tipo — só significa que
- * produção em Neon precisa trocar para `@neondatabase/serverless` com
- * WebSocket (`neon-serverless` + `Pool`) antes do deploy da Fase 2, se a
- * concorrência da venda for exercida lá.
+ * `db` é tipado como `PostgresJsDatabase` sempre. Em produção, o Pool do
+ * Neon mantém a sessão necessária para transações e `SELECT ... FOR UPDATE`.
  */
 
-import { drizzle as drizzleNeon } from 'drizzle-orm/neon-http';
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless';
 import { drizzle as drizzlePostgres, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { neon } from '@neondatabase/serverless';
+import { Pool } from '@neondatabase/serverless';
 import postgres from 'postgres';
 import * as schema from './schema';
 
@@ -30,8 +23,8 @@ function criarDb(): PostgresJsDatabase<typeof schema> {
   }
 
   if (process.env.NODE_ENV === 'production') {
-    const sql = neon(connectionString);
-    return drizzleNeon({ client: sql, schema }) as unknown as PostgresJsDatabase<typeof schema>;
+    const pool = new Pool({ connectionString });
+    return drizzleNeon({ client: pool, schema }) as unknown as PostgresJsDatabase<typeof schema>;
   }
 
   const sql = postgres(connectionString);

@@ -47,10 +47,10 @@ export async function acaoAtualizarPerfil(dados: unknown): Promise<RespostaDaCon
   return { sucesso: true };
 }
 
-export async function acaoAtualizarFoto(fotoDataUrl: string): Promise<RespostaDaConta> {
+export async function acaoAtualizarFoto(fotoUrl: string): Promise<RespostaDaConta> {
   const sessao = await exigirSessao();
   try {
-    await atualizarFoto(usuariosRepository, sessao.usuarioId, fotoDataUrl);
+    await atualizarFoto(usuariosRepository, sessao.usuarioId, fotoUrl);
   } catch (erro) {
     if (erro instanceof DadosDeEntradaInvalidosError) return { erro: erro.message };
     throw erro;

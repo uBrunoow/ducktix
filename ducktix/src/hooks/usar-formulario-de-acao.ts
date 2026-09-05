@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTransition } from 'react';
+import { toast } from 'sonner';
 import {
   type DefaultValues,
   type FieldValues,
@@ -27,10 +28,12 @@ export function usarFormularioDeAcao<T extends FieldValues>({
   esquema,
   padroes,
   acao,
+  erroComoToast = false,
 }: {
   esquema: z.ZodType<T>;
   padroes: DefaultValues<T>;
   acao: (dados: T) => Promise<RespostaDaAcao>;
+  erroComoToast?: boolean;
 }) {
   const [enviando, iniciarTransicao] = useTransition();
 
@@ -51,7 +54,8 @@ export function usarFormularioDeAcao<T extends FieldValues>({
         }
       }
       if (resposta.erro) {
-        formulario.setError('root', { message: resposta.erro });
+        if (erroComoToast) toast.error(resposta.erro);
+        else formulario.setError('root', { message: resposta.erro });
       }
     });
   });

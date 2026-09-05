@@ -141,7 +141,10 @@ export async function montarVitrine(
     },
   ];
 
-  const { categorias, cidades } = listasDeFiltro(eventos);
+  const [categorias, cidades] = await Promise.all([
+    catalogo.listarCategorias(),
+    Promise.resolve(listasDeFiltro(eventos).cidades),
+  ]);
 
   return {
     destaques,
@@ -183,7 +186,10 @@ export async function buscarEventos(
       return true;
     });
 
-  const { categorias, cidades } = listasDeFiltro(eventos);
+  const [categorias, cidades] = await Promise.all([
+    catalogo.listarCategorias(),
+    Promise.resolve(listasDeFiltro(eventos).cidades),
+  ]);
 
   return { entradas, categorias, cidades, total: entradas.length, filtros };
 }

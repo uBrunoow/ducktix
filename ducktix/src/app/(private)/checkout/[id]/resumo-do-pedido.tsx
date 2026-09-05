@@ -1,10 +1,15 @@
+'use client';
+
 import { TicketIcon } from 'lucide-react';
+import { useTransition } from 'react';
+import { toast } from 'sonner';
 import { ContadorDeReserva } from '@/components/contador-de-reserva';
 import type { Evento } from '@/server/event/domain/evento';
 import type { Cupom } from '@/server/ticketing/domain/cupom';
 import type { Pedido } from '@/server/ticketing/domain/pedido';
 import { totalBrutoCentavos, totalComDescontoCentavos } from '@/server/ticketing/domain/pedido';
 import { CampoDeCupom } from './campo-de-cupom';
+import { acaoCancelarPedido } from './acoes';
 
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -23,9 +28,17 @@ export function ResumoDoPedido({
   cupom: Cupom | null;
   itensComEvento: readonly ItemComEvento[];
 }) {
+  const [cancelando, iniciarCancelamento] = useTransition();
   const bruto = totalBrutoCentavos(pedido);
   const total = totalComDescontoCentavos(pedido, cupom);
   const desconto = bruto - total;
+
+  function cancelar() {
+    iniciarCancelamento(async () => {
+      const resposta = await acaoCancelarPedido(pedido.id);
+      if (resposta?.erro) toast.error(resposta.erro);
+    });
+  }
 
   return (
     <aside className="grid gap-4 lg:sticky lg:top-24">
@@ -78,6 +91,15 @@ export function ResumoDoPedido({
           <span className="display text-xl tabular-nums">{moeda.format(total / 100)}</span>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={cancelar}
+        disabled={cancelando}
+        className="justify-self-start text-sm text-fg-muted underline-offset-4 hover:text-fg hover:underline disabled:opacity-60"
+      >
+        {cancelando ? 'Cancelando…' : 'Cancelar pedido'}
+      </button>
     </aside>
   );
 }

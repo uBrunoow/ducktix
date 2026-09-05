@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       request,
       body,
       onBeforeGenerateToken: async (pathname) => {
-        if (!pathname.startsWith('event-covers/')) {
+        if (!pathname.startsWith('event-covers/') && !pathname.startsWith('profile-photos/')) {
           throw new Error('Caminho de upload inválido.');
         }
 

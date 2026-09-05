@@ -53,6 +53,9 @@ export interface DadosDeEdicaoDeEvento {
  * domínio nem aplicação.
  */
 export interface CatalogoPublicoRepository {
+  /** Todas as categorias cadastradas, inclusive as que ainda não têm evento. */
+  listarCategorias(): Promise<readonly string[]>;
+
   /** Eventos publicados que começam dentro do intervalo, em ordem cronológica. */
   listarPublicados(inicio: Date, fim: Date): Promise<readonly Evento[]>;
 

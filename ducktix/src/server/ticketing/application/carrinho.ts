@@ -45,7 +45,20 @@ export async function adicionarAoCarrinho(
   if (existente && reservaExpirada(existente, agora)) {
     await pedidos.atualizarStatus(existente.id, 'cancelado');
   }
-  const reutilizavel = existente && !reservaExpirada(existente, agora) ? existente : null;
+  const pertenceAoMesmoEvento =
+    existente?.itens.length === 0 ||
+    existente?.itens.every((item) => item.eventoId === eventoId);
+
+  // Um checkout nunca mistura eventos. Ao iniciar uma compra em outro
+  // evento, o pedido aberto anterior é encerrado e um novo pedido nasce.
+  if (existente && !reservaExpirada(existente, agora) && !pertenceAoMesmoEvento) {
+    await pedidos.atualizarStatus(existente.id, 'cancelado');
+  }
+
+  const reutilizavel =
+    existente && !reservaExpirada(existente, agora) && pertenceAoMesmoEvento
+      ? existente
+      : null;
   const pedido = reutilizavel ?? (await pedidos.criarAberto(participanteId));
 
   const comItem = await pedidos.adicionarItem(pedido.id, {

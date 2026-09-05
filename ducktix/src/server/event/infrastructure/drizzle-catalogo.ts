@@ -184,6 +184,14 @@ async function gerarSlugUnico(tx: typeof db, nome: string): Promise<string> {
 }
 
 class DrizzleCatalogoPublicoRepository implements CatalogoPublicoRepository {
+  async listarCategorias(): Promise<readonly string[]> {
+    const linhas = await db
+      .select({ nome: categoriaTabela.nome })
+      .from(categoriaTabela)
+      .orderBy(asc(categoriaTabela.nome));
+    return linhas.map((linha) => linha.nome);
+  }
+
   async listarPublicados(inicio: Date, fim: Date): Promise<readonly Evento[]> {
     const linhas = await baseSelectDeEventos()
       .where(

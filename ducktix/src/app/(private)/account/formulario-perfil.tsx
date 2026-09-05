@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { enviarImagemParaBlob } from '@/lib/enviar-imagem-para-blob';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/ui/loading-button';
@@ -45,20 +46,20 @@ export function FormularioPerfil({
     const arquivo = arquivos[0];
     if (!arquivo) return;
 
-    const leitor = new FileReader();
-    leitor.onload = () => {
-      const dataUrl = leitor.result as string;
-      iniciarTransicaoFoto(async () => {
-        const resposta = await acaoAtualizarFoto(dataUrl);
+    iniciarTransicaoFoto(async () => {
+      try {
+        const url = await enviarImagemParaBlob(arquivo, 'profile-photos');
+        const resposta = await acaoAtualizarFoto(url);
         if (resposta?.erro) {
           toast.error(resposta.erro);
         } else {
-          setFoto(dataUrl);
+          setFoto(url);
           toast.success('Foto atualizada.');
         }
-      });
-    };
-    leitor.readAsDataURL(arquivo);
+      } catch (erro) {
+        toast.error(erro instanceof Error ? erro.message : 'Não foi possível enviar a foto.');
+      }
+    });
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

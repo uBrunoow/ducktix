@@ -11,8 +11,7 @@ export default async function PaginaDeCriarEvento() {
   const sessao = await sessaoAtual();
   const usuario = sessao ? await usuariosRepository.buscarPorId(sessao.usuarioId) : null;
 
-  const eventos = await catalogoPublicoRepository.listarTodos();
-  const categorias = [...new Set(eventos.map((e) => e.categoria))].sort();
+  const categorias = await catalogoPublicoRepository.listarCategorias();
 
   return (
     <div>

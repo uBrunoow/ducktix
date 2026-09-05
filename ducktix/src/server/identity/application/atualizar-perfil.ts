@@ -42,18 +42,13 @@ export async function atualizarCpfCnpj(
   return repo.atualizarCpfCnpj(usuarioId, valor.replace(/\D/g, ''));
 }
 
-const TAMANHO_MAXIMO_DA_FOTO = 1_500_000; // ~1.1MB decodificado de base64
-
 export async function atualizarFoto(
   repo: UsuariosRepository,
   usuarioId: string,
-  fotoDataUrl: string,
+  fotoUrl: string,
 ): Promise<Usuario> {
-  if (!fotoDataUrl.startsWith('data:image/')) {
-    throw new DadosDeEntradaInvalidosError('Envie um arquivo de imagem válido.');
+  if (!fotoUrl.startsWith('https://')) {
+    throw new DadosDeEntradaInvalidosError('Envie uma imagem válida.');
   }
-  if (fotoDataUrl.length > TAMANHO_MAXIMO_DA_FOTO) {
-    throw new DadosDeEntradaInvalidosError('A imagem é grande demais (máximo ~1MB).');
-  }
-  return repo.atualizarFoto(usuarioId, fotoDataUrl);
+  return repo.atualizarFoto(usuarioId, fotoUrl);
 }

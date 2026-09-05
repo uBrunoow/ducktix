@@ -63,3 +63,19 @@ export async function acaoAvancarParaPagamento(pedidoId: string, dados: unknown)
 
   redirect(`/checkout/${pedidoId}/payment`);
 }
+
+export async function acaoCancelarPedido(pedidoId: string): Promise<RespostaDoCheckout> {
+  const sessao = await exigirSessao();
+  try {
+    const pedido = await pedidosRepository.buscarPorId(pedidoId);
+    if (!pedido || pedido.participanteId !== sessao.usuarioId) {
+      return { erro: 'Pedido não encontrado.' };
+    }
+    if (pedido.status !== 'aberto') return { erro: 'Este pedido já foi finalizado.' };
+    await pedidosRepository.atualizarStatus(pedidoId, 'cancelado');
+  } catch (erro) {
+    if (erro instanceof Error) return { erro: erro.message };
+    throw erro;
+  }
+  redirect('/events');
+}
