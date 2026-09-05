@@ -1,6 +1,6 @@
+import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Inter_Tight, Onest } from 'next/font/google';
-import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
 const display = Onest({
@@ -62,7 +62,7 @@ export default function RootLayout({
       <body>
         <div dangerouslySetInnerHTML={{ __html: `<!--${CONTRATO_DE_DIRECAO}-->` }} />
         {children}
-        <Toaster />
+        <Toaster richColors/>
       </body>
     </html>
   );
