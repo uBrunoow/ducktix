@@ -28,7 +28,7 @@ function paraData(valor: string | undefined, fimDoDia = false): Date | null {
 function paraDados(analise: z.infer<typeof esquemaLoteDoEvento>) {
   return {
     nome: analise.nome,
-    precoCentavos: Math.round(analise.precoReais * 100),
+    precoCentavos: analise.gratuito ? 0 : Math.round(analise.precoReais * 100),
     vagas: analise.vagas,
     iniciaEm: paraData(analise.iniciaEm),
     encerraEm: paraData(analise.encerraEm, true),

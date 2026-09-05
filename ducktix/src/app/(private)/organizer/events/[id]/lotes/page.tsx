@@ -1,6 +1,7 @@
+import { InfoIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { FormularioLote } from './formulario-lote';
-import { BotaoExcluirLote } from './botao-excluir-lote';
+import { DialogEditarLote } from './dialog-editar-lote';
 import {
   BarraDeProporcao,
   BlocoDoPainel,
@@ -26,6 +27,12 @@ import {
   type StatusLote,
 } from '@/server/event/domain/evento';
 import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,10 +115,12 @@ export default async function LotesDoEvento({
                 <TableHead className="w-[22%]">Estoque</TableHead>
                 <TableHead className="text-right">Preço</TableHead>
                 <TableHead className="pr-5 text-right">Receita</TableHead>
+                <TableHead className="pr-5 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              {evento.lotes.map((lote) => {
+            <TooltipProvider>
+              <TableBody>
+                {evento.lotes.map((lote) => {
                 const situacao = statusDoLote(lote, agora);
                 const ocupacao =
                   lote.vagas === 0
@@ -150,31 +159,40 @@ export default async function LotesDoEvento({
                     </TableCell>
                     <TableCell className="pr-5 text-right">
                       {lote.vendidos === 0 ? (
-                        <details>
-                          <summary className="cursor-pointer text-sm font-medium text-brand-ink">Editar</summary>
-                          <div className="mt-3 min-w-72 text-left">
-                            <FormularioLote
-                              eventoId={evento.id}
-                              loteId={lote.id}
-                              valores={{
-                                nome: lote.nome,
-                                precoReais: lote.precoCentavos / 100,
-                                vagas: lote.vagas,
-                                iniciaEm: lote.iniciaEm ? lote.iniciaEm.toISOString().slice(0, 10) : '',
-                                encerraEm: lote.encerraEm ? lote.encerraEm.toISOString().slice(0, 10) : '',
-                              }}
-                            />
-                            <BotaoExcluirLote eventoId={evento.id} loteId={lote.id} />
-                          </div>
-                        </details>
+                        <DialogEditarLote
+                          eventoId={evento.id}
+                          loteId={lote.id}
+                          valores={{
+                            nome: lote.nome,
+                            gratuito: lote.precoCentavos === 0,
+                            precoReais: lote.precoCentavos / 100,
+                            vagas: lote.vagas,
+                            iniciaEm: lote.iniciaEm ? lote.iniciaEm.toISOString().slice(0, 10) : '',
+                            encerraEm: lote.encerraEm ? lote.encerraEm.toISOString().slice(0, 10) : '',
+                          }}
+                        />
                       ) : (
-                        <span className="text-xs text-fg-muted">Com vendas</span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="inline-flex items-center justify-center rounded-full p-1 text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ink"
+                              aria-label="Lote bloqueado para edição"
+                            >
+                              <InfoIcon className="size-4" aria-hidden="true" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Este lote já possui vendas e não pode ser editado ou excluído.
+                          </TooltipContent>
+                        </Tooltip>
                       )}
                     </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </TooltipProvider>
           </Table>
         </div>
       </BlocoDoPainel>

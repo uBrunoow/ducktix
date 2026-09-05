@@ -5,6 +5,7 @@ import { useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { LoadingButton } from '@/components/ui/loading-button';
 import { formatarReais, reaisDoCampo } from '@/lib/formatadores';
@@ -25,6 +26,7 @@ export function FormularioLote({
     resolver: zodResolver(esquemaLoteDoEvento),
     defaultValues: {
       nome: valores?.nome ?? '',
+      gratuito: valores?.gratuito ?? false,
       precoReais: valores?.precoReais ?? 0,
       vagas: valores?.vagas ?? 100,
       iniciaEm: valores?.iniciaEm ?? '',
@@ -47,10 +49,45 @@ export function FormularioLote({
         <FormField control={formulario.control} name="nome" render={({ field }) => (
           <FormItem><FormLabel>Nome do lote</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+        <FormField
+          control={formulario.control}
+          name="gratuito"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Este lote é</FormLabel>
+              <FormControl>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <Button
+                    type="button"
+                    variant={field.value ? 'outline' : 'secondary'}
+                    className="h-auto py-2.5"
+                    onClick={() => field.onChange(false)}
+                  >
+                    Pago
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={field.value ? 'secondary' : 'outline'}
+                    className="h-auto py-2.5"
+                    onClick={() => {
+                      field.onChange(true);
+                      formulario.setValue('precoReais', 0, { shouldValidate: true });
+                    }}
+                  >
+                    Gratuito
+                  </Button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <div className="grid gap-3 sm:grid-cols-2">
-          <FormField control={formulario.control} name="precoReais" render={({ field }) => (
-            <FormItem><FormLabel>Preço (R$)</FormLabel><FormControl><Input inputMode="decimal" {...field} value={formatarReais(field.value as number)} onChange={(e) => field.onChange(reaisDoCampo(e.target.value))} /></FormControl><FormMessage /></FormItem>
-          )} />
+          {!formulario.watch('gratuito') ? (
+            <FormField control={formulario.control} name="precoReais" render={({ field }) => (
+              <FormItem><FormLabel>Preço (R$)</FormLabel><FormControl><Input inputMode="decimal" {...field} value={formatarReais(field.value as number)} onChange={(e) => field.onChange(reaisDoCampo(e.target.value))} /></FormControl><FormMessage /></FormItem>
+            )} />
+          ) : null}
           <FormField control={formulario.control} name="vagas" render={({ field }) => (
             <FormItem><FormLabel>Vagas</FormLabel><FormControl><Input type="number" min={1} {...field} value={field.value as number} /></FormControl><FormMessage /></FormItem>
           )} />
