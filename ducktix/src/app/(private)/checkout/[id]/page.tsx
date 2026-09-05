@@ -6,7 +6,7 @@ import { Rodape } from '@/components/rodape';
 import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
 import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
 import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { totalDeUnidades } from '@/server/ticketing/domain/pedido';
+import { totalComDescontoCentavos, totalDeUnidades } from '@/server/ticketing/domain/pedido';
 import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { FormularioParticipantes } from './formulario-participantes';
@@ -58,6 +58,7 @@ export default async function PaginaDeCheckout({
             totalDeUnidades={totalDeUnidades(pedido)}
             usuarioNome={usuario?.nome ?? ''}
             usuarioEmail={usuario?.email ?? ''}
+            gratuito={totalComDescontoCentavos(pedido, cupom) === 0}
           />
 
           <ResumoDoPedido pedido={pedido} cupom={cupom} itensComEvento={itensComEvento} />

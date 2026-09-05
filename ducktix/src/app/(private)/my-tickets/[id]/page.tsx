@@ -14,6 +14,8 @@ import { listarIngressosDoPedidoDoParticipante } from '@/server/participation/ap
 import { nomeDeExibicao } from '@/server/participation/domain/ingresso';
 import { drizzleIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/drizzle-ingressos';
 import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
+import { drizzleCancelamentosRepository } from '@/server/participation/infrastructure/drizzle-cancelamentos';
+import { SolicitarCancelamento } from './solicitar-cancelamento';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +54,12 @@ export default async function PaginaDeIngresso({
   if (encontrados.length === 0) notFound();
 
   const evento = await catalogoPublicoRepository.buscarPorId(encontrados[0].eventoId);
+  const ingressosComCancelamento = await Promise.all(
+    encontrados.map(async (item) => ({
+      ...item,
+      cancelamento: await drizzleCancelamentosRepository.buscarPorIngresso(item.ingresso.id),
+    })),
+  );
 
   return (
     <Moldura>
@@ -73,7 +81,7 @@ export default async function PaginaDeIngresso({
         </div>
 
         <div className="mt-10 grid min-w-0 gap-8">
-          {encontrados.map(({ ingresso }) => {
+          {ingressosComCancelamento.map(({ ingresso, cancelamento }) => {
             const dadosProfissionaisPreenchidos = ingresso.dadosProfissionais
               ? Object.entries(ingresso.dadosProfissionais).filter(([, valor]) => valor.trim() !== '')
               : [];
@@ -198,6 +206,34 @@ export default async function PaginaDeIngresso({
             <p className="px-1 text-[13px] text-fg-muted">
               Ingresso emitido em {dataEmissao.format(ingresso.emitidoEm)}.
             </p>
+            {cancelamento ? (
+              <div className="rounded-[var(--r-control)] bg-secondary px-4 py-3 text-sm">
+                <p className="font-medium">
+                  Cancelamento{' '}
+                  {cancelamento.status === 'solicitado'
+                    ? 'aguardando análise'
+                    : cancelamento.status === 'aprovado'
+                      ? 'aprovado'
+                      : 'recusado'}
+                </p>
+                {cancelamento.motivo ? (
+                  <p className="mt-1 text-[13px] text-fg-muted">Motivo: {cancelamento.motivo}</p>
+                ) : null}
+                {cancelamento.status === 'negado' ? (
+                  <SolicitarCancelamento
+                    ingressoId={ingresso.id}
+                    pedidoId={id}
+                    bloqueado={false}
+                  />
+                ) : null}
+              </div>
+            ) : (
+              <SolicitarCancelamento
+                ingressoId={ingresso.id}
+                pedidoId={id}
+                bloqueado={ingresso.status !== 'emitido'}
+              />
+            )}
           </div>
                 </div>
               );

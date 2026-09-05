@@ -122,6 +122,7 @@ CREATE TABLE evento (
   comeca_em      TIMESTAMPTZ  NOT NULL,
   termina_em     TIMESTAMPTZ  NOT NULL,
   imagem_url     TEXT,
+  is_highlighted BOOLEAN      NOT NULL DEFAULT false,
   criado_em      TIMESTAMPTZ  NOT NULL DEFAULT now(),
 
   CONSTRAINT ck_evento_modalidade CHECK (modalidade IN ('presencial', 'online', 'hibrido')),
@@ -241,12 +242,15 @@ CREATE TABLE pedido (
   participantes_rascunho JSONB,
 
   CONSTRAINT ck_pedido_status CHECK (status IN ('aberto', 'confirmado', 'cancelado')),
-  -- Pedido confirmado obrigatoriamente tem os dados de cobrança preenchidos.
+  -- Pedido confirmado pode ser gratuito (sem cobrança) ou pago (cobrança completa).
   CONSTRAINT ck_pedido_cobranca CHECK (
     status <> 'confirmado'
-    OR (cobranca_cpf IS NOT NULL AND cobranca_cep IS NOT NULL
-        AND cobranca_logradouro IS NOT NULL AND cobranca_cidade IS NOT NULL
-        AND cobranca_uf IS NOT NULL)
+    OR ((cobranca_cpf IS NULL AND cobranca_cep IS NULL
+         AND cobranca_logradouro IS NULL AND cobranca_cidade IS NULL
+         AND cobranca_uf IS NULL)
+        OR (cobranca_cpf IS NOT NULL AND cobranca_cep IS NOT NULL
+            AND cobranca_logradouro IS NOT NULL AND cobranca_cidade IS NOT NULL
+            AND cobranca_uf IS NOT NULL))
   )
 );
 

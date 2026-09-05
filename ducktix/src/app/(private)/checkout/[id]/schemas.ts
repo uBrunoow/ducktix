@@ -4,6 +4,7 @@ export const esquemaParticipante = z
   .object({
     nome: z.string().trim().min(2, 'Informe o nome.').max(80, 'Nome longo demais.'),
     sobrenome: z.string().trim().min(2, 'Informe o sobrenome.').max(80, 'Sobrenome longo demais.'),
+    cpf: z.string().transform((v) => v.replace(/\D/g, '')).refine((v) => v.length === 11, 'Informe um CPF válido.'),
     email: z.email('Informe um e-mail válido.').trim(),
     confirmarEmail: z.string().trim(),
     nomeCracha: z.string().trim().max(60, 'Nome longo demais.').optional().default(''),
@@ -47,9 +48,9 @@ export type MetodoDePagamento = (typeof metodosDePagamento)[number];
 
 export const esquemaEtapaParticipantes = z.object({
   participantes: z.array(esquemaParticipante).min(1),
-  cpf: cpfSomenteDigitos,
-  endereco: esquemaEnderecoDeCobranca,
-  metodoPagamento: z.enum(metodosDePagamento),
+  cpf: cpfSomenteDigitos.optional(),
+  endereco: esquemaEnderecoDeCobranca.optional(),
+  metodoPagamento: z.enum(metodosDePagamento).optional(),
 });
 
 export const esquemaAplicarCupom = z.object({

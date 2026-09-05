@@ -1,0 +1,3 @@
+ALTER TABLE "participante" ADD COLUMN "cpf" varchar(11);
+ALTER TABLE "pedido" DROP CONSTRAINT "ck_pedido_cobranca";
+ALTER TABLE "pedido" ADD CONSTRAINT "ck_pedido_cobranca" CHECK ("pedido"."status" <> 'confirmado' OR (("pedido"."cobranca_cpf" IS NULL AND "pedido"."cobranca_cep" IS NULL AND "pedido"."cobranca_logradouro" IS NULL AND "pedido"."cobranca_cidade" IS NULL AND "pedido"."cobranca_uf" IS NULL) OR ("pedido"."cobranca_cpf" IS NOT NULL AND "pedido"."cobranca_cep" IS NOT NULL AND "pedido"."cobranca_logradouro" IS NOT NULL AND "pedido"."cobranca_cidade" IS NOT NULL AND "pedido"."cobranca_uf" IS NOT NULL)));

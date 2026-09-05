@@ -17,6 +17,7 @@ const ABAS = [
   { sufixo: '/lotes', rotulo: 'Lotes' },
   { sufixo: '/coupons', rotulo: 'Cupons' },
   { sufixo: '/orders', rotulo: 'Pedidos' },
+  { sufixo: '/cancellations', rotulo: 'Cancelamentos' },
   { sufixo: '/attendees', rotulo: 'Participantes' },
   { sufixo: '/check-in', rotulo: 'Check-in' },
   { sufixo: '/edit', rotulo: 'Configurações' },

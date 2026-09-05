@@ -49,6 +49,7 @@ export type MetodoDePagamento = 'cartao' | 'pix' | 'boleto';
 export interface RascunhoDeParticipante {
   readonly nome: string;
   readonly sobrenome: string;
+  readonly cpf: string;
   readonly email: string;
   readonly celular: string;
   readonly nomeCracha: string;

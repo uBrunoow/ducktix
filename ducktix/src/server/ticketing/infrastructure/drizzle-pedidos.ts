@@ -4,6 +4,8 @@ import {
   itemPedido as itemPedidoTabela,
   lote as loteTabela,
   pagamento as pagamentoTabela,
+  participante as participanteTabela,
+  inscricao as inscricaoTabela,
   pedido as pedidoTabela,
 } from '@/server/db/schema';
 import { PedidoNaoEncontradoError } from '../domain/erros';
@@ -126,6 +128,20 @@ class DrizzlePedidosRepository implements PedidosRepository {
     if (!linha) return null;
     const [pedido] = await montarPedidos([linha]);
     return pedido;
+  }
+
+  async participanteJaInscritoNoEvento(eventoId: string, cpf: string): Promise<boolean> {
+    const [linha] = await db
+      .select({ id: inscricaoTabela.id })
+      .from(inscricaoTabela)
+      .innerJoin(participanteTabela, eq(participanteTabela.id, inscricaoTabela.participanteId))
+      .where(and(
+        eq(inscricaoTabela.eventoId, eventoId),
+        eq(participanteTabela.cpf, cpf),
+        eq(inscricaoTabela.status, 'ativa'),
+      ))
+      .limit(1);
+    return Boolean(linha);
   }
 
   async adicionarItem(pedidoId: string, item: Omit<ItemPedido, 'id'>): Promise<Pedido> {

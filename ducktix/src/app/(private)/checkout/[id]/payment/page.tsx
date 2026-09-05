@@ -32,10 +32,16 @@ export default async function PaginaDePagamento({
   if (!pedido) notFound();
   if (pedido.participanteId !== sessao.usuarioId) notFound();
   if (pedido.status !== 'aberto') redirect(`/checkout/${id}/thank-you`);
-  // Sem dados da Etapa 1 (participantes, cobrança e método), não tem o que pagar ainda.
-  if (!pedido.participantes || !pedido.cobranca || !pedido.metodoPagamento) redirect(`/checkout/${id}`);
+  // Pedidos gratuitos confirmam na primeira etapa e nunca chegam aqui.
+  if (!pedido.participantes) redirect(`/checkout/${id}`);
 
   const cupom = pedido.cupomId ? await cupomRepository.buscarPorId(pedido.cupomId) : null;
+  if (totalComDescontoCentavos(pedido, cupom) === 0) {
+    redirect(`/checkout/${id}/thank-you`);
+  }
+  if (!pedido.cobranca || !pedido.metodoPagamento) {
+    redirect(`/checkout/${id}`);
+  }
 
   const itensComEvento = await Promise.all(
     pedido.itens.map(async (item) => {

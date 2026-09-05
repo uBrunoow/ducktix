@@ -3,6 +3,7 @@ import type { DadosProfissionais, Ingresso } from '@/server/participation/domain
 import { emailValido } from '@/server/participation/domain/ingresso';
 import type { IngressosRepository } from '@/server/participation/ports/ingressos';
 import { cupomValeParaEvento, cupomValido, valorDoDescontoCentavos } from '../domain/cupom';
+import { totalComDescontoCentavos } from '../domain/pedido';
 import {
   CupomInvalidoError,
   DadosDeCobrancaInvalidosError,
@@ -62,17 +63,20 @@ export async function aplicarCupom(
  */
 export async function avancarParaPagamento(
   pedidos: PedidosRepository,
+  cupons: CupomRepository,
   pedidoId: string,
   participanteId: string,
   dados: {
     readonly participantes: readonly RascunhoDeParticipante[];
-    readonly cobranca: DadosDeCobranca;
-    readonly metodoPagamento: MetodoDePagamento;
+    readonly cobranca: DadosDeCobranca | null;
+    readonly metodoPagamento: MetodoDePagamento | null;
   },
   agora: Date,
 ): Promise<Pedido> {
   const pedido = exigirPedidoAbertoDoUsuario(await pedidos.buscarPorId(pedidoId), participanteId);
   if (reservaExpirada(pedido, agora)) throw new PedidoExpiradoError();
+  const cupom = pedido.cupomId ? await cupons.buscarPorId(pedido.cupomId) : null;
+  const total = totalComDescontoCentavos(pedido, cupom);
 
   const unidades = totalDeUnidades(pedido);
   if (dados.participantes.length !== unidades) {
@@ -87,18 +91,53 @@ export async function avancarParaPagamento(
     if (!emailValido(dado.email)) {
       throw new DadosDeParticipanteInvalidosError('Informe um e-mail válido para cada participante.');
     }
+    if (!/^\d{11}$/.test(dado.cpf)) {
+      throw new DadosDeParticipanteInvalidosError('Informe um CPF válido para cada participante.');
+    }
   }
 
-  if (!cpfValido(dados.cobranca.cpf)) {
-    throw new DadosDeCobrancaInvalidosError('Informe um CPF válido (11 dígitos).');
+  const cpfsNoPedido = new Set<string>();
+  for (const [indice, item] of pedido.itens.entries()) {
+    const inicio = pedido.itens
+      .slice(0, indice)
+      .reduce((total, itemAnterior) => total + itemAnterior.quantidade, 0);
+    const participantesDoItem = dados.participantes.slice(inicio, inicio + item.quantidade);
+    for (const participante of participantesDoItem) {
+      if (cpfsNoPedido.has(`${item.eventoId}:${participante.cpf}`)) {
+        throw new DadosDeParticipanteInvalidosError(
+          'Este CPF já está associado a outro ingresso deste evento no mesmo pedido.',
+        );
+      }
+      cpfsNoPedido.add(`${item.eventoId}:${participante.cpf}`);
+    }
+    for (const participante of participantesDoItem) {
+      if (await pedidos.participanteJaInscritoNoEvento(item.eventoId, participante.cpf)) {
+        throw new DadosDeParticipanteInvalidosError(
+          'Este CPF já possui um ingresso para este evento.',
+        );
+      }
+    }
   }
-  if (!cepValido(dados.cobranca.endereco.cep)) {
-    throw new DadosDeCobrancaInvalidosError('Informe um CEP válido.');
+
+  if (total > 0) {
+    if (!dados.cobranca || !dados.metodoPagamento) {
+      throw new DadosDeCobrancaInvalidosError('Informe os dados de cobrança e o meio de pagamento.');
+    }
+    if (!cpfValido(dados.cobranca.cpf)) {
+      throw new DadosDeCobrancaInvalidosError('Informe um CPF válido (11 dígitos).');
+    }
+    if (!cepValido(dados.cobranca.endereco.cep)) {
+      throw new DadosDeCobrancaInvalidosError('Informe um CEP válido.');
+    }
   }
 
   await pedidos.definirParticipantes(pedido.id, dados.participantes);
-  await pedidos.definirCobranca(pedido.id, dados.cobranca);
-  return pedidos.definirMetodoPagamento(pedido.id, dados.metodoPagamento);
+  if (dados.cobranca) await pedidos.definirCobranca(pedido.id, dados.cobranca);
+  if (dados.metodoPagamento) await pedidos.definirMetodoPagamento(pedido.id, dados.metodoPagamento);
+  return pedidos.buscarPorId(pedido.id).then((atualizado) => {
+    if (!atualizado) throw new PedidoNaoEncontradoError();
+    return atualizado;
+  });
 }
 
 export interface DependenciasDoCheckout {
@@ -139,7 +178,11 @@ export async function confirmarPedido(
     participanteId,
   );
   if (reservaExpirada(pedido, agora)) throw new PedidoExpiradoError();
-  if (!pedido.participantes || !pedido.cobranca || !pedido.metodoPagamento) {
+  if (!pedido.participantes) {
+    throw new ParticipantesAindaNaoPreenchidosError();
+  }
+  const cupom = pedido.cupomId ? await deps.cupons.buscarPorId(pedido.cupomId) : null;
+  if (totalComDescontoCentavos(pedido, cupom) > 0 && (!pedido.cobranca || !pedido.metodoPagamento)) {
     throw new ParticipantesAindaNaoPreenchidosError();
   }
 
@@ -183,6 +226,7 @@ export async function confirmarPedido(
         eventoId: item.eventoId,
         participanteNome: dado.nome.trim(),
         participanteSobrenome: dado.sobrenome.trim(),
+        participanteCpf: dado.cpf,
         participanteEmail: dado.email.trim().toLowerCase(),
         participanteCelular: dado.celular.trim(),
         participanteNomeCracha: dado.nomeCracha.trim(),

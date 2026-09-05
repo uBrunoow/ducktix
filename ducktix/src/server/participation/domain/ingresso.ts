@@ -24,6 +24,7 @@ export interface Ingresso {
   /** Quem vai usar o ingresso — não precisa ser quem comprou. */
   readonly participanteNome: string;
   readonly participanteSobrenome: string;
+  readonly participanteCpf: string;
   readonly participanteEmail: string;
   readonly participanteCelular: string;
   /** Nome pro crachá — se vazio, exibição cai para nome + sobrenome. */

@@ -42,6 +42,7 @@ const DESCRICAO_METODO: Record<(typeof metodosDePagamento)[number], string> = {
 const participanteVazio = {
   nome: '',
   sobrenome: '',
+  cpf: '',
   email: '',
   confirmarEmail: '',
   nomeCracha: '',
@@ -60,11 +61,13 @@ export function FormularioParticipantes({
   totalDeUnidades,
   usuarioNome,
   usuarioEmail,
+  gratuito,
 }: {
   pedidoId: string;
   totalDeUnidades: number;
   usuarioNome: string;
   usuarioEmail: string;
+  gratuito: boolean;
 }) {
   const [continuando, iniciarTransicaoContinuar] = useTransition();
   // Com vários ingressos no mesmo pedido, os cartões viram uma parede de
@@ -79,7 +82,7 @@ export function FormularioParticipantes({
       participantes: Array.from({ length: totalDeUnidades }, () => ({ ...participanteVazio })),
       cpf: '',
       endereco: { cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' },
-      metodoPagamento: 'pix',
+      metodoPagamento: gratuito ? undefined : 'pix',
     },
   });
 
@@ -207,6 +210,26 @@ export function FormularioParticipantes({
                               <FormLabel>Nome</FormLabel>
                               <FormControl>
                                 <Input autoComplete="given-name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={formulario.control}
+                          name={`participantes.${indice}.cpf`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>CPF</FormLabel>
+                              <FormControl>
+                                <Input
+                                  inputMode="numeric"
+                                  autoComplete="off"
+                                  placeholder="000.000.000-00"
+                                  maxLength={14}
+                                  {...field}
+                                  onChange={(e) => field.onChange(formatarCpfCnpj(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -405,6 +428,7 @@ export function FormularioParticipantes({
           </div>
         </section>
 
+        {!gratuito ? <div className="grid gap-10">
         <section>
           <h2 className="display m-0 text-lg">Dados de cobrança</h2>
           <p className="mt-1 text-[13px] text-fg-muted">
@@ -470,6 +494,7 @@ export function FormularioParticipantes({
             )}
           />
         </section>
+        </div> : null}
 
         <LoadingButton
           type="submit"
@@ -478,7 +503,7 @@ export function FormularioParticipantes({
           loadingText="Salvando…"
           className="w-full sm:w-fit"
         >
-          Continuar para pagamento
+          {gratuito ? 'Confirmar inscrição gratuita' : 'Continuar para pagamento'}
         </LoadingButton>
       </form>
     </Form>

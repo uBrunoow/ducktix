@@ -5,6 +5,7 @@ export interface DadosDeEmissao {
   readonly eventoId: string;
   readonly participanteNome: string;
   readonly participanteSobrenome: string;
+  readonly participanteCpf: string;
   readonly participanteEmail: string;
   readonly participanteCelular: string;
   readonly participanteNomeCracha: string;

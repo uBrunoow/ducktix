@@ -7,6 +7,8 @@ import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketin
 import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { esquemaAplicarCupom, esquemaEtapaParticipantes } from './schemas';
+import { totalComDescontoCentavos } from '@/server/ticketing/domain/pedido';
+import { acaoConfirmarPedido } from './payment/acoes';
 
 export interface RespostaDoCheckout {
   readonly erro?: string;
@@ -44,21 +46,32 @@ export async function acaoAvancarParaPagamento(pedidoId: string, dados: unknown)
   }
 
   const sessao = await exigirSessao();
+  let pedidoAtualizado: Awaited<ReturnType<typeof avancarParaPagamento>>;
   try {
-    await avancarParaPagamento(
+    pedidoAtualizado = await avancarParaPagamento(
       pedidosRepository,
+      cupomRepository,
       pedidoId,
       sessao.usuarioId,
       {
         participantes: analise.data.participantes,
-        cobranca: { cpf: analise.data.cpf, endereco: analise.data.endereco },
-        metodoPagamento: analise.data.metodoPagamento,
+        cobranca: analise.data.cpf && analise.data.endereco
+          ? { cpf: analise.data.cpf, endereco: analise.data.endereco }
+          : null,
+        metodoPagamento: analise.data.metodoPagamento ?? null,
       },
       new Date(),
     );
   } catch (erro) {
     if (erro instanceof Error) return { erro: erro.message };
     throw erro;
+  }
+
+  const cupom = pedidoAtualizado.cupomId
+    ? await cupomRepository.buscarPorId(pedidoAtualizado.cupomId)
+    : null;
+  if (totalComDescontoCentavos(pedidoAtualizado, cupom) === 0) {
+    await acaoConfirmarPedido(pedidoId);
   }
 
   redirect(`/checkout/${pedidoId}/payment`);

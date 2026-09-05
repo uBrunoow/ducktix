@@ -39,6 +39,7 @@ const SELECAO = {
   comoConheceu: inscricaoTabela.comoConheceu,
   nome: participanteTabela.nome,
   sobrenome: participanteTabela.sobrenome,
+  cpf: participanteTabela.cpf,
   email: participanteTabela.email,
   celular: participanteTabela.celular,
   nomeCracha: participanteTabela.nomeCracha,
@@ -60,6 +61,7 @@ function paraIngresso(linha: Record<keyof typeof SELECAO, unknown>): Ingresso {
     comoConheceu: string | null;
     nome: string;
     sobrenome: string;
+    cpf: string | null;
     email: string;
     celular: string | null;
     nomeCracha: string | null;
@@ -76,6 +78,7 @@ function paraIngresso(linha: Record<keyof typeof SELECAO, unknown>): Ingresso {
     eventoId: l.eventoId,
     participanteNome: l.nome,
     participanteSobrenome: l.sobrenome,
+    participanteCpf: l.cpf ?? '',
     participanteEmail: l.email,
     participanteCelular: l.celular ?? '',
     participanteNomeCracha: l.nomeCracha ?? '',
@@ -117,6 +120,7 @@ class DrizzleIngressosRepository implements IngressosRepository {
         .values({
           nome: dados.participanteNome,
           sobrenome: dados.participanteSobrenome,
+          cpf: dados.participanteCpf,
           email: dados.participanteEmail,
           celular: dados.participanteCelular,
           nomeCracha: dados.participanteNomeCracha || null,
@@ -154,6 +158,7 @@ class DrizzleIngressosRepository implements IngressosRepository {
       eventoId: dados.eventoId,
       participanteNome: dados.participanteNome,
       participanteSobrenome: dados.participanteSobrenome,
+      participanteCpf: dados.participanteCpf,
       participanteEmail: dados.participanteEmail,
       participanteCelular: dados.participanteCelular,
       participanteNomeCracha: dados.participanteNomeCracha,

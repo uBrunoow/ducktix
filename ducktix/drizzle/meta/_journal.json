@@ -15,6 +15,27 @@
       "when": 1788571139531,
       "tag": "0001_minor_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788615633261,
+      "tag": "0002_bored_may_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788615676236,
+      "tag": "0003_fuzzy_colleen_wing",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788616000000,
+      "tag": "0004_add_event_highlighted",
+      "breakpoints": true
     }
   ]
 }

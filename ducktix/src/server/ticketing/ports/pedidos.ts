@@ -9,6 +9,7 @@ export interface PedidosRepository {
   criarAberto(participanteId: string): Promise<Pedido>;
   buscarPorId(pedidoId: string): Promise<Pedido | null>;
   buscarAbertoPorParticipante(participanteId: string): Promise<Pedido | null>;
+  participanteJaInscritoNoEvento(eventoId: string, cpf: string): Promise<boolean>;
 
   /** Adiciona um item novo, ou incrementa a quantidade se o mesmo `loteId` já está no pedido. */
   adicionarItem(

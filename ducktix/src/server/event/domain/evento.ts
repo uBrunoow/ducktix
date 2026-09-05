@@ -72,6 +72,8 @@ export interface Evento {
   readonly formatoOnline: FormatoOnline | null;
   /** Banner do evento como data URL; `null` até o organizador enviar um. */
   readonly imagemUrl: string | null;
+  /** Controlado administrativamente no banco; define a vitrine "Em destaque". */
+  readonly isHighlighted: boolean;
 }
 
 const MODALIDADE_ROTULO: Record<Modalidade, string> = {

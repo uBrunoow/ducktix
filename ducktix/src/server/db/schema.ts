@@ -28,6 +28,7 @@ import { sql } from 'drizzle-orm';
 interface RascunhoDeParticipanteJson {
   nome: string;
   sobrenome: string;
+  cpf: string;
   email: string;
   celular: string;
   nomeCracha: string;
@@ -80,6 +81,7 @@ export const participante = pgTable('participante', {
   nome: varchar('nome', { length: 80 }).notNull(),
   sobrenome: varchar('sobrenome', { length: 80 }).notNull(),
   email: varchar('email', { length: 160 }).notNull(),
+  cpf: varchar('cpf', { length: 11 }),
   celular: varchar('celular', { length: 20 }),
   nomeCracha: varchar('nome_cracha', { length: 80 }),
   linkedin: varchar('linkedin', { length: 200 }),
@@ -126,10 +128,12 @@ export const evento = pgTable(
     comecaEm: timestamp('comeca_em', { withTimezone: true }).notNull(),
     terminaEm: timestamp('termina_em', { withTimezone: true }).notNull(),
     imagemUrl: text('imagem_url'),
+    isHighlighted: boolean('is_highlighted').notNull().default(false),
     criadoEm: timestamp('criado_em', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
     index('idx_evento_status_comeca').on(t.status, t.comecaEm),
+    index('idx_evento_highlighted').on(t.isHighlighted, t.status, t.visibilidade, t.comecaEm),
     index('idx_evento_organizador').on(t.organizadorId),
     check('ck_evento_modalidade', sql`${t.modalidade} IN ('presencial', 'online', 'hibrido')`),
     check(
@@ -254,7 +258,11 @@ export const pedido = pgTable(
     check('ck_pedido_status', sql`${t.status} IN ('aberto', 'confirmado', 'cancelado')`),
     check(
       'ck_pedido_cobranca',
-      sql`${t.status} <> 'confirmado' OR (${t.cobrancaCpf} IS NOT NULL AND ${t.cobrancaCep} IS NOT NULL AND ${t.cobrancaLogradouro} IS NOT NULL AND ${t.cobrancaCidade} IS NOT NULL AND ${t.cobrancaUf} IS NOT NULL)`,
+      sql`${t.status} <> 'confirmado' OR (
+        (${t.cobrancaCpf} IS NULL AND ${t.cobrancaCep} IS NULL AND ${t.cobrancaLogradouro} IS NULL AND ${t.cobrancaCidade} IS NULL AND ${t.cobrancaUf} IS NULL)
+        OR
+        (${t.cobrancaCpf} IS NOT NULL AND ${t.cobrancaCep} IS NOT NULL AND ${t.cobrancaLogradouro} IS NOT NULL AND ${t.cobrancaCidade} IS NOT NULL AND ${t.cobrancaUf} IS NOT NULL)
+      )`,
     ),
   ],
 );

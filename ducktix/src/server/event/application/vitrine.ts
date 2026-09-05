@@ -1,7 +1,6 @@
 import {
   type Evento,
   type StatusLote,
-  ingressosVendidos,
   precoAPartirDe,
   statusDoEvento,
 } from '../domain/evento';
@@ -69,12 +68,6 @@ function aindaVende(entrada: EntradaDaVitrine): boolean {
   return entrada.status === 'a-venda' || entrada.status === 'ultimo-lote';
 }
 
-function ordenarPorProcura(entradas: readonly EntradaDaVitrine[]): EntradaDaVitrine[] {
-  return [...entradas].sort(
-    (a, b) => ingressosVendidos(b.evento) - ingressosVendidos(a.evento),
-  );
-}
-
 function listasDeFiltro(eventos: readonly Evento[]) {
   const categorias = [...new Set(eventos.map((e) => e.categoria))].sort();
   const cidades = [...new Set(eventos.map((e) => e.local).filter((l): l is string => l !== null))].sort();
@@ -93,7 +86,9 @@ export async function montarVitrine(
   const futuros = entradas.filter((e) => e.evento.comecaEm > agora);
   const vendendo = futuros.filter(aindaVende);
 
-  const destaques = ordenarPorProcura(vendendo).slice(0, 3);
+  const destaques = vendendo
+    .filter((entrada) => entrada.evento.isHighlighted)
+    .slice(0, 3);
   const idsEmDestaque = new Set(destaques.map((e) => e.evento.id));
 
   const proximosSeteDias = new Date(agora.getTime() + 7 * DIA);

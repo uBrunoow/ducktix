@@ -57,6 +57,7 @@ function montarEvento(
     visibilidade: linha.visibilidade as Evento['visibilidade'],
     formatoOnline: linha.formatoOnline as Evento['formatoOnline'],
     imagemUrl: linha.imagemUrl,
+    isHighlighted: linha.isHighlighted,
   };
 }
 
@@ -119,6 +120,7 @@ const SELECAO_DE_EVENTO = {
   comecaEm: eventoTabela.comecaEm,
   terminaEm: eventoTabela.terminaEm,
   imagemUrl: eventoTabela.imagemUrl,
+  isHighlighted: eventoTabela.isHighlighted,
   criadoEm: eventoTabela.criadoEm,
   organizadorNome: organizadorTabela.nomeFantasia,
   organizadorUsuarioId: organizadorTabela.usuarioId,
