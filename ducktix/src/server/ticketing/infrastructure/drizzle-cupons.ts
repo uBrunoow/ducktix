@@ -1,4 +1,4 @@
-import { desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/server/db/client';
 import { cupom as cupomTabela, cupomEvento, usoDeCupom as usoDeCupomTabela } from '@/server/db/schema';
 import type { Cupom, TipoDesconto, UsoDeCupom } from '../domain/cupom';
@@ -35,6 +35,21 @@ class DrizzleCupomRepository implements CupomRepository {
       .where(eq(cupomTabela.codigo, codigo.trim().toUpperCase()))
       .limit(1);
     return linha ? paraCupom(linha) : null;
+  }
+
+  async buscarPorCodigoNoEvento(codigo: string, eventoId: string): Promise<Cupom | null> {
+    const [linha] = await db
+      .select({ cupom: cupomTabela })
+      .from(cupomTabela)
+      .innerJoin(cupomEvento, eq(cupomEvento.cupomId, cupomTabela.id))
+      .where(
+        and(
+          eq(cupomTabela.codigo, codigo.trim().toUpperCase()),
+          eq(cupomEvento.eventoId, eventoId),
+        ),
+      )
+      .limit(1);
+    return linha ? paraCupom(linha.cupom) : null;
   }
 
   async buscarPorId(cupomId: string): Promise<Cupom | null> {

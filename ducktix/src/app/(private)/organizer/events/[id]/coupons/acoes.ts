@@ -23,7 +23,7 @@ export async function acaoCriarCupomDoEvento(
   }
   const valores = analise.data;
 
-  const jaExiste = await cupomRepository.buscarPorCodigo(valores.codigo);
+  const jaExiste = await cupomRepository.buscarPorCodigoNoEvento(valores.codigo, eventoId);
   if (jaExiste) return { erro: `Já existe um cupom com o código ${valores.codigo.toUpperCase()}.` };
 
   await cupomRepository.criar({

@@ -203,7 +203,7 @@ export const cupom = pgTable(
   'cupom',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    codigo: varchar('codigo', { length: 24 }).notNull().unique(),
+    codigo: varchar('codigo', { length: 24 }).notNull(),
     tipoDesconto: varchar('tipo_desconto', { length: 12 }).notNull(),
     valor: integer('valor').notNull(),
     validoDe: timestamp('valido_de', { withTimezone: true }).notNull(),

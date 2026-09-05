@@ -44,7 +44,8 @@ export async function aplicarCupom(
 ): Promise<Pedido> {
   const pedido = exigirPedidoAbertoDoUsuario(await pedidos.buscarPorId(pedidoId), participanteId);
 
-  const cupom = await cupons.buscarPorCodigo(codigo);
+  const eventoId = pedido.itens[0]?.eventoId;
+  const cupom = eventoId ? await cupons.buscarPorCodigoNoEvento(codigo, eventoId) : null;
   if (!cupom || !cupomValido(cupom, agora)) throw new CupomInvalidoError();
 
   // O cupom precisa pertencer ao evento do item do pedido.

@@ -24,6 +24,7 @@ export interface DadosDeUsoDeCupom {
  */
 export interface CupomRepository {
   buscarPorCodigo(codigo: string): Promise<Cupom | null>;
+  buscarPorCodigoNoEvento(codigo: string, eventoId: string): Promise<Cupom | null>;
   buscarPorId(cupomId: string): Promise<Cupom | null>;
   listarTodos(): Promise<readonly Cupom[]>;
 

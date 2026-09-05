@@ -1,0 +1,1 @@
+ALTER TABLE "cupom" DROP CONSTRAINT "cupom_codigo_unique";
