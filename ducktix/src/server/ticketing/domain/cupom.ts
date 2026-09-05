@@ -15,11 +15,7 @@ export interface Cupom {
   readonly validoAte: Date;
   readonly limiteDeUso: number;
   readonly usos: number;
-  /**
-   * Eventos em que o cupom vale. Lista vazia = vale em qualquer evento — é o
-   * caso do cupom de campanha geral, e evita ter que listar 30 ids para dizer
-   * "todos". Restringir é a exceção, não a regra.
-   */
+  /** O evento ao qual o cupom pertence. */
   readonly eventosIds: readonly string[];
   /** Desativado pelo organizador — distinto de expirado ou esgotado. */
   readonly ativo: boolean;
@@ -66,9 +62,9 @@ export function cupomValido(cupom: Cupom, agora: Date): boolean {
   return statusDoCupom(cupom, agora) === 'ativo';
 }
 
-/** O cupom vale para este evento? Lista vazia significa "todos os eventos". */
+/** O cupom vale somente para o evento ao qual foi vinculado. */
 export function cupomValeParaEvento(cupom: Cupom, eventoId: string): boolean {
-  return cupom.eventosIds.length === 0 || cupom.eventosIds.includes(eventoId);
+  return cupom.eventosIds.includes(eventoId);
 }
 
 export function valorDoDescontoCentavos(cupom: Cupom, totalBrutoCentavos: number): number {

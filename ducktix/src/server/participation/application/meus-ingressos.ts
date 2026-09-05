@@ -5,6 +5,7 @@ import type { IngressosRepository } from '../ports/ingressos';
 export interface IngressoComEvento {
   readonly ingresso: Ingresso;
   readonly eventoId: string;
+  readonly pedidoId: string;
 }
 
 /**
@@ -22,7 +23,18 @@ export async function listarIngressosDoParticipante(
   if (itemIds.length === 0) return [];
 
   const emitidos = await ingressos.listarPorItensDePedido(itemIds);
-  return emitidos.map((ingresso) => ({ ingresso, eventoId: ingresso.eventoId }));
+  const pedidoPorItem = new Map(
+    pedidosDoUsuario.flatMap((pedido) =>
+      pedido.itens.map((item) => [item.id, pedido.id] as const),
+    ),
+  );
+  return emitidos
+    .map((ingresso) => ({
+      ingresso,
+      eventoId: ingresso.eventoId,
+      pedidoId: pedidoPorItem.get(ingresso.itemPedidoId),
+    }))
+    .filter((item): item is IngressoComEvento => Boolean(item.pedidoId));
 }
 
 /**
@@ -39,4 +51,20 @@ export async function buscarIngressoDoParticipante(
 ): Promise<IngressoComEvento | null> {
   const todos = await listarIngressosDoParticipante(pedidos, ingressos, participanteId);
   return todos.find(({ ingresso }) => ingresso.id === ingressoId) ?? null;
+}
+
+export async function listarIngressosDoPedidoDoParticipante(
+  pedidos: PedidosRepository,
+  ingressos: IngressosRepository,
+  participanteId: string,
+  pedidoId: string,
+): Promise<readonly IngressoComEvento[]> {
+  const pedido = await pedidos.buscarPorId(pedidoId);
+  if (!pedido || pedido.participanteId !== participanteId) return [];
+  const emitidos = await ingressos.listarPorItensDePedido(pedido.itens.map((item) => item.id));
+  return emitidos.map((ingresso) => ({
+    ingresso,
+    eventoId: ingresso.eventoId,
+    pedidoId,
+  }));
 }

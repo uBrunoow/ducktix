@@ -34,7 +34,7 @@ export default async function CuponsDoEvento({
   const todos = await cupomRepository.listarTodos();
   const usosDoEvento = await cupomRepository.listarUsosPorEvento(evento.id);
 
-  // Só o que vale aqui: sem restrição, ou restrito e incluindo este evento.
+  // Cada cupom pertence a um evento; nunca exibir cupons de outros eventos.
   const cupons = todos.filter((cupom) => cupomValeParaEvento(cupom, evento.id));
 
   const linhas = cupons.map((cupom) => {
@@ -47,7 +47,6 @@ export default async function CuponsDoEvento({
         (t, u) => t + u.descontoCentavos,
         0,
       ),
-      restrito: cupom.eventosIds.length > 0,
     };
   });
 
@@ -80,7 +79,7 @@ export default async function CuponsDoEvento({
 
       <BlocoDoPainel
         titulo="Cupons"
-        descricao="Códigos de desconto que valem para este evento — próprios dele ou de campanhas gerais."
+        descricao="Códigos de desconto criados exclusivamente para este evento."
         acao={
           <Button asChild>
             <Link href={`/organizer/events/${evento.id}/coupons/new` as Route}>
@@ -128,11 +127,6 @@ export default async function CuponsDoEvento({
                         {linha.cupom.codigo}
                       </span>
                       <SeloStatusCupom status={linha.status} />
-                      {linha.restrito ? null : (
-                        <span className="text-[13px] text-fg-muted">
-                          vale em todos os eventos
-                        </span>
-                      )}
                     </span>
 
                     <span className="text-sm font-semibold tabular-nums">

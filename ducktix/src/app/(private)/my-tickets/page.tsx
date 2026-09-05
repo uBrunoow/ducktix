@@ -31,18 +31,28 @@ export default async function PaginaDeIngressos() {
     sessao.usuarioId,
   );
 
-  const comEvento = await Promise.all(
+  const ingressosComEvento = await Promise.all(
     resultado.map(async ({ ingresso, eventoId }) => {
       const evento = await catalogoPublicoRepository.buscarPorId(eventoId);
-      return { ingresso, evento };
+      return { ingresso, evento, pedidoId: resultado.find((item) => item.ingresso.id === ingresso.id)?.pedidoId ?? '' };
     }),
   );
 
-  comEvento.sort((a, b) => {
+  ingressosComEvento.sort((a, b) => {
     const dataA = a.evento?.comecaEm.getTime() ?? 0;
     const dataB = b.evento?.comecaEm.getTime() ?? 0;
     return dataB - dataA;
   });
+  const porPedido = [...new Map(
+    ingressosComEvento.map(({ ingresso, evento, pedidoId }) => [
+      pedidoId,
+      { ingresso, evento, pedidoId, quantidade: 0 },
+    ]),
+  ).values()];
+  for (const item of ingressosComEvento) {
+    const grupo = porPedido.find((p) => p.pedidoId === item.pedidoId);
+    if (grupo) grupo.quantidade += 1;
+  }
 
   return (
     <Moldura>
@@ -52,13 +62,13 @@ export default async function PaginaDeIngressos() {
           rotulo="Sua conta"
           titulo="Meus ingressos"
           descricao={
-            comEvento.length > 0
-              ? `${comEvento.length} ${comEvento.length === 1 ? 'ingresso emitido' : 'ingressos emitidos'} para os seus eventos.`
+            ingressosComEvento.length > 0
+              ? `${porPedido.length} ${porPedido.length === 1 ? 'pedido' : 'pedidos'} · ${ingressosComEvento.length} ${ingressosComEvento.length === 1 ? 'ingresso emitido' : 'ingressos emitidos'}.`
               : undefined
           }
         />
 
-        {comEvento.length === 0 ? (
+        {porPedido.length === 0 ? (
           <div className="mt-10 flex flex-col items-center gap-4 rounded-card border border-line bg-surface px-8 py-16 text-center shadow-card">
             <span className="flex size-12 items-center justify-center rounded-full bg-surface-2 text-fg-muted">
               <TicketX className="size-5" strokeWidth={1.75} aria-hidden="true" />
@@ -75,10 +85,10 @@ export default async function PaginaDeIngressos() {
           </div>
         ) : (
           <ul className="mt-10 grid gap-3">
-            {comEvento.map(({ ingresso, evento }) => (
-              <li key={ingresso.id}>
+            {porPedido.map(({ ingresso, evento, pedidoId, quantidade }) => (
+              <li key={pedidoId}>
                 <Link
-                  href={`/my-tickets/${ingresso.id}`}
+                  href={`/my-tickets/${pedidoId}`}
                   className="group flex items-center gap-4 rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:gap-5 sm:p-4"
                 >
                   <div className="w-20 shrink-0 overflow-hidden rounded-[calc(var(--r-card)-0.4rem)] sm:w-28">
@@ -105,6 +115,7 @@ export default async function PaginaDeIngressos() {
                     </h3>
                     <p className="mt-0.5 truncate text-[13px] text-fg-muted">
                       {nomeDeExibicao(ingresso)}
+                      {quantidade > 1 ? ` · ${quantidade} ingressos` : ''}
                       {evento ? ` · ${localDeExibicao(evento)}` : ''}
                     </p>
                   </div>

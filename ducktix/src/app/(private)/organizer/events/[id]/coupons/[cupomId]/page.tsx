@@ -74,14 +74,7 @@ export default async function CupomDoEvento({
 
       <div className="flex flex-wrap items-center gap-2">
         <SeloStatusCupom status={status} />
-        {cupom.eventosIds.length === 0 ? (
-          <span className="text-[13px] text-fg-muted">Vale em todos os eventos</span>
-        ) : (
-          <span className="text-[13px] text-fg-muted">
-            Restrito a {cupom.eventosIds.length}{' '}
-            {cupom.eventosIds.length === 1 ? 'evento' : 'eventos'}
-          </span>
-        )}
+        <span className="text-[13px] text-fg-muted">Válido exclusivamente neste evento</span>
       </div>
 
       <TiraDeMetricas
@@ -93,7 +86,7 @@ export default async function CupomDoEvento({
             destaque: true,
           },
           {
-            rotulo: 'Usos (todos os eventos)',
+            rotulo: 'Usos do cupom',
             valor: `${formatarNumero(cupom.usos)} / ${formatarNumero(cupom.limiteDeUso)}`,
             apoio: `${aproveitamento}% do limite`,
           },

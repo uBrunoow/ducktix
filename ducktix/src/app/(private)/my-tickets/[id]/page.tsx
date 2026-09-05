@@ -10,7 +10,7 @@ import { SeloStatusIngresso } from '@/components/selo-status-ingresso';
 import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
 import { localDeExibicao, rotuloModalidade } from '@/server/event/domain/evento';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
-import { buscarIngressoDoParticipante } from '@/server/participation/application/meus-ingressos';
+import { listarIngressosDoPedidoDoParticipante } from '@/server/participation/application/meus-ingressos';
 import { nomeDeExibicao } from '@/server/participation/domain/ingresso';
 import { drizzleIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/drizzle-ingressos';
 import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
@@ -43,20 +43,15 @@ export default async function PaginaDeIngresso({
   const sessao = await sessaoAtual();
   if (!sessao) redirect(`/login?next=${encodeURIComponent(`/my-tickets/${id}`)}`);
 
-  const encontrado = await buscarIngressoDoParticipante(
+  const encontrados = await listarIngressosDoPedidoDoParticipante(
     pedidosRepository,
     memoriaIngressosRepository,
     sessao.usuarioId,
     id,
   );
-  if (!encontrado) notFound();
+  if (encontrados.length === 0) notFound();
 
-  const { ingresso } = encontrado;
-  const evento = await catalogoPublicoRepository.buscarPorId(encontrado.eventoId);
-
-  const dadosProfissionaisPreenchidos = ingresso.dadosProfissionais
-    ? Object.entries(ingresso.dadosProfissionais).filter(([, valor]) => valor.trim() !== '')
-    : [];
+  const evento = await catalogoPublicoRepository.buscarPorId(encontrados[0].eventoId);
 
   return (
     <Moldura>
@@ -74,10 +69,17 @@ export default async function PaginaDeIngresso({
           <h1 className="display m-0 max-w-[42rem] text-[clamp(1.75rem,3.6vw,2.5rem)] text-balance">
             {evento?.nome ?? 'Evento removido'}
           </h1>
-          <SeloStatusIngresso status={ingresso.status} />
+          <SeloStatusIngresso status={encontrados[0].ingresso.status} />
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[22rem_1fr]">
+        <div className="mt-10 grid gap-8">
+          {encontrados.map(({ ingresso }) => {
+            const dadosProfissionaisPreenchidos = ingresso.dadosProfissionais
+              ? Object.entries(ingresso.dadosProfissionais).filter(([, valor]) => valor.trim() !== '')
+              : [];
+
+            return (
+              <div key={ingresso.id} className="grid gap-6 lg:grid-cols-[22rem_1fr]">
           {/* Cartão do ingresso: capa, QR e o essencial para apresentar na entrada. */}
           <div className="overflow-hidden rounded-card border border-line bg-surface shadow-card">
             {evento ? <CapaEvento evento={evento} className="aspect-[16/9]" /> : null}
@@ -106,7 +108,7 @@ export default async function PaginaDeIngresso({
                   {hora.format(evento.comecaEm)}
                 </p>
               ) : null}
-            </div>
+                </div>
           </div>
 
           {/* Detalhamento: evento, participante e dados complementares. */}
@@ -197,6 +199,9 @@ export default async function PaginaDeIngresso({
               Ingresso emitido em {dataEmissao.format(ingresso.emitidoEm)}.
             </p>
           </div>
+                </div>
+              );
+            })}
         </div>
       </Faixa>
       <Filete />

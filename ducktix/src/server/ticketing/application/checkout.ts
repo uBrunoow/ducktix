@@ -47,7 +47,7 @@ export async function aplicarCupom(
   const cupom = await cupons.buscarPorCodigo(codigo);
   if (!cupom || !cupomValido(cupom, agora)) throw new CupomInvalidoError();
 
-  // Cupom restrito a certos eventos só vale se o pedido for de um deles.
+  // O cupom precisa pertencer ao evento do item do pedido.
   const valeParaAlgumItem = pedido.itens.some((item) => cupomValeParaEvento(cupom, item.eventoId));
   if (!valeParaAlgumItem) throw new CupomInvalidoError();
 

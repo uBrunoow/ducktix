@@ -11,9 +11,7 @@ export interface RespostaDeCupomDoEvento {
 }
 
 /**
- * Cupom criado a partir da tela de um evento nasce restrito a ele — quem
- * quer um código de campanha geral (`eventosIds: []`) usa a tela de cupons
- * do organizador, não esta.
+ * Todo cupom criado nesta tela nasce vinculado exclusivamente ao evento atual.
  */
 export async function acaoCriarCupomDoEvento(
   eventoId: string,
