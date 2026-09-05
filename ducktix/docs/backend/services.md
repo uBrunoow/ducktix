@@ -16,8 +16,10 @@ updated: 2026-08-27
 > [!abstract] Propósito
 > Use cases de aplicação e regras de domínio — onde vive o processo de negócio. Contrato externo em [[api]]; dados em [[entidades]].
 
-> [!warning] Estado atual
-> ==Nenhum use case implementado.== Tudo abaixo é ==previsto== — ver [[../../prd|PRD]] seção 8.
+> [!note] Estado atual
+> O documento foi escrito como plano inicial. Os casos de uso implementados
+> estão em `src/server/*/application/`; consulte `../estado-atual.md` para a
+> matriz vigente.
 
 ## Princípio
 

@@ -89,7 +89,8 @@ Stack: **Next.js (App Router)** em TypeScript strict contendo frontend e backend
 ## Estado atual do projeto
 
 > [!warning] Nenhum código de produto foi escrito ainda
-> O projeto está na fase de Discovery/Modelagem. Nenhuma entidade, migration, endpoint ou página foi implementada.
+> Este documento registra decisões de arquitetura tomadas no início do projeto.
+> O estado implementado está em [[estado-atual]] e no código-fonte.
 
 | Fase | Status |
 |---|---|

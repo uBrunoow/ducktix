@@ -31,7 +31,7 @@ Equipe: Bruno Werner
 | Exigência | Seção | Situação |
 |---|---|---|
 | CRUD de todas as tabelas de entidade | [4.2](#42-crud-das-tabelas-de-entidade) | parcial — ver [8.2](#82-pendente) |
-| Processo de negócio para todas as tabelas associativas | [4.3](#43-processos-de-negócio-das-tabelas-associativas) | 4 de 6 |
+| Processo de negócio para todas as tabelas associativas | [4.3](#43-processos-de-negócio-das-tabelas-associativas) | 6 de 6 |
 | Mínimo de 3 relatórios com associação de mais de uma tabela | [4.4](#44-relatórios-do-sistema) | 3 de 3 |
 | Banco com dados previamente inseridos | [5](#5-banco-de-dados) | ✅ |
 | Interface final não pode ser REST | [4.1](#41-interface-final) | ✅ interface gráfica |
@@ -369,7 +369,8 @@ Legenda: `PK` chave primária · `FK` chave estrangeira · `UK` única ·
 | cupom_id | UUID | PK, FK → cupom CASCADE | Cupom |
 | evento_id | UUID | PK, FK → evento CASCADE | Evento em que vale |
 
-**Processo de negócio:** restringir campanha. Ausência de linhas = vale em todos.
+**Processo de negócio:** restringir campanha por vínculo explícito em
+`cupom_evento`. O mesmo código pode existir em eventos diferentes.
 
 ### 3.14 `uso_de_cupom` *(associativa)*
 
@@ -486,10 +487,11 @@ Next.js (App Router) + TypeScript. As operações de escrita são executadas por
 pelos formulários da interface.
 
 > [!important] Sobre a exigência "REST não será aceito como interface final"
-> O sistema **não expõe uma API REST como interface**. Não há rotas
-> `/api/*`; a interface é a própria aplicação gráfica, e a camada de
-> aplicação (`src/server/*/application/`) é chamada diretamente pelas Server
-> Actions. Verificável: o diretório `src/app/api/` não existe no projeto.
+> O sistema **não expõe uma API REST como interface final**. A interface é a
+> própria aplicação gráfica, e a camada de aplicação
+> (`src/server/*/application/`) é chamada diretamente pelas Server Actions. A
+> rota HTTP existente em `src/app/api/uploads` é apenas um adaptador auxiliar
+> para upload de arquivos.
 
 A arquitetura em camadas isola o domínio da infraestrutura:
 
@@ -520,8 +522,8 @@ matriz abaixo declara a situação de cada uma das 12 tabelas de entidade.
 | 8 | `participante` | ✅ | ✅ | ⬜ | ⬜ | criado no checkout; listado em `/organizer/events/{id}` |
 | 9 | `categoria` | ⬜ | ✅ | ⬜ | ⬜ | consumida na criação de evento; **sem tela de cadastro** |
 | 10 | `organizador` | ⬜ | ✅ | ⬜ | ⬜ | **sem tela de cadastro** |
-| 11 | `pagamento` | ⬜ | ⬜ | ⬜ | ⬜ | **não implementado na aplicação** |
-| 12 | `cancelamento_de_inscricao` | ⬜ | ⬜ | ⬜ | ⬜ | **não implementado na aplicação** |
+| 11 | `pagamento` | ✅ | ✅ | — | — | criado e consultado na confirmação do pedido |
+| 12 | `cancelamento_de_inscricao` | ⬜ | ⬜ | ⬜ | ⬜ | sem tela específica na entrega |
 
 ✅ implementado · ⬜ pendente · — não se aplica
 
@@ -542,8 +544,8 @@ CRUD genérico.
 | 2 | `inscricao` | participante × evento × item de pedido | **Emitir ingresso** — na confirmação, cria uma inscrição por unidade comprada, nominal ao participante informado, e debita as vagas do lote | ✅ | `/checkout/{id}/payment` |
 | 3 | `uso_de_cupom` | cupom × pedido × evento | **Aplicar cupom** — valida janela, limite e restrição por evento; no fechamento rateia o desconto entre os eventos do pedido | ✅ | `/checkout/{id}` |
 | 4 | `cupom_evento` | cupom × evento | **Restringir campanha** — limita um código a eventos específicos | ✅ | `/organizer/coupons/new` |
-| 5 | `evento_categoria` | evento × categoria | **Classificar evento** — define em que trilhas da vitrine o evento aparece | 🟡 | escolhida no assistente; a aplicação ainda trata a categoria como texto |
-| 6 | `check_in` | ingresso × usuário operador | **Realizar check-in** — valida que o ingresso está emitido, é do evento certo e ainda não foi usado; então marca presença | ⬜ | **não implementado**; os dados existem no banco e são exibidos em `/organizer/events/{id}` |
+| 5 | `evento_categoria` | evento × categoria | **Classificar evento** — define em que trilhas da vitrine o evento aparece | ✅ | assistente de criação e filtros da vitrine |
+| 6 | `check_in` | ingresso × usuário operador | **Realizar check-in** — valida que o ingresso está emitido, é do evento certo e ainda não foi usado; então marca presença | ✅ | `/organizer/events/{id}/check-in` |
 
 ✅ implementado · 🟡 parcial · ⬜ pendente
 
@@ -756,7 +758,7 @@ possa ser feita sobre o estado real do sistema.
   código: estoque do lote, coerência entre modalidade e local, cobrança
   obrigatória em pedido confirmado, teto de uso de cupom, um check-in por
   ingresso.
-- 4 de 6 processos de negócio das tabelas associativas.
+- 6 de 6 processos de negócio das tabelas associativas.
 - Os 3 relatórios exigidos, com interface e SQL equivalente.
 - Interface gráfica completa da vitrine e do back-office.
 
@@ -765,12 +767,10 @@ possa ser feita sobre o estado real do sistema.
 | Pendência | Impacto na avaliação |
 |---|---|
 | **Operações de remoção (Delete)** em todas as entidades | O enunciado define CRUD incluindo remoção |
-| **Processo de check-in** na aplicação | É a 6ª tabela associativa; hoje os dados existem no banco mas não há a operação de validar o ingresso na portaria |
 | **CRUD de `categoria`** | Tabela de entidade sem tela de cadastro |
 | **CRUD de `organizador`** | Tabela de entidade sem tela de cadastro |
-| **`pagamento` como entidade na aplicação** | Existe no banco; a aplicação ainda o trata como um campo do pedido |
 | **`cancelamento_de_inscricao`** | Existe no banco; sem fluxo na aplicação |
-| **Persistência em PostgreSQL** | A aplicação roda com repositórios em memória; os *ports* já isolam a troca (`src/server/*/ports/`), então a substituição não altera domínio nem casos de uso |
+| **CRUD completo de remoção** | Algumas entidades só podem ser alteradas por processos de negócio, para preservar integridade histórica |
 
 O detalhamento técnico dessas pendências está em
 `ducktix/docs/modelo-mudancas.md`, seção 7.

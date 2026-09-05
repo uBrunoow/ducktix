@@ -15,8 +15,9 @@ updated: 2026-08-27
 > [!abstract] Propósito
 > Fluxos-chave de ponta a ponta, do ponto de vista do produto. Fluxos técnicos internos do backend estão em [[backend/fluxos]].
 
-> [!warning] Todos os fluxos abaixo são ==previstos==
-> Nenhum está implementado. Ver status em [[funcionalidades]].
+> [!note] Estado atual
+> Os fluxos abaixo correspondem à implementação atual. As regras ficam nos
+> casos de uso em `src/server/`; as páginas apenas adaptam a interface.
 
 ## Arquitetura funcional
 
@@ -25,11 +26,9 @@ graph TD
     ID[Identity] --> EV[Event Management]
     EV --> TK[Ticketing]
     TK --> PA[Participation]
-    EV --> API[HTTP API]
-    TK --> API
-    PA --> API
-    API --> W[Next.js Web]
-    API --> CLI[CLI]
+    EV --> W[Next.js Web]
+    TK --> W
+    PA --> W
 ```
 
 ## Criar e publicar evento
@@ -63,12 +62,12 @@ graph LR
 
 ```mermaid
 graph TD
-    A[Participante] --> B[createOrder]
-    B --> C[addTicketToOrder]
+    A[Participante] --> B[Criar pedido]
+    B --> C[Adicionar lote ao pedido]
     C --> D{Disponibilidade no lote?}
     D -->|sim, SELECT FOR UPDATE| E[Reservar item do pedido]
     D -->|não| F[Erro: lote esgotado]
-    E --> G[confirmOrder]
+    E --> G[Confirmar pedido]
     G --> H[BEGIN]
     H --> I[Validar pedido e disponibilidade]
     I --> J[Registrar pagamento]
@@ -78,8 +77,9 @@ graph TD
     M --> N[COMMIT]
 ```
 
-> [!danger] Concorrência na venda
-> Duas compras simultâneas não podem vender o mesmo último ingresso. `confirmOrder` roda dentro de uma transação com `SELECT ... FOR UPDATE` sobre o lote/tipo de ingresso. Ver [[backend/fluxos#Concorrência]].
+> [!important] Consistência na venda
+> A confirmação registra a venda dentro de transação no adapter PostgreSQL e
+> mantém o preço congelado no item do pedido.
 
 ## Aplicar cupom
 
@@ -133,8 +133,9 @@ graph TD
     H --> I[Atualizar status de participação]
 ```
 
-> [!danger] `checkInParticipant` não é um simples INSERT
-> Ele valida existência, vínculo ao evento, validade, cancelamento, uso prévio e janela de check-in do evento antes de registrar. Ver [[backend/services#Participation]].
+> [!important] Check-in não é um simples INSERT
+> Ele valida existência, vínculo ao evento, validade, uso prévio e janela do
+> evento antes de registrar a presença.
 
 ## Relatórios
 

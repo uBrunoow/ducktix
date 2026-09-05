@@ -15,8 +15,9 @@ updated: 2026-09-01
 > [!abstract] Propósito
 > Como o frontend busca, guarda e sincroniza dados. Rotas em [[paginas]]; contrato em [[../backend/api]].
 
-> [!warning] Estado atual
-> ==Nada implementado.== Não existe diretório `frontend/`, client HTTP nem camada de autenticação. Todo este documento descreve a abordagem ==prevista==.
+> [!note] Estado atual
+> Este documento registra decisões de planejamento. A implementação vigente
+> está em `src/app/` e é resumida em `../estado-atual.md`.
 
 ## Princípio
 

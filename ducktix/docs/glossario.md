@@ -45,20 +45,18 @@ Ação (`publishEvent`) que torna um evento visível e apto a vender ingressos, 
 ### Lote (Ticket Batch)
 Janela de disponibilidade de ingressos de um evento, com quantidade e período de venda próprios. Um evento pode ter múltiplos lotes sequenciais.
 
-### Tipo de Ingresso (Ticket Type)
-Categoria de ingresso dentro de um lote (ex.: inteira, meia, VIP), com preço próprio.
-
 ### Pedido (Order)
 Solicitação de compra feita por um participante, composta por um ou mais itens de pedido. Estados: `aberto`, `confirmado`, `cancelado`.
 
 ### Item do Pedido (Order Item)
-Vínculo entre um pedido e um tipo de ingresso, com quantidade e preço no momento da compra.
+Vínculo entre um pedido e um lote, com quantidade e preço no momento da compra.
 
 ### Ingresso (Ticket)
 Unidade emitida (`issueTicket`) após confirmação do pedido, vinculada a um participante e usada para check-in. Estados: `emitido`, `utilizado`, `cancelado`.
 
 ### Cupom (Coupon)
-Código de desconto aplicável a um pedido (`applyCoupon`), com regras de validade e limite de uso.
+Código de desconto aplicável a um pedido, com validade, limite e vínculo
+explícito ao evento. O mesmo código pode existir em eventos diferentes.
 
 ### Pagamento
 Registro da liquidação financeira de um pedido, vinculado à confirmação (`confirmOrder`).
@@ -82,8 +80,8 @@ Cruza evento, organizador, inscritos, presentes, capacidade e percentual de ocup
 ### Relatório de Vendas de Ingressos
 Cruza evento, lote, tipo de ingresso, quantidade vendida, valor unitário, receita e status dos pedidos.
 
-### Relatório de Check-in e Presença
-Cruza participante, evento, ingresso, horário de check-in e status de participação.
+### Relatório de Cupons e Descontos
+Cruza cupom, evento, uso de cupom e pedido para mostrar usos e descontos.
 
 ## Arquitetura e plataforma
 

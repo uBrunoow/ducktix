@@ -101,7 +101,7 @@ enxergar.
 
 | Tabela | Por que passou a existir |
 |---|---|
-| **`cupom_evento`** | Cupom restrito a eventos específicos (campanha de um evento só). Ausência de linhas significa "vale em todos", evitando listar 30 eventos para dizer isso. |
+| **`cupom_evento`** | Cupom restrito a eventos específicos. O vínculo é obrigatório para aplicação; o código pode repetir em eventos diferentes. |
 | **`uso_de_cupom`** | O modelo antigo só tinha o contador `usage_count`. O organizador precisa saber **em que evento** o código circulou e quanto desconto gerou — é o relatório 3. |
 
 ## 4. Tabelas descartadas e relações 1:1 que viraram colunas
@@ -144,21 +144,23 @@ verificáveis — testadas e barrando de fato:
 
 ## 7. Alinhamento entre aplicação e banco
 
-O que **já está no banco e ainda não no código da aplicação** — a aplicação
-guarda em memória e ainda representa alguns desses como texto livre:
+O schema PostgreSQL é a fonte de persistência da aplicação. Algumas estruturas
+de domínio continuam existindo como DTOs ou estado transitório antes da
+confirmação do pedido, mas os fatos definitivos são gravados nas tabelas
+relacionais:
 
 | Conceito | No banco | Na aplicação hoje |
 |---|---|---|
-| Organizador | tabela `organizador` com FK | texto livre em `Evento.organizador` |
-| Categoria | `categoria` + `evento_categoria` (N:N) | texto livre em `Evento.categoria` |
-| Pagamento | tabela `pagamento` | enum `metodoPagamento` no pedido |
-| Check-in | tabela `check_in` | booleano `compareceu` na inscrição |
+| Organizador | tabela `organizador` com FK | resolvido por `usuario_id` no adapter Drizzle |
+| Categoria | `categoria` + `evento_categoria` (N:N) | consultada e filtrada a partir do banco |
+| Pagamento | tabela `pagamento` | criado durante a confirmação do pedido |
+| Check-in | tabela `check_in` | fluxo de validação em `/organizer/events/[id]/check-in` |
 
-Isso é dívida conhecida, não divergência acidental: a Fase 1 roda com
-repositórios em memória, e a troca pelos repositórios Drizzle é justamente o
-ponto em que esses campos viram FKs. Os *ports* (`CatalogoPublicoRepository`,
-`CupomRepository`, `IngressosRepository`) já isolam a aplicação dessa troca —
-domínio e casos de uso não mudam.
+Os *ports* (`CatalogoPublicoRepository`, `CupomRepository`,
+`IngressosRepository`) continuam isolando o domínio dos adapters Drizzle. O
+estado de checkout antes da confirmação é transitório por definição; depois
+da confirmação, cupom, participantes, inscrições, pagamentos e ingressos são
+persistidos em suas tabelas próprias.
 
 **Organizador — decisão revista depois que `/organizer` precisou filtrar por
 dono.** A primeira versão desta migração resolvia o `organizador_id` casando

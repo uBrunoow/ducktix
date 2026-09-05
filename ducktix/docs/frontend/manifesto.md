@@ -32,7 +32,8 @@ updated: 2026-09-01
 ## Estado atual
 
 > [!warning] Nada implementado
-> ==Não existe código no repositório ainda.== O projeto está na Fase A (Discovery) do PRD — modelagem e arquitetura antes de código. Toda a estrutura abaixo é ==prevista==.
+> Este manifesto é histórico. A implementação vigente está em `src/app/` e
+> `src/components/`; consulte `../estado-atual.md`.
 
 > [!note] Frontend e backend no mesmo projeto
 > Não existe um diretório `frontend/` separado: a metade client-side vive em `src/app/` e `src/components/` do mesmo projeto Next.js que hospeda `src/server/` — ver [[../backend/manifesto]].

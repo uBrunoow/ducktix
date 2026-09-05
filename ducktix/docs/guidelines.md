@@ -19,7 +19,7 @@ updated: 2026-09-01
 
 ```mermaid
 graph TD
-    A[Frontend Next.js] --> B[HTTP Adapter]
+    A[Frontend Next.js] --> B[Server Component / Server Action]
     B --> C[Application / Use Cases]
     C --> D[Domain]
     D --> E[Repository Port]
@@ -67,7 +67,8 @@ O backend retorna erro estruturado, sem stack trace para o usuário:
 { "code": "TICKET_BATCH_SOLD_OUT", "message": "Lote de ingressos esgotado", "details": {} }
 ```
 
-Erros de domínio (ex.: `TicketBatchSoldOutError`, `CheckInAlreadyDoneError`) são classes distintas dos erros de infraestrutura, e cada uma mapeia para um HTTP status apropriado no adaptador de entrada.
+Erros de domínio são classes distintas dos erros de infraestrutura e devem ser
+apresentados pelo adaptador de entrada com uma mensagem adequada à interface.
 
 ## Concorrência na venda de ingressos
 

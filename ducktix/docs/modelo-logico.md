@@ -210,7 +210,7 @@ Liga pedido a lote, com a quantidade e o preço congelado.
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
 | id | UUID | PK | Identificador |
-| codigo | VARCHAR(24) | NN, UK | Código digitado no checkout (maiúsculo) |
+| codigo | VARCHAR(24) | NN | Código digitado no checkout (maiúsculo); pode repetir em eventos diferentes |
 | tipo_desconto | VARCHAR(12) | NN, CK ∈ {percentual, fixo} | Natureza do desconto |
 | valor | INTEGER | NN, CK > 0 | 1–100 se percentual; centavos se fixo |
 | valido_de | TIMESTAMPTZ | NN | Início da janela |
@@ -223,7 +223,8 @@ Liga pedido a lote, com a quantidade e o preço congelado.
 | — | — | CK percentual ⇒ valor ≤ 100 | Desconto não passa de 100% |
 
 ### 3.5 `cupom_evento` *(associativa)*
-Restringe o cupom a eventos. **Ausência de linhas = vale em todos.**
+Restringe o cupom a eventos. A aplicação exige vínculo explícito; ausência de
+linhas não transforma o cupom em global.
 
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
@@ -370,3 +371,6 @@ Além dos criados automaticamente por PK e UK:
 - [[modelo-mudancas]] — diferenças entre este modelo e o previsto antes da implementação.
 - `ducktix/db/schema.sql` — DDL executável deste dicionário.
 - `ducktix/db/seed.sql` — carga de dados de demonstração.
+O vínculo explícito define o escopo do cupom. A aplicação valida a combinação
+`codigo + evento_id`, portanto a unicidade do código é contextual ao evento,
+não global na tabela `cupom`.

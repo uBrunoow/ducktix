@@ -92,7 +92,8 @@ event-platform/
 ```
 
 > [!warning] Estado atual
-> ==Nenhum código implementado ainda.== O projeto está na fase de Discovery/Modelagem (ver [[../../prd|PRD]]). Toda a estrutura acima é ==prevista==.
+> Este manifesto é histórico. A implementação vigente está em
+> `src/server/` e é resumida em `../estado-atual.md`.
 
 ## Regras de organização
 

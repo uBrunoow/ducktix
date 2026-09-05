@@ -15,8 +15,10 @@ updated: 2026-08-27
 > [!abstract] Propósito
 > Mapa de rotas e páginas. Componentes em [[componentes]]; endpoints em [[../backend/api]].
 
-> [!warning] Estado atual
-> ==Nenhuma rota implementada.== Não existe diretório `frontend/` no repositório ainda. Todas as rotas abaixo são ==previstas==, conforme a lista mínima do PRD (seção 20).
+> [!note] Estado atual
+> Este mapa começou como planejamento. As rotas vigentes estão em
+> `src/app/` e o roteiro de demonstração atualizado está em
+> `../../README.md`.
 
 ## Navegação
 

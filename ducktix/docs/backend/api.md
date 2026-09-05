@@ -16,7 +16,11 @@ updated: 2026-08-27
 > Contrato dos Route Handlers do Ducktix, organizado por bounded context. Entidades em [[entidades]]; regras em [[services]].
 
 > [!warning] Estado atual
-> ==Nenhum endpoint implementado.== O projeto está em fase de Discovery/Modelagem — ver [[../../prd|PRD]]. Todos abaixo são ==previstos==.
+> [!note] Estado atual
+> Este arquivo preserva o contrato inicialmente planejado. A implementação
+> atual usa principalmente Server Components e Server Actions; não existe uma
+> API REST como interface final. Consulte `../estado-atual.md` e o código em
+> `src/app/` para as rotas vigentes.
 
 > [!note] Rota vs. Server Component/Action
 > Nem toda operação abaixo vira necessariamente um Route Handler. Páginas que só leem dados preferem chamar o use case direto de um Server Component (sem round-trip HTTP interno); mutações de formulário simples preferem Server Actions. Os Route Handlers em `src/app/api/**` existem para os casos que realmente precisam de fetch client-side (ex.: filtros dinâmicos de relatório) — ver [[../../prd|PRD]] seção 20.

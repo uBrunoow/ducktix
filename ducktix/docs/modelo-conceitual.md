@@ -120,7 +120,7 @@ erDiagram
 | **EVENTO_CATEGORIA** | evento × categoria | *Classificar evento* — define em que trilhas da vitrine o evento aparece. |
 | **ITEM_PEDIDO** | pedido × lote | *Adicionar ao carrinho* — valida se o lote está aberto, congela o preço unitário e reserva as vagas por 30 min. |
 | **USO_DE_CUPOM** | cupom × pedido × evento | *Aplicar cupom* — valida janela, limite e restrição por evento; no fechamento rateia o desconto entre os eventos do pedido. |
-| **CUPOM_EVENTO** | cupom × evento | *Restringir campanha* — limita um código a eventos específicos; ausência de linhas significa "vale em todos". |
+| **CUPOM_EVENTO** | cupom × evento | *Restringir campanha* — vincula um código a eventos específicos; a aplicação exige vínculo explícito. |
 | **INSCRICAO** | participante × evento (× item de pedido) | *Emitir ingresso* — na confirmação do pedido, cria uma inscrição por unidade comprada, nominal ao participante informado. |
 | **CHECK_IN** | ingresso × usuário operador | *Realizar check-in* — valida que o ingresso está emitido, que é do evento certo e que ainda não foi usado; então marca presença. |
 
@@ -154,9 +154,9 @@ erDiagram
    um carrinho segura vagas; expirado, o pedido é cancelado e as vagas voltam.
 5. **Check-in só depois do evento começar.** Presença é fato do dia; antes
    disso, todo ingresso válido está apenas `emitido`.
-6. **Cupom sem restrição vale em tudo.** Ausência de linhas em `CUPOM_EVENTO`
-   significa campanha geral — evita ter que listar todos os eventos para dizer
-   "todos".
+6. **Cupom é contextual ao evento.** Um código só pode ser aplicado quando
+   existe vínculo em `CUPOM_EVENTO`; o mesmo código pode existir em eventos
+   diferentes.
 7. **Evento publicado exige mínimo.** Nome, categoria, período, ao menos um
    lote e local (quando não for online).
 8. **Local é texto livre.** Evento presencial e híbrido exigem `local`
