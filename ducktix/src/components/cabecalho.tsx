@@ -1,6 +1,13 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { MenuIcon } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { MenuDaConta } from '@/components/conta/menu-da-conta';
 import { Marca, Seta } from '@/components/marca';
 import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
@@ -25,7 +32,19 @@ export async function Cabecalho() {
           <ItemDeMenu href="/my-tickets">Meus ingressos</ItemDeMenu>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Abrir menu">
+                <MenuIcon aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem asChild><Link href="/events">Eventos</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/organizer">Para organizadores</Link></DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/my-tickets">Meus ingressos</Link></DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {usuario ? (
             <MenuDaConta usuario={usuario} />
           ) : (
@@ -33,10 +52,10 @@ export async function Cabecalho() {
               <Link href="/login">Entrar</Link>
             </Button>
           )}
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="px-2.5 sm:px-3">
             <Link href="/organizer/events/new">
-              Criar evento
-              <Seta />
+              <span className="hidden sm:inline">Criar evento</span>
+              <Seta className="size-4" />
             </Link>
           </Button>
         </div>

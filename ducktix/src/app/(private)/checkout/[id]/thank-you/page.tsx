@@ -60,7 +60,7 @@ export default async function PaginaDeAgradecimento({
           <h1 className="display mt-5 text-[clamp(1.75rem,3.6vw,2.5rem)] text-balance">
             Pedido confirmado
           </h1>
-          <p className="mt-3 max-w-[58ch] text-[15px] leading-[1.6] text-fg-muted">
+          <p className="mt-3 max-w-[58ch] break-words text-[15px] leading-[1.6] text-fg-muted">
             {quantidade === 1
               ? 'Seu ingresso foi emitido e já está disponível com o QR code de entrada.'
               : `${quantidade} ingressos foram emitidos e já estão disponíveis com o QR code de entrada.`}
@@ -78,8 +78,8 @@ export default async function PaginaDeAgradecimento({
           {ingressosComEvento.map(({ ingresso, evento }) => (
             <li key={ingresso.id}>
               <Link
-                href={`/my-tickets/${ingresso.id}`}
-                className="group flex items-center gap-4 rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:gap-5 sm:p-4"
+                href={`/my-tickets/${id}`}
+                className="group flex min-w-0 items-center gap-3 overflow-hidden rounded-card border border-line bg-surface p-3 shadow-card transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-brand sm:gap-5 sm:p-4"
               >
                 <div className="w-20 shrink-0 overflow-hidden rounded-[calc(var(--r-card)-0.4rem)]">
                   {evento ? (
@@ -128,7 +128,7 @@ export default async function PaginaDeAgradecimento({
           </Button>
         </div>
 
-        <p className="mt-8 flex items-start gap-2 text-[13px] text-fg-muted">
+        <p className="mt-8 flex min-w-0 items-start gap-2 break-words text-[13px] text-fg-muted">
           <MailIcon
             className="mt-0.5 size-3.5 shrink-0"
             strokeWidth={1.75}
