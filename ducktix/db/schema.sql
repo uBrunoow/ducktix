@@ -195,7 +195,7 @@ COMMENT ON COLUMN lote.vendidos IS
 
 CREATE TABLE cupom (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  codigo        VARCHAR(24) NOT NULL UNIQUE,
+  codigo        VARCHAR(24) NOT NULL,
   tipo_desconto VARCHAR(12) NOT NULL,
   valor         INTEGER     NOT NULL,
   valido_de     TIMESTAMPTZ NOT NULL,

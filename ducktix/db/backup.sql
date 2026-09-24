@@ -43860,14 +43860,6 @@ ALTER TABLE ONLY public.check_in
 
 
 --
--- Name: cupom cupom_codigo_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.cupom
-    ADD CONSTRAINT cupom_codigo_key UNIQUE (codigo);
-
-
---
 -- Name: cupom_evento cupom_evento_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
