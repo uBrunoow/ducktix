@@ -49,7 +49,7 @@ export default async function VisaoGeralDoEvento({
   );
   if (!detalhe) notFound();
 
-  const pedidos = (await listarPedidosDoEvento(inscricoesRepository, id)).slice(0, 8);
+  const pedidos = (await listarPedidosDoEvento(inscricoesRepository, cupomRepository, id)).slice(0, 8);
   const { participacao } = detalhe;
 
   return (

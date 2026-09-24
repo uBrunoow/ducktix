@@ -50,10 +50,23 @@ export interface PedidoDoEvento {
   readonly compradorEmail: string;
   readonly quantidade: number;
   readonly canceladas: number;
+  /** O que o comprador pagou pelos ingressos ativos, já com o desconto do cupom. */
   readonly totalCentavos: number;
+  readonly descontoCentavos: number;
   readonly lotes: readonly string[];
   readonly compradoEm: Date;
   readonly presentes: number;
+}
+
+/**
+ * Só o que o pedido precisa saber dos cupons: quanto foi abatido em cada
+ * pedido do evento (`uso_de_cupom`). O repositório de cupons satisfaz este
+ * contrato sem que participação dependa de ticketing.
+ */
+export interface DescontosDoEvento {
+  listarUsosPorEvento(
+    eventoId: string,
+  ): Promise<readonly { readonly pedidoId: string; readonly descontoCentavos: number }[]>;
 }
 
 /**
@@ -66,9 +79,19 @@ export interface PedidoDoEvento {
  */
 export async function listarPedidosDoEvento(
   inscricoes: InscricoesRepository,
+  descontos: DescontosDoEvento,
   eventoId: string,
 ): Promise<readonly PedidoDoEvento[]> {
-  const todas = await inscricoes.todasDoEvento(eventoId);
+  const [todas, usos] = await Promise.all([
+    inscricoes.todasDoEvento(eventoId),
+    descontos.listarUsosPorEvento(eventoId),
+  ]);
+
+  const descontoPorPedido = new Map<string, number>();
+  for (const uso of usos) {
+    const acumulado = descontoPorPedido.get(uso.pedidoId) ?? 0;
+    descontoPorPedido.set(uso.pedidoId, acumulado + uso.descontoCentavos);
+  }
 
   const porPedido = new Map<string, Inscricao[]>();
   for (const inscricao of todas) {
@@ -81,6 +104,8 @@ export async function listarPedidosDoEvento(
     .map(([id, itens]): PedidoDoEvento => {
       const ativos = itens.filter((i) => !i.cancelada);
       const primeiro = itens[0]!;
+      const subtotal = ativos.reduce((t, i) => t + i.precoPagoCentavos, 0);
+      const desconto = Math.min(subtotal, descontoPorPedido.get(id) ?? 0);
 
       return {
         id,
@@ -88,7 +113,8 @@ export async function listarPedidosDoEvento(
         compradorEmail: primeiro.participanteEmail,
         quantidade: itens.length,
         canceladas: itens.length - ativos.length,
-        totalCentavos: ativos.reduce((t, i) => t + i.precoPagoCentavos, 0),
+        totalCentavos: subtotal - desconto,
+        descontoCentavos: desconto,
         lotes: [...new Set(itens.map((i) => i.loteNome))],
         compradoEm: primeiro.compradoEm,
         presentes: ativos.filter((i) => i.checkInEm !== null).length,

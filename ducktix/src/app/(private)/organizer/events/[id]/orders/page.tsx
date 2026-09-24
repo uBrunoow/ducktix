@@ -19,6 +19,7 @@ import {
 import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
 import { listarPedidosDoEvento } from '@/server/participation/application/participantes';
 import { drizzleInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/drizzle-inscricoes';
+import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,7 @@ export default async function PedidosDoEvento({
   const evento = await catalogoPublicoRepository.buscarPorId(id);
   if (!evento) notFound();
 
-  const todos = await listarPedidosDoEvento(inscricoesRepository, id);
+  const todos = await listarPedidosDoEvento(inscricoesRepository, cupomRepository, id);
   const totalDePaginas = Math.max(1, Math.ceil(todos.length / POR_PAGINA));
   const atual = Math.min(Math.max(1, Number(pagina) || 1), totalDePaginas);
   const visiveis = todos.slice((atual - 1) * POR_PAGINA, atual * POR_PAGINA);
@@ -133,6 +134,11 @@ export default async function PedidosDoEvento({
                       </TableCell>
                       <TableCell className="text-right font-semibold tabular-nums">
                         {formatarMoeda(pedido.totalCentavos)}
+                        {pedido.descontoCentavos > 0 ? (
+                          <span className="block text-[12px] font-normal text-fg-muted">
+                            −{formatarMoeda(pedido.descontoCentavos)} de cupom
+                          </span>
+                        ) : null}
                       </TableCell>
                       <TableCell className="pr-5 text-right">
                         {pedido.canceladas === 0 ? (
