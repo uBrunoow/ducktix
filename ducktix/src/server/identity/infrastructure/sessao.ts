@@ -25,7 +25,9 @@ export async function iniciarSessao(carga: CargaDaSessao): Promise<void> {
   loja.set(NOME_DO_COOKIE, codificarSessao(carga), {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    // Só na Vercel (sempre HTTPS). Um `next start` local roda em
+    // http://localhost, onde o Safari descarta cookies `Secure`.
+    secure: Boolean(process.env.VERCEL),
     path: '/',
     maxAge: VALIDADE_SEGUNDOS,
   });

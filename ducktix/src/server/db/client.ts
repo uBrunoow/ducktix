@@ -1,10 +1,11 @@
 /**
- * Factory de conexão. Dev usa o driver `postgres` (postgres.js) contra o
- * Postgres do docker-compose; produção (Vercel) usa `@neondatabase/serverless`
- * sobre HTTP, que não abre socket TCP persistente — obrigatório em runtime
- * serverless. A troca é por `NODE_ENV`, não por sniff de connection string,
- * porque o Neon também aceita conexão TCP direta (não queremos escolher o
- * driver errado em dev contra um DATABASE_URL do Neon).
+ * Factory de conexão. Local (dev ou `next start`) usa o driver `postgres`
+ * (postgres.js) contra o Postgres do docker-compose; na Vercel usa
+ * `@neondatabase/serverless`, que não abre socket TCP persistente —
+ * obrigatório em runtime serverless. A troca é pela variável `VERCEL`, que a
+ * própria Vercel define no build e no runtime — não por `NODE_ENV`, que também
+ * é `production` num `next start` local, nem por sniff de connection string,
+ * porque o Neon também aceita conexão TCP direta.
  *
  * `db` é tipado como `PostgresJsDatabase` sempre. Em produção, o Pool do
  * Neon mantém a sessão necessária para transações e `SELECT ... FOR UPDATE`.
@@ -22,7 +23,7 @@ function criarDb(): PostgresJsDatabase<typeof schema> {
     throw new Error('DATABASE_URL não definida — copie .env.example para .env.local.');
   }
 
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.VERCEL) {
     const pool = new Pool({ connectionString });
     return drizzleNeon({ client: pool, schema }) as unknown as PostgresJsDatabase<typeof schema>;
   }
