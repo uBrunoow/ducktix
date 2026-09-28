@@ -90,12 +90,43 @@ A coluna `STATUS` deve mostrar `healthy`.
 
 ### 2.3 Restaurar o backup (banco com dados)
 
+Escolha **uma** das duas opções. O banco precisa estar vazio: se já restaurou
+antes, recomece com `docker compose down -v` e `docker compose up -d postgres`.
+
+#### Opção A — por comando
+
 ```bash
 docker compose cp db/backup.sql postgres:/tmp/backup.sql
 docker compose exec postgres psql -U ducktix -d ducktix -v ON_ERROR_STOP=1 -q -f /tmp/backup.sql
 ```
 
-Conferência:
+#### Opção B — pelo pgAdmin (interface gráfica)
+
+1. Suba o pgAdmin (ele já vem configurado no `docker-compose.yml`):
+
+   ```bash
+   docker compose up -d pgadmin
+   ```
+
+2. Abra <http://localhost:5050>. Na primeira vez, o pgAdmin pede para criar
+   uma *Master Password* (é só do pgAdmin; use qualquer uma, por exemplo
+   `ducktix`).
+3. Clique em **Add New Server**:
+   - aba *General* → **Name**: `Ducktix`;
+   - aba *Connection* → **Host name/address**: `postgres` · **Port**: `5432`
+     · **Username**: `ducktix` · **Password**: `ducktix` · marque **Save
+     password**;
+   - clique em **Save**.
+4. No painel da esquerda, abra **Servers → Ducktix → Databases** e clique no
+   banco **ducktix**.
+5. Menu **Tools → Restore...**:
+   - **Format**: `Plain`;
+   - **Filename**: `/backups/backup.sql` (a pasta `db/` do projeto aparece
+     dentro do pgAdmin como `/backups`; não é preciso fazer upload);
+   - clique em **Restore**. Um aviso no canto da tela indica quando
+     terminou (alguns segundos).
+
+Conferência (vale para as duas opções):
 
 ```bash
 docker compose exec postgres psql -U ducktix -d ducktix -c "SELECT (SELECT count(*) FROM evento) AS eventos, (SELECT count(*) FROM inscricao WHERE status = 'ativa') AS inscricoes_ativas, (SELECT count(*) FROM check_in) AS check_ins;"
@@ -244,19 +275,32 @@ Cria as tabelas sem nenhum dado.
 
 ### 4.3 Gerar um backup atualizado
 
+#### Opção A — por comando
+
 ```bash
 docker compose exec postgres pg_dump -U ducktix --format=plain --no-owner --no-privileges ducktix > db/backup.sql
 ```
 
-### 4.4 Acessar o banco por interface gráfica (opcional)
+#### Opção B — pelo pgAdmin
 
-```bash
-docker compose up -d pgadmin
-```
+Com o servidor já cadastrado (passos 1 a 4 da
+[opção B da seção 2.3](#opção-b--pelo-pgadmin-interface-gráfica)):
 
-Abra <http://localhost:5050> (e-mail `dev@ducktix.com`, senha `ducktix`) e
-registre um servidor com host `postgres`, porta `5432`, usuário e senha
-`ducktix`.
+1. Clique no banco **ducktix** e abra **Tools → Backup...**.
+2. **Filename**: `/var/lib/pgadmin/backup.sql` · **Format**: `Plain`.
+3. Clique em **Backup** e espere o aviso de conclusão.
+4. O arquivo fica dentro do contêiner do pgAdmin. Copie-o para a pasta do
+   projeto:
+
+   ```bash
+   docker compose cp pgadmin:/var/lib/pgadmin/backup.sql ./backup.sql
+   ```
+
+### 4.4 Consultar o banco pelo pgAdmin (opcional)
+
+Depois de cadastrar o servidor (seção 2.3, opção B), a **Query Tool**
+(**Tools → Query Tool**) roda SQL direto no banco — por exemplo, as consultas
+dos relatórios da seção 4.4 do [`ENTREGA.md`](ENTREGA.md).
 
 ---
 

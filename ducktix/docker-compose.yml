@@ -30,6 +30,9 @@ services:
       - '5050:80'
     volumes:
       - ducktix_pgadmin:/var/lib/pgadmin
+      # A pasta db/ do projeto aparece no pgAdmin como /backups, para
+      # restaurar o backup.sql sem precisar de upload (somente leitura).
+      - ./db:/backups:ro
     depends_on:
       postgres:
         condition: service_healthy

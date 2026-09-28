@@ -3,6 +3,9 @@
 Disciplina: Banco de Dados II — UDESC
 Equipe: Bruno Werner
 
+- **Vídeo de demonstração:** <https://youtu.be/fovdRduLR8Y>
+- **Repositório (público):** <https://github.com/uBrunoow/ducktix>
+
 > Este documento acompanha o repositório do projeto. O esquema descrito aqui é
 > o que está implementado: `ducktix/db/schema.sql` é o DDL executável deste
 > dicionário (gera o mesmo esquema que as migrations em `ducktix/drizzle/`), e
@@ -765,6 +768,8 @@ Para desenvolvimento, `pnpm dev` no lugar de `build` + `start`.
 ## 7. Repositório do Projeto
 
 **Link:** <https://github.com/uBrunoow/ducktix> (público)
+
+**Vídeo de demonstração:** <https://youtu.be/fovdRduLR8Y>
 
 Conforme o item 2 do enunciado, o repositório contém:
 
