@@ -1,0 +1,38 @@
+---
+config:
+  layout: elk
+  elk:
+    mergeEdges: false
+    nodePlacementStrategy: NETWORK_SIMPLEX
+---
+erDiagram
+    USUARIO ||--o| ORGANIZADOR : "atua como"
+    USUARIO ||--o{ PARTICIPANTE : "é titular de"
+    USUARIO ||--o{ TOKEN_REDEFINICAO_SENHA : solicita
+    USUARIO ||--o{ PEDIDO : "compra (comprador)"
+    USUARIO |o--o{ CHECK_IN : opera
+
+    ORGANIZADOR ||--o{ EVENTO : organiza
+    EVENTO    ||--o{ EVENTO_CATEGORIA : "é classificado em"
+    CATEGORIA ||--o{ EVENTO_CATEGORIA : classifica
+    EVENTO    ||--|{ LOTE : "oferta em"
+
+    PEDIDO ||--|{ ITEM_PEDIDO : contém
+    LOTE   ||--o{ ITEM_PEDIDO : "é vendido em"
+    PEDIDO ||--o{ PAGAMENTO : "é quitado por"
+    CUPOM  |o--o{ PEDIDO : "aplicado no checkout"
+
+    CUPOM  ||--o{ CUPOM_EVENTO : "restringe-se a"
+    EVENTO ||--o{ CUPOM_EVENTO : aceita
+    CUPOM  ||--o{ USO_DE_CUPOM : "é usado em"
+    PEDIDO ||--o{ USO_DE_CUPOM : recebe
+    EVENTO ||--o{ USO_DE_CUPOM : "concede em"
+
+    ITEM_PEDIDO  ||--o{ INSCRICAO : origina
+    EVENTO       ||--o{ INSCRICAO : recebe
+    PARTICIPANTE ||--o{ INSCRICAO : faz
+    LOTE         ||--o{ INSCRICAO : "ocupa vaga de"
+
+    INSCRICAO ||--|| INGRESSO : materializa
+    INGRESSO  ||--o| CHECK_IN : "é validado em"
+    INSCRICAO ||--o{ CANCELAMENTO_DE_INSCRICAO : sofre
