@@ -75,6 +75,7 @@ CREATE TABLE participante (
   nome        VARCHAR(80)  NOT NULL,
   sobrenome   VARCHAR(80)  NOT NULL,
   email       VARCHAR(160) NOT NULL,
+  cpf         VARCHAR(11),
   celular     VARCHAR(20),
   nome_cracha VARCHAR(80),
 
@@ -372,6 +373,7 @@ CREATE TABLE cancelamento_de_inscricao (
 -- -----------------------------------------------------------------------------
 
 CREATE INDEX idx_evento_status_comeca   ON evento (status, comeca_em);
+CREATE INDEX idx_evento_highlighted     ON evento (is_highlighted, status, visibilidade, comeca_em);
 CREATE INDEX idx_evento_organizador     ON evento (organizador_id);
 CREATE INDEX idx_lote_evento            ON lote (evento_id);
 CREATE INDEX idx_pedido_comprador       ON pedido (comprador_id, status);

@@ -29,36 +29,36 @@ INSERT INTO categoria (id, nome, slug) VALUES
   (gen_random_uuid(), 'Urbanismo', 'urbanismo');
 
 -- Usuários organizadores ------------------------------------------------------
--- Senha de demonstração para todos: "ducktix123" (hash fictício, não reversível).
+-- Senha de demonstração para todos: "ducktix123" (hash scrypt no formato sal:chave, o mesmo do login).
 INSERT INTO usuario (id, nome, email, senha_hash, papel) VALUES
-  (gen_random_uuid(), 'Associação Passo Livre', 'associacao-passo-livre@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Associação de Moradores', 'associacao-de-moradores@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Ateliê Sabiá', 'atelie-sabia@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Banca Traço', 'banca-traco@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Barro Vivo', 'barro-vivo@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Casa Marégrafo', 'casa-maregrafo@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Cine Baleia', 'cine-baleia@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Clube das Torres', 'clube-das-torres@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Clube do Telescópio', 'clube-do-telescopio@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Coletivo Passinho', 'coletivo-passinho@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Coletivo Pato Nerd', 'coletivo-pato-nerd@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Companhia Terceiro Ato', 'companhia-terceiro-ato@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Cozinha Comum', 'cozinha-comum@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Edifício Mirante', 'edificio-mirante@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Fórum Sul', 'forum-sul@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Galpão Riso', 'galpao-riso@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Guilda de Backend', 'guilda-de-backend@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Instituto Camada Nove', 'instituto-camada-nove@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Instituto Prisma', 'instituto-prisma@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Livraria Beira', 'livraria-beira@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Mercado Público', 'mercado-publico@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Observatório da Bacia', 'observatorio-da-bacia@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Oficina Régua', 'oficina-regua@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Prefeitura de Urubici', 'prefeitura-de-urubici@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Rede Cívica', 'rede-civica@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Ruído Coletivo', 'ruido-coletivo@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Terreiro Cultural', 'terreiro-cultural@example.com', '$demo$ducktix123', 'organizador'),
-  (gen_random_uuid(), 'Trupe Vira-Lata', 'trupe-vira-lata@example.com', '$demo$ducktix123', 'organizador');
+  (gen_random_uuid(), 'Associação Passo Livre', 'associacao-passo-livre@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Associação de Moradores', 'associacao-de-moradores@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Ateliê Sabiá', 'atelie-sabia@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Banca Traço', 'banca-traco@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Barro Vivo', 'barro-vivo@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Casa Marégrafo', 'casa-maregrafo@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Cine Baleia', 'cine-baleia@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Clube das Torres', 'clube-das-torres@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Clube do Telescópio', 'clube-do-telescopio@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Coletivo Passinho', 'coletivo-passinho@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Coletivo Pato Nerd', 'coletivo-pato-nerd@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Companhia Terceiro Ato', 'companhia-terceiro-ato@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Cozinha Comum', 'cozinha-comum@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Edifício Mirante', 'edificio-mirante@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Fórum Sul', 'forum-sul@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Galpão Riso', 'galpao-riso@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Guilda de Backend', 'guilda-de-backend@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Instituto Camada Nove', 'instituto-camada-nove@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Instituto Prisma', 'instituto-prisma@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Livraria Beira', 'livraria-beira@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Mercado Público', 'mercado-publico@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Observatório da Bacia', 'observatorio-da-bacia@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Oficina Régua', 'oficina-regua@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Prefeitura de Urubici', 'prefeitura-de-urubici@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Rede Cívica', 'rede-civica@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Ruído Coletivo', 'ruido-coletivo@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Terreiro Cultural', 'terreiro-cultural@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador'),
+  (gen_random_uuid(), 'Trupe Vira-Lata', 'trupe-vira-lata@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'organizador');
 
 INSERT INTO organizador (id, usuario_id, nome_fantasia, email_contato)
 SELECT gen_random_uuid(), u.id, u.nome, u.email
@@ -563,7 +563,7 @@ VALUES ('ESTUDANTE', 'percentual', 50, '2026-03-01T03:00:00.000Z', '2027-01-01T0
 
 -- Comprador único de demonstração (os ingressos são nominais a terceiros).
 INSERT INTO usuario (id, nome, email, senha_hash, papel)
-VALUES (gen_random_uuid(), 'Comprador de Demonstração', 'comprador@example.com', '$demo$ducktix123', 'participante');
+VALUES (gen_random_uuid(), 'Comprador de Demonstração', 'comprador@example.com', '99610e4e80618862758ca77021f63d88:0bde3134df8150fc64a0df4d5b9bba20d1718a0758370e2c65c59e080d2e7e72ed9b500baccbcb765d87706c45e8267ba933cd57318bce9f9ed9e1cbca1301a0', 'participante');
 
 -- semana-de-dados-2026: 268 inscrições em 112 pedidos
 DO $$

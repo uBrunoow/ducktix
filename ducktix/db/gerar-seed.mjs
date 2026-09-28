@@ -13,11 +13,17 @@
  * Uso:  node db/gerar-seed.mjs
  */
 
+import { createHash, scryptSync } from 'node:crypto';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const aqui = dirname(fileURLToPath(import.meta.url));
+
+// Senha "ducktix123" com o mesmo scrypt do login (src/server/identity/domain/
+// senha.ts), mas com sal fixo para o seed sair igual a cada geração.
+const SAL_DEMO = createHash('sha256').update('ducktix-seed-demo').digest().subarray(0, 16);
+const SENHA_DEMO = `${SAL_DEMO.toString('hex')}:${scryptSync('ducktix123', SAL_DEMO, 64).toString('hex')}`;
 const raiz = join(aqui, '..');
 
 // -----------------------------------------------------------------------------
@@ -122,13 +128,13 @@ w('');
 
 // --- usuários organizadores --------------------------------------------------
 w('-- Usuários organizadores ------------------------------------------------------');
-w('-- Senha de demonstração para todos: "ducktix123" (hash fictício, não reversível).');
+w('-- Senha de demonstração para todos: "ducktix123" (hash scrypt no formato sal:chave, o mesmo do login).');
 w("INSERT INTO usuario (id, nome, email, senha_hash, papel) VALUES");
 w(
   organizadores
     .map(
       (o) =>
-        `  (gen_random_uuid(), ${txt(o)}, ${txt(`${slugify(o)}@example.com`)}, ${txt('$demo$ducktix123')}, 'organizador')`,
+        `  (gen_random_uuid(), ${txt(o)}, ${txt(`${slugify(o)}@example.com`)}, ${txt(SENHA_DEMO)}, 'organizador')`,
     )
     .join(',\n') + ';',
 );
@@ -202,7 +208,7 @@ w('-- Derivados de lote.vendidos com o mesmo gerador determinístico do app.');
 w('');
 w('-- Comprador único de demonstração (os ingressos são nominais a terceiros).');
 w("INSERT INTO usuario (id, nome, email, senha_hash, papel)");
-w("VALUES (gen_random_uuid(), 'Comprador de Demonstração', 'comprador@example.com', '$demo$ducktix123', 'participante');");
+w(`VALUES (gen_random_uuid(), 'Comprador de Demonstração', 'comprador@example.com', ${txt(SENHA_DEMO)}, 'participante');`);
 w('');
 
 let totalInscricoes = 0;
