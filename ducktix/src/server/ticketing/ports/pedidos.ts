@@ -1,9 +1,8 @@
 import type { DadosDeCobranca, ItemPedido, MetodoDePagamento, Pedido, RascunhoDeParticipante, StatusPedido } from '../domain/pedido';
 
 /**
- * Port do repositório de pedidos. A implementação atual guarda tudo em
- * memória; trocá-la pelo repositório Drizzle não altera domínio nem
- * aplicação.
+ * Port do repositório de pedidos. A implementação atual é MongoDB
+ * (`infrastructure/mongo-pedidos.ts`); domínio e aplicação não dependem dela.
  */
 export interface PedidosRepository {
   criarAberto(participanteId: string): Promise<Pedido>;

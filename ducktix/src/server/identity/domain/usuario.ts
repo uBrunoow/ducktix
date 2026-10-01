@@ -1,5 +1,5 @@
 /**
- * Domínio de identidade. Sem dependência de Postgres, cookies, HTTP ou React
+ * Domínio de identidade. Sem dependência de banco de dados, cookies, HTTP ou React
  * — ver docs/guidelines.md, "Camadas".
  */
 

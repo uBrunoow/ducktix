@@ -18,9 +18,8 @@ export interface DadosDeUsoDeCupom {
 }
 
 /**
- * Port do repositório de cupons. A implementação atual guarda tudo em
- * memória; trocá-la pelo repositório Drizzle não altera domínio nem
- * aplicação.
+ * Port do repositório de cupons. A implementação atual é MongoDB
+ * (`infrastructure/mongo-cupons.ts`); domínio e aplicação não dependem dela.
  */
 export interface CupomRepository {
   buscarPorCodigo(codigo: string): Promise<Cupom | null>;
@@ -34,7 +33,7 @@ export interface CupomRepository {
   /**
    * Registra o uso e incrementa o contador na mesma operação — os dois
    * sempre andam juntos, e separá-los deixaria `usos` divergir da lista de
-   * usos (no Postgres isto vira uma transação).
+   * usos (no MongoDB, um único `updateOne` com `$push` + `$inc`).
    */
   registrarUso(dados: DadosDeUsoDeCupom): Promise<void>;
 

@@ -1,6 +1,6 @@
 /**
  * Domínio da portaria: as regras que decidem se um código lido na entrada
- * vale ou não. Sem dependência de Postgres, HTTP, câmera ou React — a mesma
+ * vale ou não. Sem dependência de banco de dados, HTTP, câmera ou React — a mesma
  * função serve à leitura por câmera, à digitação manual e a um teste.
  *
  * Check-in é a sexta tabela associativa do trabalho (`check_in`: ingresso ×

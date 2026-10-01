@@ -1,5 +1,5 @@
 /**
- * Domínio de eventos. Sem dependência de Postgres, Drizzle, HTTP ou React —
+ * Domínio de eventos. Sem dependência de banco de dados, HTTP ou React —
  * ver docs/guidelines.md, "Camadas".
  */
 

@@ -1,5 +1,5 @@
 /**
- * Domínio de pedido. Sem dependência de Postgres, HTTP ou React — ver
+ * Domínio de pedido. Sem dependência de banco de dados, HTTP ou React — ver
  * docs/guidelines.md, "Camadas".
  *
  * "Carrinho" não é uma entidade própria: é o Pedido do participante com
@@ -103,7 +103,7 @@ export function totalComDescontoCentavos(pedido: Pedido, cupom: Cupom | null): n
 /** A reserva de 30min protege o lote de sumir enquanto o participante
  *  preenche o checkout — nesta fase é só um relógio no próprio pedido, sem
  *  travar o estoque contra outros carrinhos concorrentes (isso pede
- *  travamento de linha no Postgres, fora do escopo da Fase 1 em memória). */
+ *  reserva de estoque no lote, fora do escopo do trabalho). */
 export const DURACAO_DA_RESERVA_MS = 30 * 60 * 1000;
 
 export function reservaExpirada(pedido: Pedido, agora: Date): boolean {
