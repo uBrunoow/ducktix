@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { CabecalhoDePagina } from '@/components/organizer/cabecalho-de-pagina';
 import { ingressosVendidos } from '@/server/event/domain/evento';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { FormularioEditarEvento } from './formulario-editar-evento';
 import { ZonaDeRisco } from './zona-de-risco';
 

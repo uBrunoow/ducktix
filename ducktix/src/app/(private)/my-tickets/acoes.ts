@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { solicitarCancelamento } from '@/server/participation/application/cancelamentos';
-import { drizzleCancelamentosRepository } from '@/server/participation/infrastructure/drizzle-cancelamentos';
+import { mongoCancelamentosRepository } from '@/server/participation/infrastructure/mongo-cancelamentos';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 
 export async function acaoSolicitarCancelamento(
@@ -14,7 +14,7 @@ export async function acaoSolicitarCancelamento(
   if (!sessao) return { ok: false, erro: 'Sua sessão expirou. Entre novamente.' };
 
   const resultado = await solicitarCancelamento(
-    drizzleCancelamentosRepository,
+    mongoCancelamentosRepository,
     ingressoId,
     sessao.usuarioId,
     motivo.trim() || null,

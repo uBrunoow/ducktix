@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MenuDaConta } from '@/components/conta/menu-da-conta';
 import { Marca, Seta } from '@/components/marca';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 
 /** Header pill flutuante: marca à esquerda, navegação ao centro, CTA à direita. */

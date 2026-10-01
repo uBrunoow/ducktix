@@ -8,7 +8,7 @@ import {
   despublicarEvento,
   excluirEvento,
 } from '@/server/event/application/criar-evento';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { esquemaEditarEvento } from './schemas';
 
 export interface RespostaDeEdicao {

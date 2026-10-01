@@ -3,9 +3,9 @@ import { Cabecalho } from '@/components/cabecalho';
 import { CabecalhoDoCheckout } from '@/components/checkout/cabecalho-do-checkout';
 import { Faixa, Filete, Moldura } from '@/components/moldura';
 import { Rodape } from '@/components/rodape';
-import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoPedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/mongo-pedidos';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { totalComDescontoCentavos } from '@/server/ticketing/domain/pedido';
 import {
   codigoPixSimulado,

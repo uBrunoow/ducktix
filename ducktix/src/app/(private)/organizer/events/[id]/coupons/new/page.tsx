@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { CabecalhoDePagina } from '@/components/organizer/cabecalho-de-pagina';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { FormularioCriarCupomDoEvento } from './formulario-criar-cupom-do-evento';
 
 export const dynamic = 'force-dynamic';

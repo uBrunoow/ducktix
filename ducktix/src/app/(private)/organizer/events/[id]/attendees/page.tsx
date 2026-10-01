@@ -19,13 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import {
   listarParticipantes,
   resumoDoEvento,
 } from '@/server/participation/application/participantes';
 import { nomeCompleto } from '@/server/participation/domain/inscricao';
-import { drizzleInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/drizzle-inscricoes';
+import { mongoInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/mongo-inscricoes';
 import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';

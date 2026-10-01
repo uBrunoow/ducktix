@@ -1,9 +1,9 @@
 'use server';
 
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { adicionarAoCarrinho } from '@/server/ticketing/application/carrinho';
-import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
+import { mongoPedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/mongo-pedidos';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 

@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { aplicarCupom, avancarParaPagamento } from '@/server/ticketing/application/checkout';
-import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
+import { mongoPedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/mongo-pedidos';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { esquemaAplicarCupom, esquemaEtapaParticipantes } from './schemas';
 import { totalComDescontoCentavos } from '@/server/ticketing/domain/pedido';

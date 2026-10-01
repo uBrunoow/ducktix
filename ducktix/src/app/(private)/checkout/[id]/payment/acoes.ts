@@ -2,12 +2,12 @@
 
 import { redirect } from 'next/navigation';
 import { confirmarPedido } from '@/server/ticketing/application/checkout';
-import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
-import { drizzleIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/drizzle-ingressos';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoPedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/mongo-pedidos';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
+import { mongoIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/mongo-ingressos';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { enviarEmailDeConfirmacaoDoPedido } from '@/server/notifications/infrastructure/resend-email';
 
 export interface RespostaDoPagamento {

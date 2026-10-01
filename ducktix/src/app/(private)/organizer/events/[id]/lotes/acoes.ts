@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { drizzleCatalogoPublicoRepository as catalogo } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogo } from '@/server/event/infrastructure/mongo-catalogo';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { esquemaLoteDoEvento } from './schemas';
 

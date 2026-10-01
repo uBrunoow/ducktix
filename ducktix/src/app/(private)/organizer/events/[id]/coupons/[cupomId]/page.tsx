@@ -16,13 +16,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import {
   cupomValeParaEvento,
   descricaoDoDesconto,
   statusDoCupom,
 } from '@/server/ticketing/domain/cupom';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
 import { AcaoAtivarCupomDoEvento } from '../acao-ativar-cupom-do-evento';
 
 export const dynamic = 'force-dynamic';

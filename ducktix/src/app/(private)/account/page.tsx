@@ -3,7 +3,7 @@ import { Cabecalho } from '@/components/cabecalho';
 import { Faixa, Filete, Moldura, Rotulo } from '@/components/moldura';
 import { Rodape } from '@/components/rodape';
 import { rotuloPapel } from '@/server/identity/domain/usuario';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { DialogAlterarSenha } from './dialog-alterar-senha';
 import { FormularioPerfil } from './formulario-perfil';

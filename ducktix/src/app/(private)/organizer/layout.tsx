@@ -4,8 +4,8 @@ import {
   type EventoNoSeletor,
 } from '@/components/organizer/cabecalho-organizador';
 import { Moldura } from '@/components/moldura';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 
 /**

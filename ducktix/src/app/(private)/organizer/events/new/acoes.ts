@@ -4,8 +4,8 @@ import { redirect } from 'next/navigation';
 import { criarEvento } from '@/server/event/application/criar-evento';
 import { DadosDeEventoInvalidosError } from '@/server/event/domain/erros';
 import type { Evento } from '@/server/event/domain/evento';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { enderecoParaTexto, esquemaCriarEvento } from './schemas';
 

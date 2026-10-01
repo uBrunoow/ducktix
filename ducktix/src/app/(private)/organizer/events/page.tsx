@@ -14,8 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { montarPainel } from '@/server/event/application/painel-organizador';
 import { localDeExibicao, rotuloModalidade } from '@/server/event/domain/evento';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { drizzleInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/drizzle-inscricoes';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
+import { mongoInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/mongo-inscricoes';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { redirect } from 'next/navigation';
 

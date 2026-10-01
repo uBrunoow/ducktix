@@ -13,7 +13,7 @@ import {
   statusDoEvento,
 } from '@/server/event/domain/evento';
 import { buscarEventoPorSlug } from '@/server/event/application/vitrine';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 
 export const dynamic = 'force-dynamic';
 

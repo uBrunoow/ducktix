@@ -8,7 +8,7 @@ import {
   type LeituraDaPortaria,
   type PainelDaPortaria,
 } from '@/server/participation/application/check-in';
-import { drizzleInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/drizzle-inscricoes';
+import { mongoInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/mongo-inscricoes';
 
 export async function acaoLerCodigo(
   eventoId: string,
