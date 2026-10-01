@@ -23,18 +23,18 @@ graph TD
     B --> C[Application / Use Cases]
     C --> D[Domain]
     D --> E[Repository Port]
-    E --> F[PostgreSQL Adapter]
+    E --> F[MongoDB Adapter]
 ```
 
 > [!danger] Regra única e inegociável
-> `Domain` ==nunca== conhece PostgreSQL, Drizzle, HTTP, JSON, React ou Next.js. Dependency Inversion sempre: `Domain ← Application ← Ports ← Adapters`.
+> `Domain` ==nunca== conhece MongoDB, HTTP, JSON, React ou Next.js. Dependency Inversion sempre: `Domain ← Application ← Ports ← Adapters`.
 
 | Onde vive | O quê |
 |---|---|
 | `src/server/<contexto>/domain/` | Entities, value objects, regras de negócio, domain errors. Sem infraestrutura. |
 | `src/server/<contexto>/application/` | Use cases, commands, queries, orquestração. Chama ports, nunca SQL direto. |
 | `src/server/<contexto>/ports/` | Interfaces de repositório e serviços externos. |
-| `src/server/<contexto>/infrastructure/` | Implementação com Drizzle sobre Postgres. |
+| `src/server/<contexto>/infrastructure/` | Implementação com o driver oficial do MongoDB (`colecoes` em `src/server/db/colecoes.ts`). |
 | `src/app/api/**/route.ts`, Server Actions, `scripts/cli.ts` | Adaptadores de entrada: parse/validação e resposta, sem regra de negócio. |
 | `src/server/shared/` | Código realmente compartilhado entre bounded contexts (ex.: erros comuns, tipos de valor genéricos, client do Drizzle). Não vira `utils` genérico. |
 
@@ -52,8 +52,8 @@ Estrutura concreta em [[backend/manifesto]] e [[frontend/manifesto]].
 ## Segurança
 
 > [!danger] Obrigatório, sem exceção
-> - SQL sempre parametrizado — query builder do Drizzle ou `sql` com placeholders. **Nunca** interpolar entrada do usuário em query (`sql.raw` é proibido com dado de usuário).
-> - Credenciais de banco (`DATABASE_URL` do Neon) ficam em `.env.local`, nunca versionadas nem hardcoded. Nenhum segredo em variável `NEXT_PUBLIC_*`.
+> - Consultas ao MongoDB sempre com valores, nunca com operadores vindos do usuário (nada de repassar objeto do request como filtro). Texto de busca usado em regex passa por escape.
+> - Credenciais de banco (`MONGODB_URI`) ficam em `.env.local`, nunca versionadas nem hardcoded. Nenhum segredo em variável `NEXT_PUBLIC_*`.
 > - Autorização é implementada no backend, não apenas ocultando botão no frontend.
 > - Regra de negócio crítica (ex.: "não vender ingresso de lote esgotado") vive no domínio, nunca só no frontend.
 > - Route Handlers são same-origin; não expor a API a outras origens sem necessidade.
@@ -73,7 +73,7 @@ apresentados pelo adaptador de entrada com uma mensagem adequada à interface.
 ## Concorrência na venda de ingressos
 
 > [!important] Ponto crítico do projeto
-> `confirmOrder` deve rodar em transação (`db.transaction`) com `SELECT ... FOR UPDATE` (`.for('update')` no Drizzle) sobre a linha do lote/tipo de ingresso, garantindo que duas compras simultâneas nunca vendam o mesmo último ingresso. Explicar a estratégia em ADR-006. Ver [[fluxos#Comprar ingresso]] e [[backend/fluxos#Concorrência]].
+> A baixa de estoque é um update condicional atômico no documento do evento (`vendidos <= vagas - quantidade` no filtro + `$inc`), garantindo que duas compras simultâneas nunca vendam o mesmo último ingresso. Explicar a estratégia em ADR-006. Ver [[fluxos#Comprar ingresso]] e [[backend/fluxos#Concorrência]].
 
 ## Transações
 
@@ -89,11 +89,11 @@ Todo processo de negócio que altera múltiplas tabelas usa transação explíci
 
 ## TypeScript idiomático
 
-- `strict: true`, sem `any`; tipos derivados do schema Drizzle (`InferSelectModel`/`InferInsertModel`) em vez de duplicados à mão.
+- `strict: true`, sem `any`; documentos tipados pelas interfaces de `src/server/db/colecoes.ts`.
 - Interfaces pequenas (ports), definidas onde são consumidas, não onde são implementadas.
 - Erros explícitos como classes de domínio, verificadas com `instanceof`; sem exceção genérica para controle de fluxo.
 - Dependency injection manual e simples (o use case recebe o repositório por parâmetro) — sem framework de DI.
-- Drizzle como query builder tipado, sem ORM mágico (nada de lazy loading ou active record).
+- Driver oficial do MongoDB, sem ODM (nada de lazy loading ou active record); validação no banco por `$jsonSchema`.
 - Zod só na borda (parse de entrada em Route Handlers, Server Actions e CLI), nunca como regra de domínio.
 - Evitar: frameworks gigantes, "repository" genérico universal, interfaces criadas sem necessidade, abstrações que só existem para "seguir DDD".
 
@@ -124,7 +124,7 @@ Queries indexadas (`event_id`, `organizer_id`, `participant_id`, `order_id`, sta
 ## Definition of Done
 
 > [!success] Uma funcionalidade só está pronta quando
-> Domínio + aplicação + infraestrutura Drizzle/Postgres + adaptador de entrada (Route Handler, Server Action ou CLI) + UI funcionam de ponta a ponta; regra de negócio testada; transação/concorrência tratada quando aplicável; documentação (`docs/`) atualizada.
+> Domínio + aplicação + infraestrutura MongoDB + adaptador de entrada (Route Handler, Server Action ou CLI) + UI funcionam de ponta a ponta; regra de negócio testada; transação/concorrência tratada quando aplicável; documentação (`docs/`) atualizada.
 
 ## Antipadrões
 
