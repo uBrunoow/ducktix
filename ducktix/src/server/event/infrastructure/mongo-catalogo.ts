@@ -222,8 +222,13 @@ class MongoCatalogoPublicoRepository implements CatalogoPublicoRepository {
   }
 
   /** Lotes e categorias saem junto com o documento. O vínculo com cupons
-   *  (antigo `ON DELETE CASCADE` de `cupom_evento`) é desfeito à mão. */
+   *  (antigo `ON DELETE CASCADE` de `cupom_evento`) é desfeito à mão. Um
+   *  evento que já está em algum pedido não sai — era a FK
+   *  `item_pedido.lote_id` (sem cascade) que barrava isso no PostgreSQL. */
   async excluir(eventoId: string): Promise<void> {
+    if (await colecoes.pedidos().countDocuments({ 'itens.eventoId': eventoId }, { limit: 1 })) {
+      throw new Error('Este evento está em pedidos e não pode ser excluído — cancele em vez de excluir.');
+    }
     await colecoes.eventos().deleteOne({ _id: eventoId });
     await colecoes.cupons().updateMany({ eventosIds: eventoId }, { $pull: { eventosIds: eventoId } });
   }

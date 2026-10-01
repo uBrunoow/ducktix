@@ -443,6 +443,7 @@ const indices = {
     [{ compradorId: 1, status: 1, criadoEm: -1 }, { name: 'idx_pedidos_comprador' }],
     [{ 'itens._id': 1 }, { name: 'idx_pedidos_item' }],
     [{ 'itens.loteId': 1 }, { name: 'idx_pedidos_lote' }],
+    [{ 'itens.eventoId': 1 }, { name: 'idx_pedidos_evento' }],
   ],
   inscricoes: [
     [{ 'ingresso.codigo': 1 }, { unique: true, name: 'uk_inscricoes_codigo' }],

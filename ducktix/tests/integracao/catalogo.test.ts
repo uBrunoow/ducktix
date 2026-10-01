@@ -152,6 +152,21 @@ describe('eventos (catálogo)', () => {
     expect(await catalogo.buscarPorId(evento.id)).toBeNull();
     expect((await cupons.buscarPorId(cupom.id))?.eventosIds).toEqual([outro.id]);
   });
+
+  it('não exclui evento que está em algum pedido (antiga FK de item_pedido)', async () => {
+    const evento = await criarEvento();
+    const comprador = await criarUsuario();
+    const pedido = await pedidos.criarAberto(comprador.id);
+    await pedidos.adicionarItem(pedido.id, {
+      eventoId: evento.id,
+      loteId: evento.lotes[0].id,
+      quantidade: 1,
+      precoUnitarioCentavos: 100,
+    });
+
+    await expect(catalogo.excluir(evento.id)).rejects.toThrow('está em pedidos');
+    expect(await catalogo.buscarPorId(evento.id)).not.toBeNull();
+  });
 });
 
 describe('lotes (embutidos no evento)', () => {
