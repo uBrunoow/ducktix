@@ -1,5 +1,5 @@
 /**
- * Domínio de participação: o ingresso emitido. Sem dependência de Postgres,
+ * Domínio de participação: o ingresso emitido. Sem dependência de banco de dados,
  * HTTP ou React — ver docs/guidelines.md, "Camadas".
  */
 

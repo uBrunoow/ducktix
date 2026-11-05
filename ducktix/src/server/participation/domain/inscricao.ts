@@ -1,7 +1,7 @@
 /**
  * Domínio de inscrição: a linha que liga um participante a um evento, com o
  * lote que ele comprou e a presença no check-in. Sem dependência de
- * Postgres, HTTP ou React — ver docs/guidelines.md, "Camadas".
+ * banco de dados, HTTP ou React — ver docs/guidelines.md, "Camadas".
  *
  * É a tabela associativa central do trabalho (evento × participante), e é
  * dela que saem os relatórios de ocupação, presença e receita.

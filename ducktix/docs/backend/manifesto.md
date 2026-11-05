@@ -9,6 +9,10 @@ aliases:
 updated: 2026-08-27
 ---
 
+> **Nota (Fase 2):** este manifesto é o plano da Fase 1. A persistência
+> atual é MongoDB, sem Drizzle — ver
+> [`../migracao-postgresql-mongodb.md`](../migracao-postgresql-mongodb.md).
+
 # Backend — Manifesto
 
 > [!abstract] Propósito

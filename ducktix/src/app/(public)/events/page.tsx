@@ -10,7 +10,7 @@ import {
   type Filtros,
   buscarEventos,
 } from '@/server/event/application/vitrine';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 
 export const dynamic = 'force-dynamic';
 

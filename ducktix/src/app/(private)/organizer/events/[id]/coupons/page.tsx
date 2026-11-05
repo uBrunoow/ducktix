@@ -11,13 +11,13 @@ import {
 } from '@/components/organizer/metricas';
 import { SeloStatusCupom } from '@/components/organizer/selo-status-cupom';
 import { Button } from '@/components/ui/button';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import {
   cupomValeParaEvento,
   descricaoDoDesconto,
   statusDoCupom,
 } from '@/server/ticketing/domain/cupom';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
 
 export const dynamic = 'force-dynamic';
 

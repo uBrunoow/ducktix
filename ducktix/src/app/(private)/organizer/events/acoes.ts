@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { publicarEvento } from '@/server/event/application/criar-evento';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 
 export interface RespostaDePublicar {
   readonly erro?: string;

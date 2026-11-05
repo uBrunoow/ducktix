@@ -22,7 +22,7 @@ export interface ListaDeParticipantes {
  * A paginação é do repositório e não da tela porque um evento grande passa
  * de mil inscrições: mandar tudo para o React só para recortar 25 linhas
  * seria carregar o banco inteiro na memória do servidor a cada acesso — e no
- * Postgres isso vira LIMIT/OFFSET sem mudar uma linha desta função.
+ * MongoDB isso é `skip`/`limit` sem mudar uma linha desta função.
  */
 export async function listarParticipantes(
   inscricoes: InscricoesRepository,

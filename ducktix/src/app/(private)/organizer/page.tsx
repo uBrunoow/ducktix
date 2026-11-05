@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { EventoNoSeletor } from '@/components/organizer/cabecalho-organizador';
 import { SeletorDeEventoPainel } from '@/components/organizer/seletor-de-evento-painel';
 import { Rotulo } from '@/components/moldura';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 
 export const dynamic = 'force-dynamic';

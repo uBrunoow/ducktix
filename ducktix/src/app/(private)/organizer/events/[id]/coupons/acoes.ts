@@ -3,7 +3,7 @@
 import type { Route } from 'next';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
 import { esquemaCriarCupomDoEvento } from './schemas';
 
 export interface RespostaDeCupomDoEvento {

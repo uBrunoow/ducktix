@@ -1,18 +1,25 @@
 # Documentação do Ducktix
 
 Esta pasta reúne a documentação técnica e acadêmica do estado atual do
-projeto. O documento formal exigido pela Fase 1 está em
-`../documento_entrega_fase1.md`.
+projeto. Na **Fase 2** a persistência passou a ser MongoDB: comece por
+[`migracao-postgresql-mongodb.md`](migracao-postgresql-mongodb.md). O
+documento formal da Fase 1 está em `../../ENTREGA.md`.
+
+Os documentos de modelagem relacional (`modelo-conceitual.md`,
+`modelo-logico.md`, `modelo-mudancas.md`) e os planos em `superpowers/`
+descrevem a Fase 1 e são mantidos como histórico.
 
 ## Entrada rápida
 
 | Documento | Conteúdo |
 |---|---|
+| [`migracao-postgresql-mongodb.md`](migracao-postgresql-mongodb.md) | **Fase 2:** modelo de documentos MongoDB, decisões, queries SQL → MongoDB, validação |
+| [`../database/README.md`](../database/README.md) | Scripts do banco: criação, índices, seed |
 | [`estado-atual.md`](estado-atual.md) | Implementação disponível, pendências e matriz do enunciado |
 | [`modelo-conceitual.md`](modelo-conceitual.md) | Entidades, relacionamentos e cardinalidades |
 | [`modelo-logico.md`](modelo-logico.md) | Dicionário de dados, normalização e índices |
 | [`modelo-mudancas.md`](modelo-mudancas.md) | Diferenças entre o modelo previsto e o implementado |
-| [`MIGRACAO.md`](MIGRACAO.md) | Plano de migração gradual do PostgreSQL para uma arquitetura híbrida com NoSQL |
+| [`MIGRACAO.md`](MIGRACAO.md) | Plano híbrido inicial (substituído pela migração completa) |
 | [`funcionalidades.md`](funcionalidades.md) | Funcionalidades e status |
 | [`fluxos.md`](fluxos.md) | Fluxos públicos e do organizador |
 | [`glossario.md`](glossario.md) | Vocabulário do domínio |

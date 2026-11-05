@@ -1,19 +1,32 @@
-# Fase 1 — Sistema de Gestão de Eventos, Ingressos e Participantes (Ducktix)
+# Sistema de Gestão de Eventos, Ingressos e Participantes (Ducktix)
 
 Disciplina: Banco de Dados II — UDESC
 Equipe: Bruno Werner
 
-- **Vídeo de demonstração:** <https://youtu.be/fovdRduLR8Y>
-- **Repositório (público):** <https://github.com/uBrunoow/ducktix>
+**Vídeo de demonstração:** <https://youtu.be/fovdRduLR8Y>
+**Repositório (público):** <https://github.com/uBrunoow/ducktix>
 
-> Este documento acompanha o repositório do projeto. O esquema descrito aqui é
-> o que está implementado: `ducktix/db/schema.sql` é o DDL executável deste
-> dicionário (gera o mesmo esquema que as migrations em `ducktix/drizzle/`), e
-> `ducktix/db/backup.sql` é o backup do banco já populado.
+> **Fase 1** — banco relacional PostgreSQL · **Fase 2** — banco NoSQL MongoDB.
+>
+> Na Fase 2 o PostgreSQL foi **substituído** pelo MongoDB, e a aplicação passou
+> a operar só sobre ele. As seções 1 a 4 descrevem o domínio e o modelo
+> relacional da Fase 1 — a base da modelagem —; a
+> [seção 9](#9-fase-2--banco-nosql-mongodb) mostra como cada parte ficou no
+> MongoDB: collections, documentos, restrições e os mesmos relatórios
+> reescritos como agregações. Os arquivos do PostgreSQL (DDL, migrations e
+> backup) estão preservados em `ducktix/database/legacy-postgres/`.
 
 ## Onde está cada item da entrega
 
-**Item 1 — documento de texto**
+**Fase 2 — repositório**
+
+| Exigência | Onde |
+|---|---|
+| (a) Código-fonte da aplicação (operando sobre o MongoDB) | `ducktix/src/` — repositórios em `ducktix/src/server/*/infrastructure/mongo-*.ts` |
+| (b) Scripts de criação do banco de dados | `ducktix/database/criar-banco.js` (collections, validação e índices) e `ducktix/database/scripts/seed.mjs` (dados iniciais) — ver [9.7](#97-scripts-de-criação-e-dados) |
+| (c) Instruções de compilação e execução | `README.md` (raiz do repositório) — resumidas na seção [6](#6-instruções-de-compilação-e-execução) |
+
+**Fase 1 — item 1, documento de texto**
 
 | Exigência | Seção |
 |---|---|
@@ -22,12 +35,12 @@ Equipe: Bruno Werner
 | (c) Esquema lógico na forma de dicionário de dados | [3](#3-esquema-lógico-relacional--dicionário-de-dados) |
 | Link do repositório | [7](#7-repositório-do-projeto) |
 
-**Item 2 — repositório**
+**Fase 1 — item 2, repositório**
 
 | Exigência | Onde |
 |---|---|
 | (a) Código-fonte da aplicação | `ducktix/src/` |
-| (b) Backup do banco de dados | `ducktix/db/backup.sql` |
+| (b) Backup do banco de dados | `ducktix/database/legacy-postgres/backup.sql` |
 | (c) Instruções de compilação e execução | `README.md` (raiz do repositório) — resumidas na seção [6](#6-instruções-de-compilação-e-execução) |
 
 **Requisitos da aplicação**
@@ -96,7 +109,8 @@ real:
 
 Regras de negócio que o modelo sustenta: um evento publicado precisa de
 informações mínimas; a quantidade vendida de um lote nunca ultrapassa as vagas
-(concorrência de venda resolvida com travamento de linha); o preço pago é
+(concorrência de venda resolvida com travamento de linha na Fase 1 e com
+update condicional atômico na Fase 2); o preço pago é
 histórico e não muda se o lote for reajustado; um ingresso só é emitido após a
 confirmação do pedido; e presença é um fato datado, distinto de estar inscrito
 — quem não comparece é o *no-show*, que o relatório precisa evidenciar.
@@ -187,7 +201,7 @@ Notação pé-de-galinha: `||` exatamente um, `o|` zero ou um, `|{` um ou mais,
 
 ## 3. Esquema Lógico Relacional — Dicionário de Dados
 
-**SGBD:** PostgreSQL 16. **DDL executável:** `ducktix/db/schema.sql`.
+**SGBD (Fase 1):** PostgreSQL 16. **DDL executável:** `ducktix/database/legacy-postgres/schema.sql`.
 
 Convenções: tabelas no singular em `snake_case`; PK `id` do tipo `UUID` com
 `gen_random_uuid()`; valores monetários em **centavos** (`INTEGER`), nunca
@@ -509,8 +523,10 @@ ports/             interfaces de repositório
 infrastructure/    implementações concretas
 ```
 
-É essa separação que torna a Fase 2 (NoSQL) uma troca de `infrastructure/`,
-sem reescrever regra de negócio.
+Foi essa separação que tornou a Fase 2 (NoSQL) uma troca de
+`infrastructure/`: os repositórios Drizzle/PostgreSQL deram lugar a
+repositórios MongoDB que implementam as mesmas interfaces, e domínio, casos de
+uso e telas não mudaram (seção [9](#9-fase-2--banco-nosql-mongodb)).
 
 ### 4.2 CRUD das tabelas de entidade
 
@@ -652,12 +668,16 @@ Exemplo no banco de entrega, evento *Festival de Inverno Tardio*: 1.084
 inscritos, 921 presentes, 163 ausentes (85% de presença, 43% de ocupação); lote
 *Inteira* com 612 ingressos vendidos e R$ 55.080,00 de receita.
 
+Na Fase 2 os mesmos três relatórios são agregações do MongoDB, com os mesmos
+resultados — ver [9.5](#95-os-três-relatórios-no-mongodb).
+
 ---
 
 ## 5. Banco de Dados
 
 O banco acompanha o repositório **com dados previamente inseridos**, conforme
-exigido.
+exigido. Contagem por tabela na Fase 1 (na Fase 2, os mesmos registros estão
+distribuídos nas collections da seção [9.7](#97-scripts-de-criação-e-dados)):
 
 | Tabela | Registros |
 |---|---|
@@ -689,12 +709,15 @@ nos 16 eventos já realizados.
 
 ### 5.1 Arquivos
 
+Arquivos da Fase 1, hoje em `ducktix/database/legacy-postgres/`:
+
 | Arquivo | Conteúdo |
 |---|---|
-| `ducktix/db/schema.sql` | DDL do esquema — versão executável do dicionário da seção 3 |
-| `ducktix/db/seed.sql` | Carga dos dados de demonstração |
-| `ducktix/db/backup.sql` | **Backup do banco** (`pg_dump` 16, texto puro, sem compactação), item 2(b) da entrega. Inclui o registro das migrations do Drizzle |
-| `ducktix/db/gerar-seed.mjs` | Gerador do `seed.sql` a partir da fixture da aplicação |
+| `schema.sql` | DDL do esquema — versão executável do dicionário da seção 3 |
+| `seed.sql` | Carga dos dados de demonstração |
+| `backup.sql` | **Backup do banco** (`pg_dump` 16, texto puro, sem compactação), item 2(b) da Fase 1. Na Fase 2 é a fonte de dados do seed do MongoDB |
+| `gerar-seed.mjs` | Gerador do `seed.sql` a partir da fixture da aplicação |
+| `drizzle-migrations/` | Migrations do Drizzle usadas na Fase 1 |
 
 O `seed.sql` foi **gerado** por `gerar-seed.mjs`, não escrito à mão, a partir
 da fixture de dados que a aplicação usava antes de passar a ler do banco. Todas
@@ -717,36 +740,36 @@ Resumo:
 ### 6.1 Requisitos
 
 Git, Node.js 20+, pnpm 10+ (ou npm 10+) e Docker com Docker Compose (que
-fornece o PostgreSQL 16). Sem Docker, um PostgreSQL 16 instalado localmente
-também serve.
+fornece o MongoDB 8). Sem Docker, um MongoDB 7+ instalado localmente ou um
+cluster MongoDB Atlas também serve. **PostgreSQL não é mais necessário.**
 
 ### 6.2 Banco de dados
 
 ```bash
 git clone https://github.com/uBrunoow/ducktix.git
 cd ducktix/ducktix
-docker compose up -d postgres
-docker compose exec -T postgres psql -U ducktix -d ducktix -v ON_ERROR_STOP=1 < db/backup.sql
+docker compose up -d mongo
+cp .env.example .env.local
+pnpm install
+pnpm db:setup     # collections, validação $jsonSchema e índices
+pnpm db:seed      # dados de demonstração
 ```
 
 Conferência:
 
 ```bash
-docker compose exec -T postgres psql -U ducktix -d ducktix -c "
-SELECT 'eventos', count(*)::text FROM evento
-UNION ALL SELECT 'inscrições ativas', count(*)::text FROM inscricao WHERE status='ativa'
-UNION ALL SELECT 'check-ins', count(*)::text FROM check_in;"
+docker compose exec mongo mongosh ducktix --quiet --eval 'printjson({eventos: db.eventos.countDocuments(), inscricoesAtivas: db.inscricoes.countDocuments({status: "ativa"}), checkIns: db.inscricoes.countDocuments({checkIn: {$ne: null}})})'
 ```
 
-Esperado: **30 eventos, 8.864 inscrições ativas, 4.779 check-ins**.
+Esperado: **30 eventos, 8.864 inscrições ativas, 4.779 check-ins** — os mesmos
+números da Fase 1.
 
 ### 6.3 Aplicação
 
 ```bash
-cp .env.example .env.local
-pnpm install
 pnpm build
 pnpm start       # http://localhost:3000
+pnpm test        # 44 testes de integração contra o MongoDB
 ```
 
 Para desenvolvimento, `pnpm dev` no lugar de `build` + `start`.
@@ -771,13 +794,13 @@ Para desenvolvimento, `pnpm dev` no lugar de `build` + `start`.
 
 **Vídeo de demonstração:** <https://youtu.be/fovdRduLR8Y>
 
-Conforme o item 2 do enunciado, o repositório contém:
+O repositório contém:
 
-| Item exigido | Onde está |
-|---|---|
-| (a) Código-fonte da aplicação | `ducktix/src/` |
-| (b) Backup do banco de dados | `ducktix/db/backup.sql` |
-| (c) Instruções de compilação e execução | `README.md` (raiz do repositório) |
+| Item exigido | Fase 1 | Fase 2 |
+|---|---|---|
+| (a) Código-fonte da aplicação | `ducktix/src/` | `ducktix/src/` |
+| (b) Banco de dados | backup `ducktix/database/legacy-postgres/backup.sql` | scripts `ducktix/database/criar-banco.js` e `ducktix/database/scripts/seed.mjs` |
+| (c) Instruções de compilação e execução | `README.md` (raiz) | `README.md` (raiz) |
 
 Nenhum arquivo está compactado. O link deve permanecer público e sem alterações
 após a defesa.
@@ -803,6 +826,10 @@ possa ser feita sobre o estado real do sistema.
 - CRUD completo de `evento` e `lote`; fluxo de cancelamento de inscrição
   (solicitar e decidir).
 - Interface gráfica completa da vitrine e do back-office.
+- **Fase 2:** aplicação operando só sobre o MongoDB, com as 18 tabelas
+  remodeladas em 7 collections, as restrições da Fase 1 reproduzidas em
+  validadores `$jsonSchema`, índices e updates condicionais, os 3 relatórios
+  reescritos como agregações e 44 testes de integração.
 
 ### 8.2 Pendente
 
@@ -820,3 +847,367 @@ pedidos e dos relatórios.
 
 O detalhamento técnico dessas pendências está em
 `ducktix/docs/modelo-mudancas.md`, seção 7.
+
+---
+
+## 9. Fase 2 — Banco NoSQL (MongoDB)
+
+Enunciado da Fase 2: *substituir o banco de dados por um banco equivalente em
+um modelo NoSQL e ajustar a aplicação (requisições e consultas ao banco) para
+operar sobre o novo banco.*
+
+O banco escolhido foi o **MongoDB 8**, orientado a documentos, acessado pelo
+driver oficial `mongodb` para Node.js. Relatório técnico completo, com cada
+consulta SQL e a sua equivalente: `ducktix/docs/migracao-postgresql-mongodb.md`.
+
+### 9.1 Do modelo relacional ao modelo de documentos
+
+A modelagem não copiou cada tabela para uma collection. Ela partiu de **como a
+aplicação lê os dados**: o que aparece junto numa tela fica junto num
+documento (*embedding*), e o que cresce sem limite ou é consultado por outro
+caminho fica em documento próprio, ligado por id (*referencing*).
+
+| Collection | Tabelas da Fase 1 | Como ficou |
+|---|---|---|
+| `usuarios` | `usuario`, `organizador` | organizador **embutido** (1:1, sempre lido com o usuário) |
+| `tokensRedefinicaoSenha` | `token_redefinicao_senha` | separada; índice **TTL** apaga os tokens vencidos |
+| `categorias` | `categoria` | separada (lista de filtros da vitrine) |
+| `eventos` | `evento`, `lote`, `evento_categoria` | lotes e categorias **embutidos**; organizador como **referência estendida** (id + nome) |
+| `cupons` | `cupom`, `cupom_evento`, `uso_de_cupom` | eventos válidos (`eventosIds`) e histórico de usos **embutidos** |
+| `pedidos` | `pedido`, `item_pedido`, `pagamento` | itens, pagamentos e cobrança **embutidos** |
+| `inscricoes` | `inscricao`, `participante`, `ingresso`, `check_in`, `cancelamento_de_inscricao` | um documento por ingresso nominal, com tudo embutido; **referencia** o evento e o pedido |
+
+**18 tabelas → 7 collections.** As principais decisões:
+
+- **Inscrições não ficam dentro do evento.** Um evento passa de mil inscrições
+  (o *Festival de Inverno Tardio* tem 1.084) e cada uma recebe check-in e
+  cancelamento separadamente. Embutir faria cada check-in reescrever um
+  documento enorme e disputado.
+- **Inscrições não ficam dentro do pedido.** A lista de inscritos é
+  consultada **por evento** e paginada; dentro dos pedidos, montar essa lista
+  exigiria desmontar todos os pedidos a cada página.
+- **Participante virou subdocumento.** Na Fase 1, cada ingresso já criava a
+  sua própria linha de `participante` (o portador do ingresso, sem conta), sem
+  reaproveitamento — o dado só existia em função da inscrição.
+- **Lotes ficam dentro do evento.** São poucos por evento, aparecem em toda
+  página do evento e mudam junto com ele.
+- **Cópias controladas:** o nome do organizador no evento e o nome do lote na
+  inscrição evitam leituras extras nas telas mais acessadas. O nome do lote
+  não diverge porque lote com venda não pode ser editado (regra da Fase 1).
+
+```text
+usuarios ──(organizador.usuarioId)──< eventos >──(eventosIds)── cupons
+   │                                    │  ▲
+   │ compradorId                        │  │ itens.eventoId / itens.loteId
+   ▼                                    │  │
+pedidos ──(pedidoId, itemPedidoId)──< inscricoes (eventoId) >───┘
+```
+
+`>` marca o lado "muitos"; tudo o que não aparece no diagrama está embutido.
+
+### 9.2 Exemplos de documentos
+
+Documentos reais do banco de demonstração (ids encurtados).
+
+**Evento** — o que no PostgreSQL exigia `evento` + JOIN com `organizador` +
+consultas em `lote` e `evento_categoria` agora é uma leitura só:
+
+```js
+// db.eventos.findOne({ slug: "festival-de-inverno-tardio" })
+{
+  _id: "13880925-…",
+  slug: "festival-de-inverno-tardio",
+  nome: "Festival de Inverno Tardio",
+  local: "Urubici · SC",
+  modalidade: "presencial", formatoOnline: null,
+  status: "publicado", visibilidade: "publico",
+  comecaEm: ISODate("…"), terminaEm: ISODate("…"),
+  isHighlighted: false,
+  organizador: { id: "6511f0eb-…", usuarioId: "891c844b-…", nome: "Prefeitura de Urubici" },
+  categorias: [ { id: "4486ef05-…", nome: "Música" } ],
+  lotes: [
+    { _id: "6e97b5ec-…", nome: "Solidário", precoCentavos: 0,    vagas: 500,  vendidos: 500, ordem: 0, … },
+    { _id: "…",          nome: "Inteira",   precoCentavos: 9000, vagas: 2000, vendidos: 612, ordem: 1, … }
+  ]
+}
+```
+
+**Pedido** — `pedido` + `item_pedido` + `pagamento` + as 8 colunas
+`cobranca_*`:
+
+```js
+{
+  _id: "a280ead6-…", compradorId: "533da962-…", status: "confirmado",
+  criadoEm: ISODate("…"), confirmadoEm: ISODate("…"), reservadoAte: null, cupomId: null,
+  cobranca: { cpf: "12345678909",
+              endereco: { cep: "88010000", logradouro: "Rua Bocaiuva", numero: "12",
+                          bairro: "Centro", cidade: "Florianópolis", uf: "SC", complemento: "" } },
+  itens: [ { _id: "ca0d3dfd-…", loteId: "16580d18-…", eventoId: "926114a6-…",
+             quantidade: 1, precoUnitarioCentavos: 4900 } ],
+  pagamentos: [ { _id: "…", metodo: "pix", status: "aprovado", valorCentavos: 4900,
+                  criadoEm: ISODate("…"), pagoEm: ISODate("…"), codigoExterno: null } ]
+}
+```
+
+**Inscrição** — `inscricao` + `participante` + `ingresso` + `check_in` +
+`cancelamento_de_inscricao`. Na Fase 1, uma linha da lista de inscritos saía de
+um JOIN de sete tabelas; agora é este documento:
+
+```js
+{
+  _id: "d2800446-…",
+  eventoId: "926114a6-…", pedidoId: "6805b9d9-…", itemPedidoId: "aacf080f-…", compradorId: "533da962-…",
+  lote: { id: "16580d18-…", nome: "Lote 1" },
+  precoPagoCentavos: 4900, status: "ativa", inscritoEm: ISODate("…"),
+  pedidoCriadoEm: ISODate("…"), pedidoConfirmadoEm: ISODate("…"),
+  participante: { nome: "Isabela", sobrenome: "Fernandes", email: "isabela.fernandes1@example.com",
+                  cpf: null, celular: null, nomeCracha: null, empresa: null, cargo: null, … },
+  ingresso: { id: "c1e15999-…", codigo: "semana-de-dados-2026-1", status: "utilizado", emitidoEm: ISODate("…") },
+  checkIn: { realizadoEm: ISODate("…"), operadorId: null },   // null = ainda não entrou
+  cancelamentos: []                                            // solicitações de cancelamento
+}
+```
+
+**Cupom** — `cupom` + `cupom_evento` + `uso_de_cupom`:
+
+```js
+{
+  _id: "1c421cd7-…", codigo: "INVERNO25", tipoDesconto: "percentual", valor: 25,
+  validoDe: ISODate("…"), validoAte: ISODate("…"), limiteUso: 200, usos: 0, ativo: true,
+  eventosIds: [ "13880925-…" ],   // antiga cupom_evento: o cupom só vale nestes eventos
+  historicoDeUsos: []             // antiga uso_de_cupom: { pedidoId, eventoId, descontoCentavos, usadoEm }
+}
+```
+
+Os ids continuam sendo os UUIDs da Fase 1 (`_id` do tipo string), de modo que
+links, sessões e QR codes valem nas duas fases.
+
+### 9.3 Restrições: do DDL para o MongoDB
+
+O MongoDB não tem `CREATE TABLE`, `CHECK` nem chave estrangeira. Cada tipo de
+restrição da Fase 1 tem um equivalente:
+
+| PostgreSQL (Fase 1) | MongoDB (Fase 2) |
+|---|---|
+| `NOT NULL`, tipos, `varchar(n)`, `CHECK ... IN (...)` | validador `$jsonSchema` da collection (`required`, `bsonType`, `maxLength`, `enum`, `minimum`) |
+| `CHECK` entre colunas (ex.: `termina_em > comeca_em`) | `$expr` no validador |
+| `PRIMARY KEY`, `UNIQUE` | `_id` e índices únicos (`uk_usuarios_email`, `uk_eventos_slug`, `uk_inscricoes_codigo`…) |
+| `UNIQUE` dentro de um mesmo pai (ex.: nome do lote no evento) | condição no filtro do update que insere (`'lotes.nome': {$ne: nome}`) |
+| `FOREIGN KEY ... ON DELETE CASCADE` | subdocumentos embutidos saem junto com o documento |
+| `FOREIGN KEY` sem cascade (restrição) | checagem no repositório antes de excluir |
+| `SELECT ... FOR UPDATE` e transações | update condicional atômico num único documento |
+
+Trecho do validador da collection `eventos` (`ducktix/database/criar-banco.js`),
+com os `CHECK`s da Fase 1 que ele substitui:
+
+```js
+eventos: {
+  $and: [
+    { $jsonSchema: {
+        required: ['_id', 'slug', 'nome', 'modalidade', 'status', 'comecaEm', 'terminaEm', 'lotes', …],
+        properties: {
+          modalidade: { bsonType: 'string', enum: ['presencial', 'online', 'hibrido'] },  // ck_evento_modalidade
+          status: { bsonType: 'string', enum: ['rascunho', 'publicado', 'encerrado', 'cancelado'] },
+          lotes: { bsonType: 'array', items: {
+            properties: { precoCentavos: { minimum: 0 }, vagas: { minimum: 1 }, vendidos: { minimum: 0 } } } },
+        } } },
+    { $expr: { $gt: ['$terminaEm', '$comecaEm'] } },                                     // ck_evento_periodo
+    { $or: [                                                                             // ck_evento_local_por_modalidade
+        { modalidade: 'online',     local: null,          formatoOnline: { $ne: null } },
+        { modalidade: 'presencial', local: { $ne: null }, formatoOnline: null },
+        { modalidade: 'hibrido',    local: { $ne: null }, formatoOnline: { $ne: null } } ] },
+    // + ck_lote_estoque (vendidos <= vagas) e ck_lote_janela, aplicados a cada lote com $map
+  ]
+}
+```
+
+Um documento que viole a regra é recusado pelo próprio banco
+(`Document failed validation`), como um `CHECK` violado no PostgreSQL.
+
+**Concorrência.** A venda do último ingresso, que na Fase 1 usava
+`SELECT ... FOR UPDATE`, virou um único update que só acontece se ainda houver
+vaga:
+
+```js
+db.eventos.updateOne(
+  { _id: eventoId, lotes: { $elemMatch: { _id: loteId, vendidos: { $lte: vagas - quantidade } } } },
+  { $inc: { 'lotes.$.vendidos': quantidade } }
+)
+// modifiedCount === 0 → sem estoque; a compra é recusada
+```
+
+Os testes confirmam: 12 confirmações simultâneas de 1 ingresso num lote de 5
+vagas resultam em exatamente 5 vendas. O mesmo padrão garante um check-in por
+ingresso (`checkIn: null` no filtro) e o limite de uso do cupom
+(`usos < limiteUso` no filtro).
+
+### 9.4 CRUD e processos de negócio no MongoDB
+
+As telas e regras das seções 4.2 e 4.3 são as mesmas; mudou a operação no
+banco. Os processos das seis tabelas associativas:
+
+| Associativa (Fase 1) | Processo | Operação no MongoDB |
+|---|---|---|
+| `item_pedido` | Adicionar ao carrinho | `$inc` na quantidade do item do mesmo lote ou `$push` de um item novo em `pedidos.itens` |
+| `inscricao` | Emitir ingresso | `insertOne` em `inscricoes`, com participante e ingresso no mesmo documento |
+| `uso_de_cupom` | Aplicar cupom | `$push` em `historicoDeUsos` + `$inc` em `usos`, num único `updateOne` |
+| `cupom_evento` | Restringir campanha | array `eventosIds`; "vale neste evento?" é `find({codigo, eventosIds: eventoId})` |
+| `evento_categoria` | Classificar evento | array `categorias` embutido no evento: a vitrine recebe a categoria junto com o evento, sem JOIN |
+| `check_in` | Realizar check-in | `updateOne({_id, checkIn: null}, {$set: {checkIn: {...}}})` |
+
+O cancelamento aprovado, que na Fase 1 eram três `UPDATE`s numa transação
+(cancelamento, inscrição e ingresso), é um único `updateOne` no documento da
+inscrição.
+
+### 9.5 Os três relatórios no MongoDB
+
+As consultas SQL da seção 4.4 reescritas como pipelines de agregação. Para
+rodar no `mongosh` (`docker compose exec mongo mongosh ducktix`):
+
+```js
+const eventoId = db.eventos.findOne({ slug: 'festival-de-inverno-tardio' })._id;
+```
+
+**Relatório 1 — Participação.** O `$lookup` faz o papel do JOIN com
+`inscricao`; ingresso e check-in já estão dentro de cada inscrição:
+
+```js
+db.eventos.aggregate([
+  { $match: { _id: eventoId } },
+  { $lookup: { from: 'inscricoes', localField: '_id', foreignField: 'eventoId', as: 'i',
+               pipeline: [{ $project: { status: 1, presente: { $ne: ['$checkIn', null] } } }] } },
+  { $project: {
+      _id: 0, evento: '$nome', vagas: { $sum: '$lotes.vagas' },
+      inscritos: { $size: { $filter: { input: '$i', cond: { $eq: ['$$this.status', 'ativa'] } } } },
+      presentes: { $size: { $filter: { input: '$i', cond: '$$this.presente' } } },
+      ausentes:  { $size: { $filter: { input: '$i', cond: {
+                   $and: [{ $eq: ['$$this.status', 'ativa'] }, { $not: ['$$this.presente'] }] } } } } } },
+  { $set: {
+      presencaPct: { $round: [{ $multiply: [100, { $divide: ['$presentes', { $max: ['$inscritos', 1] }] }] }, 0] },
+      ocupacaoPct: { $round: [{ $multiply: [100, { $divide: ['$inscritos', '$vagas'] }] }, 0] } } },
+  { $unset: 'vagas' }
+])
+```
+
+```js
+[ { evento: 'Festival de Inverno Tardio', inscritos: 1084, presentes: 921, ausentes: 163,
+    presencaPct: 85, ocupacaoPct: 43 } ]
+```
+
+**Relatório 2 — Vendas por lote** (pedidos confirmados, receita bruta). `$unwind`
+abre os lotes embutidos e os itens dos pedidos:
+
+```js
+db.eventos.aggregate([
+  { $match: { _id: eventoId } },
+  { $unwind: '$lotes' },
+  { $lookup: { from: 'pedidos', as: 'vendas', let: { loteId: '$lotes._id' }, pipeline: [
+      { $match: { status: 'confirmado', $expr: { $in: ['$$loteId', '$itens.loteId'] } } },
+      { $unwind: '$itens' },
+      { $match: { $expr: { $eq: ['$itens.loteId', '$$loteId'] } } },
+      { $group: { _id: null, vendidos: { $sum: '$itens.quantidade' },
+                  receitaCentavos: { $sum: { $multiply: ['$itens.quantidade', '$itens.precoUnitarioCentavos'] } } } } ] } },
+  { $set: { v: { $ifNull: [{ $first: '$vendas' }, { vendidos: 0, receitaCentavos: 0 }] } } },
+  { $project: {
+      _id: 0, lote: '$lotes.nome', vagas: '$lotes.vagas', vendidos: '$v.vendidos',
+      ocupacaoPct: { $round: [{ $multiply: [100, { $divide: ['$v.vendidos', '$lotes.vagas'] }] }, 0] },
+      receita: { $divide: ['$v.receitaCentavos', 100] },
+      ticketMedio: { $cond: [{ $eq: ['$v.vendidos', 0] }, null,
+                     { $round: [{ $divide: ['$v.receitaCentavos', { $multiply: ['$v.vendidos', 100] }] }, 2] }] },
+      ordem: '$lotes.ordem' } },
+  { $sort: { ordem: 1 } }, { $unset: 'ordem' }
+])
+```
+
+```js
+[ { lote: 'Solidário', vagas: 500,  vendidos: 500, ocupacaoPct: 100, receita: 0,     ticketMedio: 0 },
+  { lote: 'Inteira',   vagas: 2000, vendidos: 612, ocupacaoPct: 31,  receita: 55080, ticketMedio: 90 } ]
+```
+
+Como cada lote embutido guarda o contador `vendidos`, a tela de visão geral lê
+esse número direto do documento do evento, sem agregar os pedidos; a
+agregação acima é a versão que recalcula a partir dos pedidos, equivalente
+ao SQL.
+
+**Relatório 3 — Cupons do evento.** O vínculo e os usos estão no próprio
+cupom; o `$lookup` só confere quais pedidos foram confirmados:
+
+```js
+db.cupons.aggregate([
+  { $match: { eventosIds: eventoId } },
+  { $set: { usosNoEvento: { $filter: { input: '$historicoDeUsos', cond: { $eq: ['$$this.eventoId', eventoId] } } } } },
+  { $lookup: { from: 'pedidos', localField: 'usosNoEvento.pedidoId', foreignField: '_id', as: 'pedidos',
+               pipeline: [{ $match: { status: 'confirmado' } }, { $project: { _id: 1 } }] } },
+  { $project: {
+      _id: 0, codigo: 1, tipoDesconto: 1, usos: 1, limiteUso: 1,
+      aproveitamentoPct: { $round: [{ $multiply: [100, { $divide: ['$usos', '$limiteUso'] }] }, 0] },
+      pedidos: { $size: '$pedidos' },
+      descontoConcedido: { $divide: [{ $sum: '$usosNoEvento.descontoCentavos' }, 100] } } },
+  { $sort: { usos: -1 } }
+])
+```
+
+```js
+[ { codigo: 'INVERNO25', tipoDesconto: 'percentual', limiteUso: 200, usos: 0,
+    aproveitamentoPct: 0, pedidos: 0, descontoConcedido: 0 } ]
+```
+
+Os resultados são **idênticos** aos da Fase 1 (seção 4.4). O banco de
+demonstração não tem usos de cupom registrados; eles aparecem ao comprar com
+cupom pela aplicação.
+
+### 9.6 Índices
+
+25 índices, declarados em `ducktix/database/criar-banco.js`. Os principais e o
+equivalente da Fase 1:
+
+| Collection | Índice | Uso | Fase 1 |
+|---|---|---|---|
+| `usuarios` | `email` (único) | login | `usuario.email UNIQUE` |
+| `eventos` | `slug` (único) | página pública do evento | `evento.slug UNIQUE` |
+| `eventos` | `status, comecaEm` | vitrine | `idx_evento_status_comeca` |
+| `eventos` | `organizador.usuarioId, comecaEm` | painel do organizador | `idx_evento_organizador` |
+| `inscricoes` | `ingresso.codigo` (único) | leitura do QR na portaria | `ingresso.codigo UNIQUE` |
+| `inscricoes` | `eventoId, pedidoCriadoEm` | lista de inscritos paginada | `idx_inscricao_evento` |
+| `inscricoes` | `eventoId, participante.cpf, status` | "este CPF já tem ingresso?" | JOIN `inscricao` × `participante` |
+| `pedidos` | `compradorId, status, criadoEm` | carrinho e meus ingressos | `idx_pedido_comprador` |
+| `cupons` | `codigo, eventosIds` | cupom digitado no checkout | JOIN `cupom` × `cupom_evento` |
+| `tokensRedefinicaoSenha` | `expiraEm` (**TTL**) | apaga tokens vencidos sozinho | — (não existia) |
+
+A lista completa está em `ducktix/database/README.md`.
+
+### 9.7 Scripts de criação e dados
+
+| Arquivo | Papel |
+|---|---|
+| `ducktix/database/criar-banco.js` | Cria as 7 collections com os validadores e os 25 índices. Idempotente. Roda com `pnpm db:setup` ou direto no `mongosh` |
+| `ducktix/database/scripts/seed.mjs` | Converte o backup da Fase 1 (lido como texto, sem precisar de PostgreSQL) nos documentos; cada documento passa pela validação ao ser inserido. `pnpm db:seed` |
+| `ducktix/database/README.md` | Ordem de execução e lista de índices |
+
+Dados após o seed — os mesmos registros da Fase 1 (seção 5), reorganizados:
+
+| Collection | Documentos | Subdocumentos embutidos |
+|---|---|---|
+| `usuarios` | 29 | 28 organizadores |
+| `categorias` | 13 | — |
+| `eventos` | 30 | 39 lotes, 30 vínculos de categoria |
+| `cupons` | 4 | 3 vínculos com evento, 0 usos |
+| `pedidos` | 3.643 | 3.645 itens, 3.643 pagamentos |
+| `inscricoes` | 9.111 (8.864 ativas) | 9.111 participantes e ingressos, 4.779 check-ins |
+| `tokensRedefinicaoSenha` | 0 | — |
+
+### 9.8 O que mudou na aplicação
+
+- Só a camada `infrastructure/` foi reescrita: os 7 repositórios Drizzle
+  deram lugar a 7 repositórios MongoDB com as mesmas interfaces. Domínio,
+  casos de uso, telas e rotas são os da Fase 1.
+- Removidos: Drizzle ORM, drivers do PostgreSQL e do Neon, migrations e a
+  variável `DATABASE_URL`. A configuração agora é `MONGODB_URI` e
+  `MONGODB_DB`.
+- Adicionados 44 testes de integração que rodam contra o MongoDB
+  (`pnpm test`).
+
+Limitação conhecida: não há transação entre collections. A confirmação do
+pedido grava, em sequência, o uso do cupom, a baixa de estoque, os ingressos e
+o status — cada passo atômico. Na Fase 1 também não havia uma transação
+única envolvendo esses passos.

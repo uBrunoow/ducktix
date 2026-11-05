@@ -1,9 +1,9 @@
 import type { Papel, TokenDeRedefinicao, Usuario } from '../domain/usuario';
 
 /**
- * Port do repositório de identidade. A implementação atual guarda tudo em
- * memória; trocá-la pelo repositório Drizzle não altera domínio nem
- * aplicação — ver docs/backend/manifesto.md.
+ * Port do repositório de identidade. A implementação atual é MongoDB
+ * (`infrastructure/mongo-usuarios.ts`); domínio e aplicação não dependem
+ * dela.
  */
 export interface UsuariosRepository {
   buscarPorEmail(email: string): Promise<Usuario | null>;

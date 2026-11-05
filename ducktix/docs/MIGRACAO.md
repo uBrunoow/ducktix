@@ -14,6 +14,11 @@ updated: 2026-09-05
 
 # Plano de migração gradual do Ducktix para NoSQL
 
+> **Substituído.** Este era um plano de arquitetura híbrida (PostgreSQL +
+> NoSQL). A Fase 2 seguiu o enunciado e substituiu o PostgreSQL pelo
+> MongoDB por completo — ver
+> [`migracao-postgresql-mongodb.md`](migracao-postgresql-mongodb.md).
+
 ## 1. Objetivo
 
 Este documento define a estratégia para introduzir NoSQL no Ducktix sem perder

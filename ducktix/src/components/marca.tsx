@@ -1,8 +1,8 @@
 /**
  * `Marca` e `Seta` vivem à parte de `cabecalho.tsx` de propósito: são SVGs
  * puros, sem dependência de servidor, usados por vários Client Components
- * (banner, busca, hero). `Cabecalho` agora lê a sessão (Drizzle/Postgres) e
- * arrasta `node:crypto`/`postgres` para dentro de quem importa dali — um
+ * (banner, busca, hero). `Cabecalho` agora lê a sessão (MongoDB) e
+ * arrasta `node:crypto`/`mongodb` para dentro de quem importa dali — um
  * Client Component que só queria o ícone quebrava o build inteiro.
  */
 

@@ -1,37 +1,38 @@
 /**
- * Factory de conexão. Local (dev ou `next start`) usa o driver `postgres`
- * (postgres.js) contra o Postgres do docker-compose; na Vercel usa
- * `@neondatabase/serverless`, que não abre socket TCP persistente —
- * obrigatório em runtime serverless. A troca é pela variável `VERCEL`, que a
- * própria Vercel define no build e no runtime — não por `NODE_ENV`, que também
- * é `production` num `next start` local, nem por sniff de connection string,
- * porque o Neon também aceita conexão TCP direta.
+ * Conexão com o MongoDB. Um único `MongoClient` por processo, guardado em
+ * `globalThis` para sobreviver ao hot reload do `next dev` (sem isso cada
+ * edição abriria um pool novo). O driver gerencia o pool sozinho, tanto no
+ * `next start` local quanto em função serverless (Atlas). Na Vercel,
+ * `attachDatabasePool` e `maxIdleTimeMS` encerram as conexões ociosas antes de
+ * a função suspender, para não esgotar o limite de conexões do cluster.
  *
- * `db` é tipado como `PostgresJsDatabase` sempre. Em produção, o Pool do
- * Neon mantém a sessão necessária para transações e `SELECT ... FOR UPDATE`.
+ * `MONGODB_DB` escolhe o database — os testes usam `ducktix_test` para não
+ * tocar nos dados de desenvolvimento.
  */
 
-import { drizzle as drizzleNeon } from 'drizzle-orm/neon-serverless';
-import { drizzle as drizzlePostgres, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { Pool } from '@neondatabase/serverless';
-import postgres from 'postgres';
-import * as schema from './schema';
+import { attachDatabasePool } from '@vercel/functions';
+import { MongoClient, type Db } from 'mongodb';
 
-function criarDb(): PostgresJsDatabase<typeof schema> {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL não definida — copie .env.example para .env.local.');
+const global_ = globalThis as unknown as { __ducktixMongo?: MongoClient };
+
+function cliente(): MongoClient {
+  if (global_.__ducktixMongo) return global_.__ducktixMongo;
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI não definida — copie .env.example para .env.local.');
   }
-
-  if (process.env.VERCEL) {
-    const pool = new Pool({ connectionString });
-    return drizzleNeon({ client: pool, schema }) as unknown as PostgresJsDatabase<typeof schema>;
-  }
-
-  const sql = postgres(connectionString);
-  return drizzlePostgres({ client: sql, schema });
+  // O driver conecta sozinho na primeira operação; não é preciso `connect()`.
+  global_.__ducktixMongo = new MongoClient(uri, { maxIdleTimeMS: 5000 });
+  attachDatabasePool(global_.__ducktixMongo);
+  return global_.__ducktixMongo;
 }
 
-const global_ = globalThis as unknown as { __ducktixDb?: PostgresJsDatabase<typeof schema> };
+export function db(): Db {
+  return cliente().db(process.env.MONGODB_DB || 'ducktix');
+}
 
-export const db = global_.__ducktixDb ?? (global_.__ducktixDb = criarDb());
+/** Fecha a conexão — usado pelos testes e scripts, nunca pela aplicação. */
+export async function fecharConexao(): Promise<void> {
+  await global_.__ducktixMongo?.close();
+  global_.__ducktixMongo = undefined;
+}

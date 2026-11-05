@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { drizzleCancelamentosRepository } from '@/server/participation/infrastructure/drizzle-cancelamentos';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
+import { mongoCancelamentosRepository } from '@/server/participation/infrastructure/mongo-cancelamentos';
 
 export async function acaoResolverCancelamento(
   eventoId: string,
@@ -15,7 +15,7 @@ export async function acaoResolverCancelamento(
   if (!sessao || !evento || evento.organizadorUsuarioId !== sessao.usuarioId) {
     return { ok: false, erro: 'Você não tem permissão para resolver esta solicitação.' };
   }
-  const cancelamento = await drizzleCancelamentosRepository.resolver(
+  const cancelamento = await mongoCancelamentosRepository.resolver(
     cancelamentoId,
     eventoId,
     decisao,

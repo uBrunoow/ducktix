@@ -6,13 +6,13 @@ import { Faixa, Filete, Moldura, TituloDeSecao } from '@/components/moldura';
 import { Rodape } from '@/components/rodape';
 import { SeloStatusIngresso } from '@/components/selo-status-ingresso';
 import { Button } from '@/components/ui/button';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { localDeExibicao } from '@/server/event/domain/evento';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { listarIngressosDoParticipante } from '@/server/participation/application/meus-ingressos';
 import { nomeDeExibicao } from '@/server/participation/domain/ingresso';
-import { drizzleIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/drizzle-ingressos';
-import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
+import { mongoIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/mongo-ingressos';
+import { mongoPedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/mongo-pedidos';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';

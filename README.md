@@ -1,20 +1,21 @@
 # Ducktix
 
 Aplicação web de gestão de eventos, venda de ingressos, participantes,
-check-in e relatórios. Projeto da disciplina de Banco de Dados II — UDESC,
-Fase 1 (banco relacional PostgreSQL).
+check-in e relatórios. Projeto da disciplina de Banco de Dados II — UDESC.
 
-- Repositório: <https://github.com/uBrunoow/ducktix>
-- Versão publicada: <https://ducktix.vercel.app>
-- Documento da entrega (introdução, esquema conceitual e dicionário de dados):
-  [`ENTREGA.md`](ENTREGA.md)
+- **Fase 2 (este estado do repositório):** banco **NoSQL MongoDB**. O
+  PostgreSQL da Fase 1 foi substituído; a aplicação não depende mais dele.
+- Relatório da migração (modelo de documentos, decisões, consultas SQL →
+  MongoDB): [`ducktix/docs/migracao-postgresql-mongodb.md`](ducktix/docs/migracao-postgresql-mongodb.md)
+- Documento da entrega da Fase 1 (domínio, esquema relacional, dicionário de
+  dados): [`ENTREGA.md`](ENTREGA.md)
 
-## Onde está cada item da entrega
+## Onde está cada item da entrega (Fase 2)
 
-| Item 2 do enunciado | Onde está |
+| Item do enunciado | Onde está |
 |---|---|
 | (a) Código-fonte da aplicação | [`ducktix/src/`](ducktix/src) |
-| (b) Backup do banco de dados | [`ducktix/db/backup.sql`](ducktix/db/backup.sql) — `pg_dump` em texto puro, sem compactação |
+| (b) Scripts de criação do banco de dados | [`ducktix/database/criar-banco.js`](ducktix/database/criar-banco.js) — collections, validação e índices · [`ducktix/database/scripts/seed.mjs`](ducktix/database/scripts/seed.mjs) — dados iniciais · ver [`ducktix/database/README.md`](ducktix/database/README.md) |
 | (c) Instruções de compilação e execução | este arquivo |
 
 Nenhum arquivo do repositório está compactado.
@@ -22,13 +23,14 @@ Nenhum arquivo do repositório está compactado.
 Estrutura do repositório:
 
 ```text
-README.md        este arquivo (instruções)
-ENTREGA.md       documento da entrega (item 1)
-ducktix/         a aplicação
-  src/           código-fonte (Next.js + TypeScript)
-  db/            schema.sql, seed.sql e backup.sql
-  drizzle/       migrations do banco
-  docs/          documentação técnica e diagramas
+README.md                 este arquivo (instruções)
+ENTREGA.md                documento da entrega da Fase 1
+ducktix/                  a aplicação
+  src/                    código-fonte (Next.js + TypeScript)
+  database/               scripts do MongoDB (criação do banco e seed)
+    legacy-postgres/      artefatos da Fase 1 (DDL, backup) — histórico e fonte do seed
+  tests/                  testes de integração contra o MongoDB
+  docs/                   documentação técnica e diagramas
 ```
 
 ---
@@ -38,13 +40,13 @@ ducktix/         a aplicação
 | Ferramenta | Versão | Para quê | Como conferir |
 |---|---|---|---|
 | **Git** | qualquer recente | baixar o repositório | `git --version` |
-| **Node.js** | **20 ou mais novo** (testado no 24) | compilar e executar a aplicação | `node --version` |
+| **Node.js** | **20 ou mais novo** (testado no 24) | compilar e executar a aplicação e os scripts do banco | `node --version` |
 | **pnpm** | 10 ou mais novo | instalar as dependências | `pnpm --version` |
-| **Docker** com **Docker Compose** | Docker 24+ / Compose v2 | rodar o PostgreSQL 16 sem instalá-lo | `docker --version` e `docker compose version` |
+| **Docker** com **Docker Compose** | Docker 24+ / Compose v2 | rodar o MongoDB 8 sem instalá-lo | `docker --version` e `docker compose version` |
 
-Não é preciso instalar o PostgreSQL: o Docker baixa e roda o PostgreSQL 16.
-Se você preferir não usar Docker, veja a
-[seção 5](#5-alternativa-sem-docker-postgresql-instalado-no-computador).
+Não é preciso instalar o MongoDB: o Docker baixa e roda o MongoDB 8. Se você
+preferir não usar Docker, veja a
+[seção 5](#5-alternativa-sem-docker-mongodb-instalado-no-computador).
 
 Se algum comando da coluna "Como conferir" responder *command not found* (ou
 "não é reconhecido como comando"), instale a ferramenta seguindo o
@@ -67,20 +69,17 @@ cd ducktix/ducktix
 A pasta `ducktix/ducktix` é a da aplicação. **Todos os comandos seguintes
 são executados dentro dela.**
 
-### 2.2 Subir o banco de dados
+### 2.2 Subir o MongoDB
 
 Abra o Docker Desktop (Windows/macOS) e espere ele indicar que está rodando.
 Depois:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d mongo
 ```
 
-Isso cria um PostgreSQL 16 acessível em `localhost:5433` (usuário, senha e
-banco: `ducktix`). A porta é 5433, não a padrão 5432, para não colidir com um
-PostgreSQL que já exista no computador.
-
-Espere uns 10 segundos e confira se ele está pronto:
+Isso cria um MongoDB 8 acessível em `localhost:27017`, sem autenticação (é só
+para desenvolvimento). Espere uns 10 segundos e confira se ele está pronto:
 
 ```bash
 docker compose ps
@@ -88,53 +87,7 @@ docker compose ps
 
 A coluna `STATUS` deve mostrar `healthy`.
 
-### 2.3 Restaurar o backup (banco com dados)
-
-Escolha **uma** das duas opções. O banco precisa estar vazio: se já restaurou
-antes, recomece com `docker compose down -v` e `docker compose up -d postgres`.
-
-#### Opção A — por comando
-
-```bash
-docker compose cp db/backup.sql postgres:/tmp/backup.sql
-docker compose exec postgres psql -U ducktix -d ducktix -v ON_ERROR_STOP=1 -q -f /tmp/backup.sql
-```
-
-#### Opção B — pelo pgAdmin (interface gráfica)
-
-1. Suba o pgAdmin (ele já vem configurado no `docker-compose.yml`):
-
-   ```bash
-   docker compose up -d pgadmin
-   ```
-
-2. Abra <http://localhost:5050>. Na primeira vez, o pgAdmin pede para criar
-   uma *Master Password* (é só do pgAdmin; use qualquer uma, por exemplo
-   `ducktix`).
-3. Clique em **Add New Server**:
-   - aba *General* → **Name**: `Ducktix`;
-   - aba *Connection* → **Host name/address**: `postgres` · **Port**: `5432`
-     · **Username**: `ducktix` · **Password**: `ducktix` · marque **Save
-     password**;
-   - clique em **Save**.
-4. No painel da esquerda, abra **Servers → Ducktix → Databases** e clique no
-   banco **ducktix**.
-5. Menu **Tools → Restore...**:
-   - **Format**: `Plain`;
-   - **Filename**: `/backups/backup.sql` (a pasta `db/` do projeto aparece
-     dentro do pgAdmin como `/backups`; não é preciso fazer upload);
-   - clique em **Restore**. Um aviso no canto da tela indica quando
-     terminou (alguns segundos).
-
-Conferência (vale para as duas opções):
-
-```bash
-docker compose exec postgres psql -U ducktix -d ducktix -c "SELECT (SELECT count(*) FROM evento) AS eventos, (SELECT count(*) FROM inscricao WHERE status = 'ativa') AS inscricoes_ativas, (SELECT count(*) FROM check_in) AS check_ins;"
-```
-
-Resultado esperado: **30 eventos, 8864 inscrições ativas, 4779 check-ins**.
-
-### 2.4 Configurar a aplicação
+### 2.3 Configurar a aplicação
 
 Copie o arquivo de exemplo de configuração:
 
@@ -144,21 +97,63 @@ cp .env.example .env.local
 
 No Windows (PowerShell): `Copy-Item .env.example .env.local`.
 
-Não é preciso editar nada: o `.env.example` já aponta para o banco do passo 2.2
-(`postgresql://ducktix:ducktix@localhost:5433/ducktix`).
+Não é preciso editar nada: o `.env.example` já aponta para o MongoDB do passo
+2.2.
 
-### 2.5 Instalar as dependências, compilar e executar
+| Variável | Valor padrão | Para quê |
+|---|---|---|
+| `MONGODB_URI` | `mongodb://localhost:27017` | endereço do servidor MongoDB |
+| `MONGODB_DB` | `ducktix` | nome do database usado pela aplicação |
+| `BLOB_READ_WRITE_TOKEN`, `RESEND_*`, `APP_URL` | vazios / exemplo | serviços externos opcionais (seção 3) |
+
+### 2.4 Instalar as dependências
 
 ```bash
 pnpm install
+```
+
+Baixa as bibliotecas (leva alguns minutos na primeira vez). O aviso *Ignored
+build scripts: sharp* no fim é normal e pode ser ignorado.
+
+### 2.5 Criar o banco e carregar os dados
+
+```bash
+pnpm db:setup     # cria as collections, a validação ($jsonSchema) e os índices
+pnpm db:seed      # carrega os dados de demonstração
+```
+
+- `db:setup` executa [`database/criar-banco.js`](ducktix/database/criar-banco.js).
+  No MongoDB não existe `CREATE TABLE`: o database nasce na primeira escrita.
+  O script cria as 7 collections explicitamente, com as regras de validação
+  que fazem o papel dos `NOT NULL`/`CHECK` do PostgreSQL, e os índices (únicos
+  e de consulta). Ele é idempotente — rodar de novo só atualiza.
+- `db:seed` converte o backup da Fase 1
+  (`database/legacy-postgres/backup.sql`, lido como texto — **não precisa de
+  PostgreSQL**) nos documentos do MongoDB. Os ids originais são mantidos.
+- Para apagar os dados e carregar de novo: `pnpm db:reset`.
+
+O mesmo script de criação também roda direto no `mongosh` (o shell do
+MongoDB), sem Node:
+
+```bash
+docker compose exec mongo mongosh ducktix /database/criar-banco.js
+```
+
+Conferência:
+
+```bash
+docker compose exec mongo mongosh ducktix --quiet --eval 'printjson({eventos: db.eventos.countDocuments(), inscricoesAtivas: db.inscricoes.countDocuments({status: "ativa"}), checkIns: db.inscricoes.countDocuments({checkIn: {$ne: null}})})'
+```
+
+Resultado esperado: **30 eventos, 8864 inscrições ativas, 4779 check-ins** —
+os mesmos números da Fase 1.
+
+### 2.6 Compilar e executar
+
+```bash
 pnpm build
 pnpm start
 ```
-
-- `pnpm install` baixa as bibliotecas (leva alguns minutos na primeira vez).
-  O aviso *Ignored build scripts: sharp* no fim é normal e pode ser ignorado.
-- `pnpm build` compila a aplicação para produção.
-- `pnpm start` executa a aplicação.
 
 Abra <http://localhost:3000> no navegador. Para parar, use `Ctrl+C` no
 terminal.
@@ -166,9 +161,9 @@ terminal.
 Para desenvolvimento (recarrega sozinho ao editar o código), use `pnpm dev` no
 lugar de `pnpm build` e `pnpm start`.
 
-### 2.6 Contas de demonstração
+### 2.7 Contas de demonstração
 
-Todas as contas do banco de entrega usam a senha **`ducktix123`**.
+Todas as contas do banco de demonstração usam a senha **`ducktix123`**.
 
 | Perfil | E-mail | O que dá para ver |
 |---|---|---|
@@ -182,15 +177,43 @@ Para testar a compra com cupom: entre como organizador de um evento futuro,
 crie um cupom na aba *Cupons* do evento e use o código no checkout. Um cupom
 só vale no evento em que foi criado.
 
-A lista completa de organizadores sai com:
+A lista completa de contas sai com:
 
 ```bash
-docker compose exec postgres psql -U ducktix -d ducktix -c "SELECT email FROM usuario ORDER BY papel, email;"
+docker compose exec mongo mongosh ducktix --quiet --eval 'db.usuarios.find({}, {email: 1, papel: 1, _id: 0}).sort({papel: 1, email: 1}).forEach(printjson)'
 ```
 
 Também é possível criar uma conta nova em `/register`.
 
-### 2.7 Encerrar
+### 2.8 Ver os documentos (opcional)
+
+O `docker-compose.yml` traz o **mongo-express**, uma interface web para
+navegar nas collections:
+
+```bash
+docker compose up -d mongo-express
+```
+
+Abra <http://localhost:8081> e escolha o database `ducktix`. O **MongoDB
+Compass** (aplicativo oficial) também funciona: conecte em
+`mongodb://localhost:27017`.
+
+### 2.9 Testes
+
+Os testes de integração rodam contra o MongoDB do passo 2.2, num database
+separado (`ducktix_test`) que é apagado e recriado pelo próprio
+`criar-banco.js` a cada execução — os dados de demonstração não são tocados.
+
+```bash
+pnpm test
+```
+
+São 44 testes cobrindo os 7 repositórios: CRUD, rejeição pela validação
+`$jsonSchema` e pelos índices únicos, paginação e busca, o checkout completo
+(carrinho → cupom → pagamento → ingressos) e as garantias de concorrência
+(estoque do lote, check-in duplo, limite do cupom).
+
+### 2.10 Encerrar
 
 ```bash
 docker compose down          # para o banco e mantém os dados
@@ -223,13 +246,12 @@ docker compose down -v       # para o banco e APAGA os dados (para começar do z
 | Editar, publicar, cancelar ou excluir evento | `/organizer/events/[id]/edit` |
 | Lotes (criar, editar e excluir sem vendas) | `/organizer/events/[id]/lotes` |
 | Pedidos | `/organizer/events/[id]/orders` |
-| Participantes (lista nominal e presença) | `/organizer/events/[id]/attendees` |
+| Participantes (lista nominal, busca, presença) | `/organizer/events/[id]/attendees` |
 | Check-in | `/organizer/events/[id]/check-in` |
 | Cupons do evento — relatório de cupons | `/organizer/events/[id]/coupons` |
 | Cancelamentos | `/organizer/events/[id]/cancellations` |
 
-Os três relatórios são **por evento**, nas abas da página do evento. O SQL
-equivalente de cada um está em [`ENTREGA.md`](ENTREGA.md), seção 4.4.
+Os três relatórios são **por evento**, nas abas da página do evento.
 
 ### O que depende de serviços externos
 
@@ -244,83 +266,70 @@ serviços da nuvem e, sem as chaves, ficam desligados sem quebrar o resto:
 
 ---
 
-## 4. Outras formas de montar o banco
+## 4. Arquitetura NoSQL
 
-### 4.1 Esquema e dados separados (em vez do backup)
+O relatório completo está em
+[`ducktix/docs/migracao-postgresql-mongodb.md`](ducktix/docs/migracao-postgresql-mongodb.md).
+Resumo:
 
-Numa base vazia (se já restaurou o backup, rode antes `docker compose down -v`
-e `docker compose up -d postgres`):
+### Collections
 
-```bash
-docker compose cp db/schema.sql postgres:/tmp/schema.sql
-docker compose cp db/seed.sql postgres:/tmp/seed.sql
-docker compose exec postgres psql -U ducktix -d ducktix -v ON_ERROR_STOP=1 -q -f /tmp/schema.sql
-docker compose exec postgres psql -U ducktix -d ducktix -v ON_ERROR_STOP=1 -q -f /tmp/seed.sql
-```
+As 18 tabelas da Fase 1 viraram **7 collections**. A modelagem partiu de como
+a aplicação lê os dados (*access patterns*), não de uma cópia das tabelas.
 
-| Arquivo | Conteúdo |
-|---|---|
-| `db/schema.sql` | DDL do esquema (tabelas, restrições e índices) — versão executável do dicionário de dados |
-| `db/seed.sql` | dados sintéticos de demonstração |
-| `db/backup.sql` | backup completo (`pg_dump`), esquema + dados |
-| `drizzle/` | migrations usadas pela aplicação no deploy |
+| Collection | Tabelas de origem | Decisão |
+|---|---|---|
+| `usuarios` | `usuario`, `organizador` | organizador **embutido** (1:1, sempre lido junto) |
+| `tokensRedefinicaoSenha` | `token_redefinicao_senha` | separada, com **índice TTL** que apaga tokens vencidos |
+| `categorias` | `categoria` | separada (lista de filtros da vitrine) |
+| `eventos` | `evento`, `lote`, `evento_categoria` | lotes e categorias **embutidos**; organizador como **referência estendida** (id + nome) |
+| `cupons` | `cupom`, `cupom_evento`, `uso_de_cupom` | eventos válidos (`eventosIds`) e histórico de usos **embutidos** |
+| `pedidos` | `pedido`, `item_pedido`, `pagamento` | itens, pagamentos e cobrança **embutidos** |
+| `inscricoes` | `inscricao`, `participante`, `ingresso`, `check_in`, `cancelamento_de_inscricao` | um documento por ingresso nominal, com tudo embutido; **referencia** evento e pedido |
 
-### 4.2 Banco vazio, só com as migrations
+### Embedding × referencing
 
-```bash
-pnpm db:migrate
-```
+- **Embutido** quando os dados nascem, mudam e são lidos junto com o
+  documento-pai e têm tamanho limitado: lotes de um evento, itens de um
+  pedido, o ingresso e o check-in de uma inscrição.
+- **Referência** quando o lado "muitos" cresce sem limite ou é consultado
+  sozinho: as inscrições ficam fora do evento (um evento tem mais de mil) e
+  fora do pedido (a lista de inscritos pagina por evento).
+- **Cópia controlada** (desnormalização) só onde evita leitura extra em tela
+  quente: nome do organizador no evento, nome do lote e datas do pedido na
+  inscrição.
 
-Cria as tabelas sem nenhum dado.
+### Índices
 
-### 4.3 Gerar um backup atualizado
+Cada `UNIQUE`/`INDEX` relevante da Fase 1 tem equivalente em
+`database/criar-banco.js` — por exemplo `uk_usuarios_email`,
+`uk_eventos_slug`, `uk_inscricoes_codigo` (código do QR) e
+`idx_inscricoes_evento` (lista de inscritos paginada).
 
-#### Opção A — por comando
+### Integridade sem transações
 
-```bash
-docker compose exec postgres pg_dump -U ducktix --format=plain --no-owner --no-privileges ducktix > db/backup.sql
-```
+O `SELECT ... FOR UPDATE` e as transações do PostgreSQL foram substituídos por
+**atualizações condicionais atômicas em um único documento** — possível
+justamente porque os dados que mudam juntos estão no mesmo documento:
 
-#### Opção B — pelo pgAdmin
-
-Com o servidor já cadastrado (passos 1 a 4 da
-[opção B da seção 2.3](#opção-b--pelo-pgadmin-interface-gráfica)):
-
-1. Clique no banco **ducktix** e abra **Tools → Backup...**.
-2. **Filename**: `/var/lib/pgadmin/backup.sql` · **Format**: `Plain`.
-3. Clique em **Backup** e espere o aviso de conclusão.
-4. O arquivo fica dentro do contêiner do pgAdmin. Copie-o para a pasta do
-   projeto:
-
-   ```bash
-   docker compose cp pgadmin:/var/lib/pgadmin/backup.sql ./backup.sql
-   ```
-
-### 4.4 Consultar o banco pelo pgAdmin (opcional)
-
-Depois de cadastrar o servidor (seção 2.3, opção B), a **Query Tool**
-(**Tools → Query Tool**) roda SQL direto no banco — por exemplo, as consultas
-dos relatórios da seção 4.4 do [`ENTREGA.md`](ENTREGA.md).
+| Regra | PostgreSQL (Fase 1) | MongoDB (Fase 2) |
+|---|---|---|
+| Não vender acima do estoque | `SELECT ... FOR UPDATE` + `UPDATE` | `updateOne` com `vendidos <= vagas - qtd` no filtro e `$inc` |
+| Um check-in por ingresso | `INSERT ... ON CONFLICT DO NOTHING` | `updateOne` com `checkIn: null` no filtro |
+| Limite de uso do cupom | transação `INSERT` + `UPDATE` | `$push` + `$inc` com `usos < limiteUso` no filtro |
+| Lote com venda não muda | leitura + `UPDATE` | `vendidos: 0` no filtro do `$set`/`$pull` |
 
 ---
 
-## 5. Alternativa sem Docker (PostgreSQL instalado no computador)
+## 5. Alternativa sem Docker (MongoDB instalado no computador)
 
-Com um PostgreSQL 16 instalado (veja o [guia](#64-postgresql-16-só-se-não-for-usar-docker)):
+Com o MongoDB Community 7 ou 8 instalado e rodando (veja o
+[guia](#64-mongodb-só-se-não-for-usar-docker)), o `.env.example` já aponta para
+`mongodb://localhost:27017`. Siga a partir do passo
+[2.3](#23-configurar-a-aplicação).
 
-```bash
-psql -U postgres -c "CREATE ROLE ducktix LOGIN PASSWORD 'ducktix';"
-psql -U postgres -c "CREATE DATABASE ducktix OWNER ducktix;"
-psql -U ducktix -h localhost -d ducktix -v ON_ERROR_STOP=1 -q -f db/backup.sql
-```
-
-Depois, em `.env.local`, troque a porta `5433` por `5432`:
-
-```env
-DATABASE_URL="postgresql://ducktix:ducktix@localhost:5432/ducktix"
-```
-
-e siga a partir do passo [2.5](#25-instalar-as-dependências-compilar-e-executar).
+Um MongoDB Atlas (nuvem) também serve: troque `MONGODB_URI` em `.env.local`
+pela *connection string* do cluster.
 
 ---
 
@@ -361,9 +370,9 @@ pnpm --version
 Se o `corepack enable` der erro de permissão, use `npm install -g pnpm` (no
 Linux/macOS pode ser preciso `sudo`).
 
-> Sem pnpm, o npm (que vem com o Node) também funciona: troque `pnpm install`,
-> `pnpm build` e `pnpm start` por `npm install`, `npm run build` e
-> `npm start`.
+> Sem pnpm, o npm (que vem com o Node) também funciona: troque `pnpm <comando>`
+> por `npm run <comando>` (por exemplo `npm run db:setup`, `npm run build`) e
+> `pnpm install` por `npm install`.
 
 ### 6.3 Docker
 
@@ -381,15 +390,16 @@ Linux/macOS pode ser preciso `sudo`).
 
 Confira com `docker compose version`.
 
-### 6.4 PostgreSQL 16 (só se não for usar Docker)
+### 6.4 MongoDB (só se não for usar Docker)
 
-- **Windows e macOS:** instalador em
-  <https://www.postgresql.org/download/>. Anote a senha do usuário `postgres`
-  definida na instalação. No Windows, o `psql` fica em
-  `C:\Program Files\PostgreSQL\16\bin` (adicione ao PATH ou use o *SQL Shell*
-  instalado junto).
-- **Linux (Ubuntu/Debian):** `sudo apt install postgresql` e use
-  `sudo -u postgres psql` no lugar de `psql -U postgres`.
+- **Windows e macOS:** instale o *MongoDB Community Server* em
+  <https://www.mongodb.com/try/download/community> (no Windows, deixe marcada
+  a opção de instalar como serviço). O `mongosh` é instalado à parte:
+  <https://www.mongodb.com/try/download/shell>. No macOS também dá para usar o
+  Homebrew: `brew tap mongodb/brew && brew install mongodb-community`.
+- **Linux:** siga <https://www.mongodb.com/docs/manual/administration/install-on-linux/>.
+
+O `mongosh` é opcional: `pnpm db:setup` cria o banco pelo Node.
 
 ---
 
@@ -398,13 +408,15 @@ Confira com `docker compose version`.
 | Sintoma | Causa e solução |
 |---|---|
 | `Cannot connect to the Docker daemon` / `error during connect` | O Docker não está rodando. Abra o Docker Desktop e espere iniciar. |
-| `port is already allocated` ao subir o banco | Algo já usa a porta 5433. Pare esse serviço ou troque `5433:5432` em `docker-compose.yml` e a porta em `.env.local`. |
-| `relation "..." already exists` ao restaurar o backup | O banco já tinha dados. Recomece do zero: `docker compose down -v`, `docker compose up -d postgres` e restaure de novo. |
-| `ECONNREFUSED 127.0.0.1:5433` ao abrir a aplicação | O banco não está no ar ou ainda não ficou `healthy`. Rode `docker compose ps` e espere. |
+| `port is already allocated` ao subir o banco | Algo já usa a porta 27017 (um MongoDB local, por exemplo). Pare esse serviço ou troque `27017:27017` em `docker-compose.yml` e a porta em `MONGODB_URI`. |
+| `MongoServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017` | O MongoDB não está no ar ou ainda não ficou `healthy`. Rode `docker compose ps` e espere. |
+| `MONGODB_URI não definida` | Falta o `.env.local` (passo 2.3). |
+| `A collection "..." já tem N documento(s)` ao rodar `db:seed` | O banco já tinha dados. Use `pnpm db:reset` para apagar e carregar de novo. |
+| `Document failed validation` | Um documento violou a validação `$jsonSchema` — o equivalente a um `CHECK` do PostgreSQL. A mensagem mostra a regra. |
 | `pnpm: command not found` | Rode `corepack enable` (seção 6.2) ou use npm. |
 | Erro de sintaxe ao rodar `pnpm install` ou `pnpm build` | Node.js antigo. `node --version` precisa ser 20 ou mais novo. |
 | `Port 3000 is in use` | Outra aplicação usa a porta. Rode `pnpm start -p 3001` (com npm: `npm start -- -p 3001`) e abra <http://localhost:3001>. |
-| Login recusado com uma conta de demonstração | Confira se o backup foi restaurado (passo 2.3) e se a senha é `ducktix123`. |
+| Login recusado com uma conta de demonstração | Confira se o seed rodou (passo 2.5) e se a senha é `ducktix123`. |
 | No Windows, `cp` não é reconhecido | Use `Copy-Item .env.example .env.local` no PowerShell, ou o Git Bash. |
 
 ---
@@ -412,20 +424,25 @@ Confira com `docker compose version`.
 ## 8. Tecnologias
 
 - Next.js 15 (App Router) e React 19, TypeScript em modo strict
-- PostgreSQL 16, Drizzle ORM e Drizzle Kit
+- **MongoDB 8** com o driver oficial `mongodb` para Node.js (sem ODM)
+- Vitest para os testes de integração
 - Tailwind CSS v4, Radix UI e Sonner
 
 O backend é organizado por contexto em `ducktix/src/server/` (`identity`,
 `event`, `ticketing`, `participation`), cada um com as camadas `domain`
 (regras puras), `application` (casos de uso), `ports` (interfaces de
-repositório) e `infrastructure` (PostgreSQL). A interface final é gráfica: as
-escritas passam por Server Actions do Next.js, não por uma API REST.
+repositório) e `infrastructure` (MongoDB). A migração trocou só a camada
+`infrastructure`: domínio, casos de uso e telas são os mesmos da Fase 1. A
+interface é gráfica: as escritas passam por Server Actions do Next.js, não
+por uma API REST.
 
 ## 9. Documentação técnica
 
 | Documento | Conteúdo |
 |---|---|
-| [`ENTREGA.md`](ENTREGA.md) | documento da entrega: domínio, esquema conceitual, dicionário de dados, relatórios |
+| [`ducktix/docs/migracao-postgresql-mongodb.md`](ducktix/docs/migracao-postgresql-mongodb.md) | relatório da migração para o MongoDB (Fase 2) |
+| [`ducktix/database/README.md`](ducktix/database/README.md) | scripts do banco: criação, seed, índices |
+| [`ENTREGA.md`](ENTREGA.md) | documento da entrega da Fase 1: domínio, esquema conceitual, dicionário de dados |
 | [`ducktix/docs/README.md`](ducktix/docs/README.md) | índice da documentação técnica |
 | [`ducktix/docs/diagramas/`](ducktix/docs/diagramas) | diagrama entidade-relacionamento (PNG, SVG e fonte Mermaid) |
 

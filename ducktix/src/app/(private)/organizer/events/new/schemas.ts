@@ -109,7 +109,7 @@ export type DadosCriarEvento = z.input<typeof esquemaCriarEvento>;
 
 /** Compõe o endereço num único texto de exibição — `Evento.local` no
  *  domínio continua sendo uma string, o detalhe estruturado é só desta
- *  tela (fica em memória; migrará para colunas próprias no Postgres). */
+ *  tela e não é persistido separadamente). */
 export function enderecoParaTexto(endereco: z.infer<typeof esquemaEndereco>): string {
   const rua = [endereco.logradouro, endereco.numero].filter(Boolean).join(', ');
   const partes = [rua, endereco.bairro, endereco.cidade && endereco.uf ? `${endereco.cidade} · ${endereco.uf}` : endereco.cidade || endereco.uf];

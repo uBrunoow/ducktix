@@ -7,14 +7,14 @@ import { CodigoQR } from '@/components/codigo-qr';
 import { Faixa, Filete, Moldura } from '@/components/moldura';
 import { Rodape } from '@/components/rodape';
 import { SeloStatusIngresso } from '@/components/selo-status-ingresso';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { localDeExibicao, rotuloModalidade } from '@/server/event/domain/evento';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { listarIngressosDoPedidoDoParticipante } from '@/server/participation/application/meus-ingressos';
 import { nomeDeExibicao } from '@/server/participation/domain/ingresso';
-import { drizzleIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/drizzle-ingressos';
-import { drizzlePedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/drizzle-pedidos';
-import { drizzleCancelamentosRepository } from '@/server/participation/infrastructure/drizzle-cancelamentos';
+import { mongoIngressosRepository as memoriaIngressosRepository } from '@/server/participation/infrastructure/mongo-ingressos';
+import { mongoPedidosRepository as pedidosRepository } from '@/server/ticketing/infrastructure/mongo-pedidos';
+import { mongoCancelamentosRepository } from '@/server/participation/infrastructure/mongo-cancelamentos';
 import { SolicitarCancelamento } from './solicitar-cancelamento';
 
 export const dynamic = 'force-dynamic';
@@ -57,7 +57,7 @@ export default async function PaginaDeIngresso({
   const ingressosComCancelamento = await Promise.all(
     encontrados.map(async (item) => ({
       ...item,
-      cancelamento: await drizzleCancelamentosRepository.buscarPorIngresso(item.ingresso.id),
+      cancelamento: await mongoCancelamentosRepository.buscarPorIngresso(item.ingresso.id),
     })),
   );
 

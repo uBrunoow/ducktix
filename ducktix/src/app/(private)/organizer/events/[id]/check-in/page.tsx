@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation';
 import { PortariaDoEvento } from '@/components/organizer/portaria/portaria-do-evento';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { montarPainelDaPortaria } from '@/server/participation/application/check-in';
-import { drizzleInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/drizzle-inscricoes';
+import { mongoInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/mongo-inscricoes';
 
 export const dynamic = 'force-dynamic';
 

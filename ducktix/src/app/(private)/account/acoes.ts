@@ -14,7 +14,7 @@ import {
   DadosDeEntradaInvalidosError,
   EmailJaCadastradoError,
 } from '@/server/identity/domain/erros';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { esquemaPerfil, esquemaSenha } from './schemas';
 

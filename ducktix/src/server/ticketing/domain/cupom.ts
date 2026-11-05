@@ -1,5 +1,5 @@
 /**
- * Domínio de cupom. Sem dependência de Postgres, HTTP ou React — ver
+ * Domínio de cupom. Sem dependência de banco de dados, HTTP ou React — ver
  * docs/guidelines.md, "Camadas".
  */
 

@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 import { FormularioCriarEvento } from './formulario-criar-evento';
 

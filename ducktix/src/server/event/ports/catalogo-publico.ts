@@ -49,8 +49,8 @@ export interface DadosDeEdicaoDeEvento {
 /**
  * Port do catálogo de eventos — atende tanto a leitura pública (vitrine)
  * quanto a escrita do organizador (criar/publicar). A implementação atual
- * guarda tudo em memória; trocá-la pelo repositório Drizzle não altera
- * domínio nem aplicação.
+ * é MongoDB (`infrastructure/mongo-catalogo.ts`); domínio e aplicação não
+ * dependem dela.
  */
 export interface CatalogoPublicoRepository {
   /** Todas as categorias cadastradas, inclusive as que ainda não têm evento. */

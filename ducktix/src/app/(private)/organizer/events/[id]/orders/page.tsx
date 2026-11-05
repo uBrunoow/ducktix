@@ -16,10 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
 import { listarPedidosDoEvento } from '@/server/participation/application/participantes';
-import { drizzleInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/drizzle-inscricoes';
-import { drizzleCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/drizzle-cupons';
+import { mongoInscricoesRepository as inscricoesRepository } from '@/server/participation/infrastructure/mongo-inscricoes';
+import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infrastructure/mongo-cupons';
 
 export const dynamic = 'force-dynamic';
 

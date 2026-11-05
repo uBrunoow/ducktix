@@ -14,9 +14,8 @@ export interface DadosDeEmissao {
 }
 
 /**
- * Port do repositório de ingressos. A implementação atual guarda tudo em
- * memória; trocá-la pelo repositório Drizzle não altera domínio nem
- * aplicação.
+ * Port do repositório de ingressos. A implementação atual é MongoDB
+ * (`infrastructure/mongo-ingressos.ts`); domínio e aplicação não dependem dela.
  */
 export interface IngressosRepository {
   emitir(dados: DadosDeEmissao): Promise<Ingresso>;

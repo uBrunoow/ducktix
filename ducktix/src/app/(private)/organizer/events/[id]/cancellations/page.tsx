@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { drizzleCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/drizzle-catalogo';
-import { drizzleCancelamentosRepository } from '@/server/participation/infrastructure/drizzle-cancelamentos';
+import { mongoCatalogoPublicoRepository as catalogoPublicoRepository } from '@/server/event/infrastructure/mongo-catalogo';
+import { mongoCancelamentosRepository } from '@/server/participation/infrastructure/mongo-cancelamentos';
 import { DecidirCancelamento } from './decidir-cancelamento';
 
 export const dynamic = 'force-dynamic';
@@ -33,7 +33,7 @@ export default async function CancelamentosDoEvento({
   const evento = await catalogoPublicoRepository.buscarPorId(id);
   if (!evento) notFound();
 
-  const solicitacoes = await drizzleCancelamentosRepository.listarSolicitadosDoEvento(id);
+  const solicitacoes = await mongoCancelamentosRepository.listarSolicitadosDoEvento(id);
 
   return (
     <BlocoDoPainel

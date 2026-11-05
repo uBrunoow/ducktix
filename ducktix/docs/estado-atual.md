@@ -1,15 +1,22 @@
 ---
 title: Estado atual do projeto
-updated: 2026-09-05
+updated: 2026-10-01
 ---
 
 # Estado atual do Ducktix
 
 ## Resumo
 
-O Ducktix está na Fase 1 do trabalho de Banco de Dados II. É uma aplicação web
-funcional para eventos, ingressos e participantes, com PostgreSQL, migrations
-Drizzle, seed e backup versionados no repositório.
+O Ducktix está na **Fase 2** do trabalho de Banco de Dados II: a persistência
+foi migrada do PostgreSQL para o **MongoDB**. É uma aplicação web funcional para
+eventos, ingressos e participantes, com o script de criação do banco
+(`../database/criar-banco.js`), o seed e os testes de integração versionados
+no repositório. A migração está documentada em
+[`migracao-postgresql-mongodb.md`](migracao-postgresql-mongodb.md).
+
+As linhas da tabela de requisitos abaixo referentes ao esquema relacional
+descrevem a entrega da Fase 1; os arquivos citados estão agora em
+`../database/legacy-postgres/`.
 
 ## O que está implementado
 
@@ -45,19 +52,22 @@ Drizzle, seed e backup versionados no repositório.
 
 ## Limites conhecidos
 
-O código possui adapters Drizzle para identidade, eventos, pedidos, cupons,
-inscrições e ingressos. Algumas áreas ainda mantêm contratos de domínio e
-camadas de compatibilidade em memória para testes e transição incremental.
-Isso não altera o DDL nem o backup entregues; ao expandir persistência,
-preservar os ports e validar os fluxos de venda com transação.
+Os adapters de persistência (identidade, eventos, pedidos, cupons,
+inscrições, ingressos e cancelamentos) são MongoDB, em
+`src/server/*/infrastructure/mongo-*.ts`. Não há transação entre collections:
+as garantias de concorrência são updates condicionais num único documento —
+ver [`migracao-postgresql-mongodb.md`](migracao-postgresql-mongodb.md), seções
+10 e 15.
 
 Pagamentos são simulados para a demonstração acadêmica: Pix e boleto geram
 identificadores de demonstração, sem gateway financeiro externo.
 
 ## Arquivos de entrega
 
-- `../README.md`: compilação, execução, banco, backup e roteiro.
-- `../db/schema.sql`: DDL.
-- `../db/seed.sql`: dados sintéticos previamente inseridos.
-- `../db/backup.sql`: backup PostgreSQL sem compactação.
-- `../../documento_entrega_fase1.md`: documento formal da Fase 1.
+- `../../README.md`: compilação, execução, banco e roteiro.
+- `../database/criar-banco.js`: criação do banco MongoDB (collections,
+  validação e índices).
+- `../database/scripts/seed.mjs`: dados iniciais.
+- `migracao-postgresql-mongodb.md`: relatório da migração (Fase 2).
+- `../database/legacy-postgres/`: DDL, seed e backup PostgreSQL da Fase 1.
+- `../../ENTREGA.md`: documento formal da Fase 1.

@@ -1,42 +1,37 @@
 name: ducktix
 
 services:
-  postgres:
-    image: postgres:16-alpine
+  mongo:
+    image: mongo:8
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ducktix
-      POSTGRES_PASSWORD: ducktix
-      POSTGRES_DB: ducktix
+      MONGO_INITDB_DATABASE: ducktix
     ports:
-      # 5433 no host para não colidir com um Postgres local na 5432 padrão.
-      - '5433:5432'
+      - '27017:27017'
     volumes:
-      - ducktix_pgdata:/var/lib/postgresql/data
+      - ducktix_mongodata:/data/db
+      # O script de criação do banco fica acessível dentro do container para
+      # rodar com `mongosh` (ver database/README.md). Não fica em
+      # /docker-entrypoint-initdb.d de propósito: a criação é um passo
+      # explícito (`pnpm db:setup`), igual para Docker e para o Atlas.
+      - ./database:/database:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ducktix -d ducktix']
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
+  mongo-express:
+    image: mongo-express:latest
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: dev@ducktix.com
-      PGADMIN_DEFAULT_PASSWORD: ducktix
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+      ME_CONFIG_BASICAUTH: 'false'
     ports:
-      - '5050:80'
-    volumes:
-      - ducktix_pgadmin:/var/lib/pgadmin
-      # A pasta db/ do projeto aparece no pgAdmin como /backups, para
-      # restaurar o backup.sql sem precisar de upload (somente leitura).
-      - ./db:/backups:ro
+      - '8081:8081'
     depends_on:
-      postgres:
+      mongo:
         condition: service_healthy
 
 volumes:
-  ducktix_pgdata:
-  ducktix_pgadmin:
+  ducktix_mongodata:

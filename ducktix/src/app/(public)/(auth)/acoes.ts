@@ -22,7 +22,7 @@ import {
   redefinirSenha,
   solicitarRedefinicaoDeSenha,
 } from '@/server/identity/application/redefinicao-de-senha';
-import { drizzleUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/drizzle-usuarios';
+import { mongoUsuariosRepository as usuariosRepository } from '@/server/identity/infrastructure/mongo-usuarios';
 import { encerrarSessao, iniciarSessao } from '@/server/identity/infrastructure/sessao';
 import { enviarEmailDeRedefinicao } from '@/server/notifications/infrastructure/resend-email';
 
