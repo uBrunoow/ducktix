@@ -15,6 +15,9 @@
  *
  * Uso:  pnpm db:seed            (falha se o banco já tiver dados)
  *       pnpm db:seed --reset    (apaga os documentos e popula de novo)
+ *       pnpm db:seed --arquivo <dump.sql>
+ *                               (usa outro `pg_dump` em texto puro no lugar do
+ *                               backup; dump real fica fora do repositório)
  */
 
 import { readFileSync } from 'node:fs';
@@ -26,6 +29,15 @@ import { criarBanco } from './criar-banco.mjs';
 
 const aqui = dirname(fileURLToPath(import.meta.url));
 const CAMINHO_DO_BACKUP = join(aqui, '..', 'legacy-postgres', 'backup.sql');
+
+/** Lê `--arquivo <caminho>` da linha de comando; sem ele, usa o backup da Fase 1. */
+export function arquivoDosArgumentos(argumentos) {
+  const posicao = argumentos.indexOf('--arquivo');
+  if (posicao === -1) return CAMINHO_DO_BACKUP;
+  const caminho = argumentos[posicao + 1];
+  if (!caminho || caminho.startsWith('--')) throw new Error('--arquivo exige um caminho.');
+  return caminho;
+}
 
 // -----------------------------------------------------------------------------
 // 1. Leitura dos blocos COPY
@@ -312,9 +324,12 @@ export function converterBackup(sql) {
 // 3. Inserção
 // -----------------------------------------------------------------------------
 
-export async function popular(db, { reset = false, log = console.log } = {}) {
+export async function popular(
+  db,
+  { reset = false, log = console.log, arquivo = CAMINHO_DO_BACKUP } = {},
+) {
   await criarBanco(db, () => {});
-  const colecoes = converterBackup(readFileSync(CAMINHO_DO_BACKUP, 'utf8'));
+  const colecoes = converterBackup(readFileSync(arquivo, 'utf8'));
 
   for (const nome of Object.keys(colecoes)) {
     const existentes = await db.collection(nome).estimatedDocumentCount();
@@ -340,8 +355,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const cliente = new MongoClient(uri);
   try {
     await cliente.connect();
-    console.log(`Populando "${nomeDoBanco}" a partir de ${CAMINHO_DO_BACKUP}…`);
-    await popular(cliente.db(nomeDoBanco), { reset: process.argv.includes('--reset') });
+    const arquivo = arquivoDosArgumentos(process.argv.slice(2));
+    console.log(`Populando "${nomeDoBanco}" a partir de ${arquivo}…`);
+    await popular(cliente.db(nomeDoBanco), { reset: process.argv.includes('--reset'), arquivo });
     console.log('Seed concluído.');
   } catch (erro) {
     // Falha de validação do $jsonSchema traz o documento e a regra violada.

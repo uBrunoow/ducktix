@@ -2,12 +2,15 @@
  * Conexão com o MongoDB. Um único `MongoClient` por processo, guardado em
  * `globalThis` para sobreviver ao hot reload do `next dev` (sem isso cada
  * edição abriria um pool novo). O driver gerencia o pool sozinho, tanto no
- * `next start` local quanto em função serverless (Atlas).
+ * `next start` local quanto em função serverless (Atlas). Na Vercel,
+ * `attachDatabasePool` e `maxIdleTimeMS` encerram as conexões ociosas antes de
+ * a função suspender, para não esgotar o limite de conexões do cluster.
  *
  * `MONGODB_DB` escolhe o database — os testes usam `ducktix_test` para não
  * tocar nos dados de desenvolvimento.
  */
 
+import { attachDatabasePool } from '@vercel/functions';
 import { MongoClient, type Db } from 'mongodb';
 
 const global_ = globalThis as unknown as { __ducktixMongo?: MongoClient };
@@ -19,7 +22,8 @@ function cliente(): MongoClient {
     throw new Error('MONGODB_URI não definida — copie .env.example para .env.local.');
   }
   // O driver conecta sozinho na primeira operação; não é preciso `connect()`.
-  global_.__ducktixMongo = new MongoClient(uri);
+  global_.__ducktixMongo = new MongoClient(uri, { maxIdleTimeMS: 5000 });
+  attachDatabasePool(global_.__ducktixMongo);
   return global_.__ducktixMongo;
 }
 
