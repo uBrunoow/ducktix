@@ -1,5 +1,6 @@
 'use server';
 
+import { instanteNoBrasil } from '@/lib/fuso-horario';
 import type { Route } from 'next';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -34,8 +35,8 @@ export async function acaoCriarCupomDoEvento(
       valores.tipoDesconto === 'percentual'
         ? Math.round(valores.valor)
         : Math.round(valores.valor * 100),
-    validoDe: new Date(`${valores.validoDe}T00:00:00`),
-    validoAte: new Date(`${valores.validoAte}T23:59:59`),
+    validoDe: instanteNoBrasil(`${valores.validoDe}T00:00:00`),
+    validoAte: instanteNoBrasil(`${valores.validoAte}T23:59:59`),
     limiteDeUso: valores.limiteDeUso,
     eventosIds: [eventoId],
   });

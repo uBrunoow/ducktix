@@ -1,3 +1,4 @@
+import { FUSO_HORARIO, diaNoBrasil } from '@/lib/fuso-horario';
 import { InfoIcon } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { FormularioLote } from './formulario-lote';
@@ -37,6 +38,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: 'short',
   year: 'numeric',
@@ -167,8 +169,8 @@ export default async function LotesDoEvento({
                             gratuito: lote.precoCentavos === 0,
                             precoReais: lote.precoCentavos / 100,
                             vagas: lote.vagas,
-                            iniciaEm: lote.iniciaEm ? lote.iniciaEm.toISOString().slice(0, 10) : '',
-                            encerraEm: lote.encerraEm ? lote.encerraEm.toISOString().slice(0, 10) : '',
+                            iniciaEm: lote.iniciaEm ? diaNoBrasil(lote.iniciaEm) : '',
+                            encerraEm: lote.encerraEm ? diaNoBrasil(lote.encerraEm) : '',
                           }}
                         />
                       ) : (

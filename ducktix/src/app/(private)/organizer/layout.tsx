@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { redirect } from 'next/navigation';
 import {
   CabecalhoOrganizador,
@@ -45,6 +46,7 @@ provenance.
 `;
 
 const dataCurta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: 'short',
   year: 'numeric',

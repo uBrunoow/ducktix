@@ -7,6 +7,7 @@
  * operador) e o processo de negócio que ela materializa.
  */
 
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { type Inscricao, nomeCompleto } from './inscricao';
 
 /**
@@ -54,7 +55,7 @@ export function avaliarCheckIn(
   return { aceito: true, inscricao };
 }
 
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 /** Mensagem que a portaria lê na tela — sempre nomeando a pessoa quando dá. */
 export function mensagemDeRecusa(resultado: CheckInRecusado): string {

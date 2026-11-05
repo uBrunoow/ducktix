@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { SearchIcon } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ import { nomeCompleto } from '@/server/participation/domain/inscricao';
 const POR_PAGINA = 25;
 
 const dataCurta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: '2-digit',
   year: '2-digit',

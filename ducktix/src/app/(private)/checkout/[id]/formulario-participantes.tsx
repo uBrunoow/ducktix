@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckIcon, ChevronDownIcon, UserIcon } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { acaoAvancarParaPagamento } from './acoes';
@@ -38,6 +38,17 @@ const DESCRICAO_METODO: Record<(typeof metodosDePagamento)[number], string> = {
   pix: 'Confirmação em minutos.',
   boleto: 'Vence em 3 dias úteis.',
 };
+
+/** Pedido gratuito não tem cobrança: sem CPF e endereço para validar. */
+function cobrancaInicial(gratuito: boolean) {
+  return gratuito
+    ? { cpf: undefined, endereco: undefined, metodoPagamento: undefined }
+    : {
+        cpf: '',
+        endereco: { cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' },
+        metodoPagamento: 'pix' as const,
+      };
+}
 
 const participanteVazio = {
   nome: '',
@@ -80,11 +91,18 @@ export function FormularioParticipantes({
     resolver: zodResolver(esquemaEtapaParticipantes),
     defaultValues: {
       participantes: Array.from({ length: totalDeUnidades }, () => ({ ...participanteVazio })),
-      cpf: '',
-      endereco: { cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '' },
-      metodoPagamento: gratuito ? undefined : 'pix',
+      ...cobrancaInicial(gratuito),
     },
   });
+
+  // Um cupom de 100% torna o pedido gratuito com o formulário já aberto: os
+  // campos de cobrança somem da tela e não podem mais reprovar a validação.
+  useEffect(() => {
+    const cobranca = cobrancaInicial(gratuito);
+    formulario.setValue('cpf', cobranca.cpf);
+    formulario.setValue('endereco', cobranca.endereco);
+    formulario.setValue('metodoPagamento', cobranca.metodoPagamento);
+  }, [gratuito, formulario]);
 
   const { fields } = useFieldArray({ control: formulario.control, name: 'participantes' });
   const metodoPagamento = useWatch({ control: formulario.control, name: 'metodoPagamento' });

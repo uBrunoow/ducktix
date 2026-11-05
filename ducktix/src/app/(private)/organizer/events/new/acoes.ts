@@ -1,5 +1,6 @@
 'use server';
 
+import { instanteNoBrasil } from '@/lib/fuso-horario';
 import { redirect } from 'next/navigation';
 import { criarEvento } from '@/server/event/application/criar-evento';
 import { DadosDeEventoInvalidosError } from '@/server/event/domain/erros';
@@ -18,22 +19,21 @@ function paraCentavos(reais: number): number {
 }
 
 /**
- * Converte a data do formulário (YYYY-MM-DD) para o instante correto.
- * A hora é montada no texto de propósito: `new Date('2026-01-01')` é
- * interpretado como UTC e volta um dia no fuso do Brasil.
+ * Converte a data do formulário (YYYY-MM-DD) para o instante correto, no
+ * horário de Brasília: o servidor roda em UTC.
  *
  * A abertura vale a partir do primeiro minuto do dia e o encerramento até o
  * último — é o que o organizador entende ao digitar só a data.
  */
 function paraInicioDoDia(valor: string | undefined): Date | null {
   if (!valor) return null;
-  const data = new Date(`${valor}T00:00:00`);
+  const data = instanteNoBrasil(`${valor}T00:00:00`);
   return Number.isNaN(data.getTime()) ? null : data;
 }
 
 function paraDataDeEncerramento(valor: string | undefined): Date | null {
   if (!valor) return null;
-  const data = new Date(`${valor}T23:59:00`);
+  const data = instanteNoBrasil(`${valor}T23:59:00`);
   return Number.isNaN(data.getTime()) ? null : data;
 }
 
@@ -56,8 +56,8 @@ export async function acaoCriarEvento(
   const usuario = await usuariosRepository.buscarPorId(sessao.usuarioId);
   const organizador = usuario?.nome ?? 'Organizador';
 
-  const comecaEm = new Date(analise.data.comecaEm);
-  const terminaEm = new Date(analise.data.terminaEm);
+  const comecaEm = instanteNoBrasil(analise.data.comecaEm);
+  const terminaEm = instanteNoBrasil(analise.data.terminaEm);
   if (Number.isNaN(comecaEm.getTime()) || Number.isNaN(terminaEm.getTime())) {
     return { erro: 'Informe datas válidas de início e término.' };
   }

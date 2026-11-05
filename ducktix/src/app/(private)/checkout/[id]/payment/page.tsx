@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { notFound, redirect } from 'next/navigation';
 import { Cabecalho } from '@/components/cabecalho';
 import { CabecalhoDoCheckout } from '@/components/checkout/cabecalho-do-checkout';
@@ -57,6 +58,7 @@ export default async function PaginaDePagamento({
   const codigoPix = codigoPixSimulado(pedido.id, total);
   const qrPixSvg = pedido.metodoPagamento === 'pix' ? await gerarQrSvg(codigoPix) : '';
   const vencimento = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: FUSO_HORARIO,
     day: '2-digit',
     month: 'long',
   }).format(vencimentoDoBoleto(new Date()));

@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { notFound } from 'next/navigation';
 import { CabecalhoDePagina } from '@/components/organizer/cabecalho-de-pagina';
 import {
@@ -28,11 +29,13 @@ import { AcaoAtivarCupomDoEvento } from '../acao-ativar-cupom-do-evento';
 export const dynamic = 'force-dynamic';
 
 const dataCurta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
 });
 const dataHora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: '2-digit',
   hour: '2-digit',

@@ -1,15 +1,16 @@
 'use client';
 
+import { FUSO_HORARIO, instanteNoBrasil } from '@/lib/fuso-horario';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { PainelArte, digerir } from '@/components/painel-arte';
 import { gerarSlug } from '@/server/event/domain/evento';
 import { type DadosCriarEvento, enderecoParaTexto } from './schemas';
 
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-const diaDaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
-const diaDoMes = new Intl.DateTimeFormat('pt-BR', { day: '2-digit' });
-const mesCurto = new Intl.DateTimeFormat('pt-BR', { month: 'short' });
+const diaDaSemana = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, weekday: 'long' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
+const diaDoMes = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit' });
+const mesCurto = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, month: 'short' });
 
 const ROTULO_MODALIDADE = {
   presencial: 'Presencial',
@@ -29,7 +30,7 @@ export function PreviaDoEvento() {
 
   const nome = valores.nome?.trim() || 'Nome do evento';
   const semente = digerir(gerarSlug(nome));
-  const comecaEm = valores.comecaEm ? new Date(valores.comecaEm) : null;
+  const comecaEm = valores.comecaEm ? instanteNoBrasil(valores.comecaEm) : null;
   const dataValida = comecaEm !== null && !Number.isNaN(comecaEm.getTime());
 
   const local =

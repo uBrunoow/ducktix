@@ -1,5 +1,6 @@
 'use client';
 
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Seta } from '@/components/marca';
@@ -10,11 +11,12 @@ import type { EntradaDaVitrine } from '@/server/event/application/vitrine';
 import { localDeExibicao, rotuloModalidade } from '@/server/event/domain/evento';
 
 const dataLonga = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   weekday: 'long',
   day: 'numeric',
   month: 'long',
 });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 const INTERVALO = 7000;
 

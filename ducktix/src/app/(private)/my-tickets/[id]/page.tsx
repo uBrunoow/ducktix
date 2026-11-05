@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { ArrowLeft, Briefcase, Calendar, Mail, MapPin, Phone } from 'lucide-react';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -20,12 +21,13 @@ import { SolicitarCancelamento } from './solicitar-cancelamento';
 export const dynamic = 'force-dynamic';
 
 const dataCompleta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   weekday: 'long',
   day: '2-digit',
   month: 'long',
 });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
-const dataEmissao = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
+const dataEmissao = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit', month: '2-digit', year: 'numeric' });
 
 const CAMPO_PROFISSIONAL: Record<string, string> = {
   cargo: 'Cargo',

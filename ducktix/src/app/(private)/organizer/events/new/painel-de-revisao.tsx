@@ -1,5 +1,6 @@
 'use client';
 
+import { FUSO_HORARIO, instanteNoBrasil } from '@/lib/fuso-horario';
 import { PencilIcon } from 'lucide-react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { type DadosCriarEvento, enderecoParaTexto } from './schemas';
 
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const dataHora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: 'long',
   hour: '2-digit',
@@ -28,7 +30,7 @@ const ROTULO_FORMATO = {
 
 function formatarData(valor: string | undefined): string {
   if (!valor) return '—';
-  const data = new Date(valor);
+  const data = instanteNoBrasil(valor);
   return Number.isNaN(data.getTime()) ? '—' : dataHora.format(data);
 }
 

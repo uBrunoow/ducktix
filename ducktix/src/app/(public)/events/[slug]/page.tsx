@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { notFound } from 'next/navigation';
 import { BotaoFalarComOrganizador } from '@/components/botao-falar-com-organizador';
 import { Cabecalho } from '@/components/cabecalho';
@@ -20,12 +21,13 @@ export const dynamic = 'force-dynamic';
 const catalogo = catalogoPublicoRepository;
 
 const dataLonga = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   weekday: 'long',
   day: 'numeric',
   month: 'long',
   year: 'numeric',
 });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 export default async function PaginaDoEvento({
   params,

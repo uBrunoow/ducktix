@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import 'server-only';
 import { Resend } from 'resend';
 import type { Evento } from '@/server/event/domain/evento';
@@ -49,6 +50,7 @@ function moeda(centavos: number): string {
 
 function dataHora(data: Date): string {
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: FUSO_HORARIO,
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(data);
@@ -56,6 +58,7 @@ function dataHora(data: Date): string {
 
 function dataDoEvento(data: Date): string {
   return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: FUSO_HORARIO,
     dateStyle: 'full',
     timeStyle: 'short',
   }).format(data);

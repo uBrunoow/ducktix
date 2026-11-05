@@ -1,3 +1,4 @@
+import { dataHoraNoBrasil } from '@/lib/fuso-horario';
 import { notFound } from 'next/navigation';
 import { CabecalhoDePagina } from '@/components/organizer/cabecalho-de-pagina';
 import { ingressosVendidos } from '@/server/event/domain/evento';
@@ -6,14 +7,6 @@ import { FormularioEditarEvento } from './formulario-editar-evento';
 import { ZonaDeRisco } from './zona-de-risco';
 
 export const dynamic = 'force-dynamic';
-
-/** `<input type="datetime-local">` só aceita `YYYY-MM-DDTHH:mm` em hora local. */
-function paraCampoDeDataHora(data: Date): string {
-  const deslocado = new Date(
-    data.getTime() - data.getTimezoneOffset() * 60_000,
-  );
-  return deslocado.toISOString().slice(0, 16);
-}
 
 export default async function PaginaDeEditarEvento({
   params,
@@ -45,8 +38,8 @@ export default async function PaginaDeEditarEvento({
           formatoOnline: evento.formatoOnline ?? undefined,
           categoria: evento.categoria,
           local: evento.local ?? '',
-          comecaEm: paraCampoDeDataHora(evento.comecaEm),
-          terminaEm: paraCampoDeDataHora(evento.terminaEm),
+          comecaEm: dataHoraNoBrasil(evento.comecaEm),
+          terminaEm: dataHoraNoBrasil(evento.terminaEm),
           imagemUrl: evento.imagemUrl,
           descricao: evento.descricao,
           visibilidade: evento.visibilidade,

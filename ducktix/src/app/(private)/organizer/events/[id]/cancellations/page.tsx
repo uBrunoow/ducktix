@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { notFound } from 'next/navigation';
 import {
   BlocoDoPainel,
@@ -17,6 +18,7 @@ import { DecidirCancelamento } from './decidir-cancelamento';
 export const dynamic = 'force-dynamic';
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',

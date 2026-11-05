@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import {
   type Evento,
   type StatusLote,
@@ -48,7 +49,7 @@ export interface PainelOrganizador {
   readonly linhas: readonly LinhaDoPainel[];
 }
 
-const mesCurto = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: '2-digit' });
+const mesCurto = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, month: 'short', year: '2-digit' });
 
 export function montarLinha(
   evento: Evento,

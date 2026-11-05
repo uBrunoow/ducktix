@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import Link from 'next/link';
 import { CapaEvento } from '@/components/capa-evento';
 import { AcaoEditarEvento } from '@/components/organizer/acao-editar-evento';
@@ -12,8 +13,8 @@ import {
   rotuloModalidade,
 } from '@/server/event/domain/evento';
 
-const diaDaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const diaDaSemana = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, weekday: 'long' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
 function preco(centavos: number | null): string {

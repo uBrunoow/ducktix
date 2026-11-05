@@ -1,5 +1,6 @@
 'use server';
 
+import { instanteNoBrasil } from '@/lib/fuso-horario';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
@@ -41,8 +42,8 @@ export async function acaoEditarEvento(
         valores.modalidade === 'online'
           ? null
           : (valores.local?.trim() ?? null),
-      comecaEm: new Date(valores.comecaEm),
-      terminaEm: new Date(valores.terminaEm),
+      comecaEm: instanteNoBrasil(valores.comecaEm),
+      terminaEm: instanteNoBrasil(valores.terminaEm),
       descricao: valores.descricao,
       imagemUrl: valores.imagemUrl,
       visibilidade: valores.visibilidade,

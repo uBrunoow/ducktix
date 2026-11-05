@@ -7,7 +7,7 @@ import { PassosDoFluxo } from '@/components/passos-do-fluxo';
 import { PainelDeRevisao } from './painel-de-revisao';
 import { PreviaDoEvento } from './previa-do-evento';
 import { useDropzone } from 'react-dropzone';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch, type FieldErrors } from 'react-hook-form';
 import { toast } from 'sonner';
 import { CamposDeEndereco } from '@/components/campos-de-endereco';
 import { EditorDeTexto } from '@/components/editor-de-texto';
@@ -138,6 +138,19 @@ export function FormularioCriarEvento({
     }
   }
 
+  /**
+   * O schema só roda as regras cruzadas (endereço, datas) quando todos os
+   * campos básicos passam, então um erro pode aparecer só no fim, num passo
+   * que não está na tela. Sem isto, o botão simplesmente não faria nada.
+   */
+  function aoEncontrarErros(erros: FieldErrors<DadosCriarEvento>) {
+    const passoComErro = CAMPOS_DO_PASSO.findIndex((campos) =>
+      campos.some((campo) => erros[campo]),
+    );
+    if (passoComErro !== -1) setPasso(passoComErro);
+    toast.error('Revise os campos destacados antes de continuar.');
+  }
+
   function voltarPasso() {
     setPasso((p) => Math.max(p - 1, 0));
   }
@@ -148,7 +161,7 @@ export function FormularioCriarEvento({
       if (resposta?.erro) toast.error(resposta.erro);
       // Sucesso não retorna: a Server Action redireciona para a lista.
     });
-  });
+  }, aoEncontrarErros);
 
   const publicarAgora = formulario.handleSubmit((valores) => {
     iniciarTransicaoPublicar(async () => {
@@ -156,7 +169,7 @@ export function FormularioCriarEvento({
       if (resposta?.erro) toast.error(resposta.erro);
       // Sucesso não retorna: a Server Action redireciona para a página pública.
     });
-  });
+  }, aoEncontrarErros);
 
   const enviando = salvandoRascunho || publicando;
 

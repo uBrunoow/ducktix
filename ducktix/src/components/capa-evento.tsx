@@ -1,8 +1,9 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { PainelArte, digerir } from '@/components/painel-arte';
 import type { Evento } from '@/server/event/domain/evento';
 
-const diaDoMes = new Intl.DateTimeFormat('pt-BR', { day: '2-digit' });
-const mesCurto = new Intl.DateTimeFormat('pt-BR', { month: 'short' });
+const diaDoMes = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit' });
+const mesCurto = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, month: 'short' });
 
 /** Capa de evento: a data em escala de cartaz. É informação, não enfeite. */
 export function CapaEvento({

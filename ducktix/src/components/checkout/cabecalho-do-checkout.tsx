@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { CapaEvento } from '@/components/capa-evento';
 import { PassosDoFluxo } from '@/components/passos-do-fluxo';
 import type { Evento } from '@/server/event/domain/evento';
@@ -5,8 +6,8 @@ import { localDeExibicao } from '@/server/event/domain/evento';
 
 const PASSOS = ['Participantes', 'Pagamento', 'Confirmação'] as const;
 
-const dataCurta = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long' });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const dataCurta = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit', month: 'long' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 /**
  * Topo comum das duas etapas do checkout: a trilha de progresso e, abaixo, o

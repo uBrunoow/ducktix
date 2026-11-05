@@ -1,5 +1,6 @@
 'use client';
 
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, BarcodeIcon, CreditCardIcon, QrCodeIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -23,7 +24,7 @@ import { acaoConfirmarPedido } from './acoes';
 import { type DadosPagamentoComCartao, esquemaPagamentoComCartao } from './schemas';
 
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-const dataLonga = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long' });
+const dataLonga = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit', month: 'long' });
 
 const ROTULO_METODO: Record<MetodoDePagamento, string> = {
   cartao: 'Cartão de crédito',

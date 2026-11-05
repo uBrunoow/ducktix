@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { CalendarPlusIcon } from 'lucide-react';
 import Link from 'next/link';
 import type { EventoNoSeletor } from '@/components/organizer/cabecalho-organizador';
@@ -9,6 +10,7 @@ import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 export const dynamic = 'force-dynamic';
 
 const dataCurta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: 'short',
   year: 'numeric',

@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { CalendarIcon, ExternalLinkIcon, MapPinIcon, PencilIcon } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -19,6 +20,7 @@ import { sessaoAtual } from '@/server/identity/infrastructure/sessao';
 export const dynamic = 'force-dynamic';
 
 const dataLonga = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   weekday: 'long',
   day: '2-digit',
   month: 'long',

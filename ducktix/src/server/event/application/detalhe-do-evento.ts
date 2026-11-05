@@ -1,3 +1,4 @@
+import { FUSO_HORARIO, diaNoBrasil, instanteNoBrasil } from '@/lib/fuso-horario';
 import type { Cupom } from '@/server/ticketing/domain/cupom';
 import type { CupomRepository } from '@/server/ticketing/ports/cupons';
 import {
@@ -50,7 +51,7 @@ export interface DetalheDoEvento {
   readonly vendasPorDia: readonly { readonly rotulo: string; readonly valor: number }[];
 }
 
-const diaCurto = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
+const diaCurto = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit', month: '2-digit' });
 
 /**
  * Tudo o que a tela de um evento precisa, montado numa passada só: números de
@@ -87,16 +88,15 @@ export async function montarDetalheDoEvento(
   // Curva de vendas: agrupa as compras por dia nos 30 dias que antecedem o
   // evento — a janela em que praticamente toda a venda acontece.
   const inicioDaJanela = new Date(evento.comecaEm.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const porDia = new Map<number, number>();
+  const porDia = new Map<string, number>();
   for (const inscricao of inscricoes) {
     if (inscricao.cancelada || inscricao.compradoEm < inicioDaJanela) continue;
-    const dia = new Date(inscricao.compradoEm);
-    dia.setHours(0, 0, 0, 0);
-    porDia.set(dia.getTime(), (porDia.get(dia.getTime()) ?? 0) + 1);
+    const dia = diaNoBrasil(inscricao.compradoEm);
+    porDia.set(dia, (porDia.get(dia) ?? 0) + 1);
   }
   const vendasPorDia = [...porDia]
-    .sort(([a], [b]) => a - b)
-    .map(([tempo, valor]) => ({ rotulo: diaCurto.format(new Date(tempo)), valor }));
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([dia, valor]) => ({ rotulo: diaCurto.format(instanteNoBrasil(`${dia}T12:00`)), valor }));
 
   return {
     evento,

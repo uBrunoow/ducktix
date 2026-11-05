@@ -99,7 +99,7 @@ class MongoCancelamentosRepository implements CancelamentosRepository {
     const filtroDoEvento = { eventoId, 'cancelamentos._id': cancelamentoId };
     if (!(await colecoes.inscricoes().countDocuments(filtroDoEvento, { limit: 1 }))) return null;
 
-    await colecoes.inscricoes().updateOne(
+    const decisao = await colecoes.inscricoes().updateOne(
       { eventoId, cancelamentos: { $elemMatch: { _id: cancelamentoId, status: 'solicitado' } } },
       {
         $set: {
@@ -111,6 +111,13 @@ class MongoCancelamentosRepository implements CancelamentosRepository {
     );
 
     const doc = await colecoes.inscricoes().findOne(filtroDoEvento);
+    // `modifiedCount` garante uma devolução só, mesmo com duas decisões juntas.
+    if (doc && status === 'aprovado' && decisao.modifiedCount === 1) {
+      await colecoes.eventos().updateOne(
+        { _id: eventoId, lotes: { $elemMatch: { _id: doc.lote.id, vendidos: { $gte: 1 } } } },
+        { $inc: { 'lotes.$.vendidos': -1 } },
+      );
+    }
     const cancelamento = doc?.cancelamentos.find((c) => c._id === cancelamentoId);
     return doc && cancelamento ? paraCancelamento(doc, cancelamento) : null;
   }

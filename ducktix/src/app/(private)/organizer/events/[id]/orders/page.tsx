@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import {
@@ -26,6 +27,7 @@ export const dynamic = 'force-dynamic';
 const POR_PAGINA = 30;
 
 const dataHora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: '2-digit',
   year: '2-digit',

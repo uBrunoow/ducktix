@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { SearchIcon } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
@@ -31,11 +32,13 @@ import { cn } from '@/lib/utils';
 export const dynamic = 'force-dynamic';
 
 const dataCurta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: '2-digit',
   year: '2-digit',
 });
 const hora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   hour: '2-digit',
   minute: '2-digit',
 });

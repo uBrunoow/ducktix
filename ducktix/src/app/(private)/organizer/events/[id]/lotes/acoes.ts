@@ -1,5 +1,6 @@
 'use server';
 
+import { instanteNoBrasil } from '@/lib/fuso-horario';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
@@ -21,7 +22,7 @@ async function exigirDono(eventoId: string) {
 
 function paraData(valor: string | undefined, fimDoDia = false): Date | null {
   if (!valor) return null;
-  const data = new Date(`${valor}T${fimDoDia ? '23:59:59' : '00:00:00'}`);
+  const data = instanteNoBrasil(`${valor}T${fimDoDia ? '23:59:59' : '00:00:00'}`);
   return Number.isNaN(data.getTime()) ? null : data;
 }
 

@@ -139,7 +139,9 @@ describe('cancelamentos (array embutido na inscrição)', () => {
     expect(pendentes).toHaveLength(1);
     expect(pendentes[0]).toMatchObject({ participanteNome: 'Ana', motivo: 'Não vou poder ir', status: 'solicitado' });
 
+    const vendidosAntes = (await catalogo.buscarPorId(evento.id))!.lotes[0].vendidos;
     const aprovado = await cancelamentos.resolver(pendentes[0].id, evento.id, 'aprovado');
+    expect((await catalogo.buscarPorId(evento.id))!.lotes[0].vendidos).toBe(vendidosAntes - 1);
     expect(aprovado?.status).toBe('aprovado');
     expect(aprovado?.resolvidoEm).toBeInstanceOf(Date);
 
@@ -149,6 +151,7 @@ describe('cancelamentos (array embutido na inscrição)', () => {
 
     // Decidir de novo não muda nada.
     expect((await cancelamentos.resolver(pendentes[0].id, evento.id, 'negado'))?.status).toBe('aprovado');
+    expect((await catalogo.buscarPorId(evento.id))!.lotes[0].vendidos).toBe(vendidosAntes - 1);
   });
 
   it('negar mantém o ingresso válido e permite nova solicitação', async () => {

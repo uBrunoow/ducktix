@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { ChevronRight, PencilIcon } from 'lucide-react';
 import Link from 'next/link';
 import { CabecalhoDePagina } from '@/components/organizer/cabecalho-de-pagina';
@@ -23,9 +24,9 @@ export const dynamic = 'force-dynamic';
 
 // Formatadores separados de propósito: em pt-BR um formato composto vira
 // "03 de out. de 2026", e partir isso por espaço devolve "de" no lugar do mês.
-const diaDoMes = new Intl.DateTimeFormat('pt-BR', { day: '2-digit' });
-const mesCurto = new Intl.DateTimeFormat('pt-BR', { month: 'short' });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const diaDoMes = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit' });
+const mesCurto = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, month: 'short' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 const FILTROS = [
   { chave: 'todos', rotulo: 'Todos' },

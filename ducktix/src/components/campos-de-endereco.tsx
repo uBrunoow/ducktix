@@ -24,10 +24,13 @@ export function CamposDeEndereco({ prefix }: { prefix: string }) {
       if (cep.replace(/\D/g, '').length === 8) toast.error('CEP não encontrado.');
       return;
     }
-    formulario.setValue(`${prefix}logradouro`, encontrado.logradouro, { shouldValidate: true });
-    formulario.setValue(`${prefix}bairro`, encontrado.bairro, { shouldValidate: true });
-    formulario.setValue(`${prefix}cidade`, encontrado.cidade, { shouldValidate: true });
-    formulario.setValue(`${prefix}uf`, encontrado.uf, { shouldValidate: true });
+    // CEP geral de cidade pequena vem sem rua e bairro: o que vier vazio não
+    // pode apagar o que a pessoa já digitou.
+    for (const campo of ['logradouro', 'bairro', 'cidade', 'uf'] as const) {
+      if (encontrado[campo]) {
+        formulario.setValue(`${prefix}${campo}`, encontrado[campo], { shouldValidate: true });
+      }
+    }
   }
 
   return (

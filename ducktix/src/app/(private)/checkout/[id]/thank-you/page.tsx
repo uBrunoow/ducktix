@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { Cabecalho } from '@/components/cabecalho';
 import { CapaEvento } from '@/components/capa-evento';
 import { Faixa, Filete, Moldura } from '@/components/moldura';
@@ -16,8 +17,8 @@ import { notFound, redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-const dataCurta = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long' });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const dataCurta = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit', month: 'long' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 export default async function PaginaDeAgradecimento({
   params,

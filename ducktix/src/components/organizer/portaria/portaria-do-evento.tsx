@@ -1,5 +1,6 @@
 'use client';
 
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import {
   CheckCircle2Icon,
   ChevronDownIcon,
@@ -26,6 +27,7 @@ import type { Inscricao } from '@/server/participation/domain/inscricao';
 import { nomeCompleto } from '@/server/participation/domain/inscricao';
 
 const hora = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   hour: '2-digit',
   minute: '2-digit',
 });

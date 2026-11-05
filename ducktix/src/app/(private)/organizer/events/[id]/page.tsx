@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { ArrowRightIcon } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -28,6 +29,7 @@ import { mongoCupomRepository as cupomRepository } from '@/server/ticketing/infr
 export const dynamic = 'force-dynamic';
 
 const dataCurta = new Intl.DateTimeFormat('pt-BR', {
+  timeZone: FUSO_HORARIO,
   day: '2-digit',
   month: 'short',
 });

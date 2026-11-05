@@ -1,3 +1,4 @@
+import { FUSO_HORARIO } from '@/lib/fuso-horario';
 import { ChevronRight, TicketX } from 'lucide-react';
 import Link from 'next/link';
 import { CapaEvento } from '@/components/capa-evento';
@@ -17,9 +18,9 @@ import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
-const diaDaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'short' });
-const diaMes = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' });
-const hora = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const diaDaSemana = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, weekday: 'short' });
+const diaMes = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, day: '2-digit', month: 'short' });
+const hora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO_HORARIO, hour: '2-digit', minute: '2-digit' });
 
 export default async function PaginaDeIngressos() {
   const sessao = await sessaoAtual();
@@ -31,12 +32,20 @@ export default async function PaginaDeIngressos() {
     sessao.usuarioId,
   );
 
-  const ingressosComEvento = await Promise.all(
-    resultado.map(async ({ ingresso, eventoId }) => {
-      const evento = await catalogoPublicoRepository.buscarPorId(eventoId);
-      return { ingresso, evento, pedidoId: resultado.find((item) => item.ingresso.id === ingresso.id)?.pedidoId ?? '' };
-    }),
+  // Uma consulta por evento, não por ingresso: uma conta pode ter milhares.
+  const idsDosEventos = [...new Set(resultado.map(({ eventoId }) => eventoId))];
+  const eventos = new Map(
+    await Promise.all(
+      idsDosEventos.map(
+        async (id) => [id, await catalogoPublicoRepository.buscarPorId(id)] as const,
+      ),
+    ),
   );
+  const ingressosComEvento = resultado.map(({ ingresso, eventoId, pedidoId }) => ({
+    ingresso,
+    evento: eventos.get(eventoId) ?? null,
+    pedidoId,
+  }));
 
   ingressosComEvento.sort((a, b) => {
     const dataA = a.evento?.comecaEm.getTime() ?? 0;
@@ -49,8 +58,9 @@ export default async function PaginaDeIngressos() {
       { ingresso, evento, pedidoId, quantidade: 0 },
     ]),
   ).values()];
+  const grupoPorPedido = new Map(porPedido.map((grupo) => [grupo.pedidoId, grupo]));
   for (const item of ingressosComEvento) {
-    const grupo = porPedido.find((p) => p.pedidoId === item.pedidoId);
+    const grupo = grupoPorPedido.get(item.pedidoId);
     if (grupo) grupo.quantidade += 1;
   }
 
